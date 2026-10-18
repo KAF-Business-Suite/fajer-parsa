@@ -1,89 +1,138 @@
-<details><summary>Directory Metadata (for smart change detection)</summary>
+# 📚 fajer-parsa Documentation
 
-```json
-{
-  "doc_type": "directory_index",
-  "directory_path": "_docs",
-  "directory_hash": "f23278ae26df53820dfd50cd3bb386fc16f188070ad93299279424f46f741a58",
-  "file_count": 1,
-  "file_hashes": {
-    "vitest.config.js": "ff18c0996dd9871b"
-  }
-}
+Welcome to the complete documentation for this repository. This documentation is automatically generated and maintained by Woden Docbot.
+
+![Files Documented: 2](https://img.shields.io/badge/Files_Documented-2-blue) ![Coverage: 14%](https://img.shields.io/badge/Coverage-14%-orange) ![Last Updated: 2026-10-18](https://img.shields.io/badge/Last_Updated-2026--10--18-gray)
+
+## 🔗 Quick Links
+
+[📂 tests](./tests/README.md)
+[📋 Dependencies](./DEPENDENCIES.md)
+
+
+---
+
+> A React + Vite codebase (JS/TS/JSX) with Tailwind and font packages, accompanied by Vitest-based automated tests.
+
+
+
+## 📖 Overview
+
+This repository includes a test suite and the package manifests that declare the project's frontend dependencies. The tests folder holds a flat set of Vitest test modules, with a root-level fajer-parsa.test.js that exercises the codebase.
+
+The codebase is built with React and Vite and uses JavaScript/JSX and TypeScript sources, along with Tailwind CSS and font packages. Dependencies and build tooling are declared in the project manifests, and Vitest is configured as the test runner for the tests present in the tests directory.
+
+
+### 🧩 Key Components
+
+| Component | Purpose | Technologies |
+| --- | --- | --- |
+| **tests** | Holds the project's Vitest test modules; a flat collection of test files intended to be discovered and run by the Vitest test runner. | `Vitest`, `JavaScript` |
+| **fajer-parsa.test.js** | Root-level test file that defines test suites and cases to validate behavior of the implementation code referenced by the tests. | `JavaScript`, `Vitest` |
+
+
+
+
+**Component Architecture:**
+
+```mermaid
+graph TD
+    C0[tests]
+    C1[fajer-parsa.test.js]
+    C0 --> C1
 ```
 
-</details>
+### 🏗️ Architecture
 
-[Documentation Home](README.md)
+Repository structure centers on a flat tests directory with a root test file; the project itself is a Vite-powered React codebase (JS/TS/JSX) with Tailwind and font packages declared in its manifests.
+
+### 💡 Use Cases
+
+- ✦ Automated unit and integration testing of the repository code using Vitest
+
+
+
+### 🔧 Technologies
+
+
+**Languages:** ![JavaScript: ](https://img.shields.io/badge/JavaScript--blue) ![TypeScript: ](https://img.shields.io/badge/TypeScript--blue)
+
+**Frameworks:** ![React: ](https://img.shields.io/badge/React--blue)
+
+**Databases:** ![SQL: ](https://img.shields.io/badge/SQL--blue)
+![CSS: ](https://img.shields.io/badge/CSS--blue) ![HTML: ](https://img.shields.io/badge/HTML--blue) ![JSX: ](https://img.shields.io/badge/JSX--blue) ![Node.js: ](https://img.shields.io/badge/Node.js--blue) ![Vite: ](https://img.shields.io/badge/Vite--blue) ![npm: ](https://img.shields.io/badge/npm--blue) ![tailwindcss: ](https://img.shields.io/badge/tailwindcss--blue) ![Vitest: ](https://img.shields.io/badge/Vitest--blue)
+
+### 📦 External Dependencies
+
+The following external packages are used across the project:
+
+- `@fontsource-variable/manrope`
+- `@fontsource-variable/vazirmatn`
+- `@tailwindcss/vite`
+- `@types/react`
+- `@types/react-dom`
+- `@vitejs/plugin-react`
+- `dotenv`
+- `lucide-react`
+- `react`
+- `react-dom`
+- `tailwindcss`
+- `testdriverai`
+- `typescript`
+- `vite`
+- `vitest`
+
+
 
 ---
 
-# 📁 _docs
+## 📑 Documentation Sections
 
-> **Purpose:** Houses Vitest test runner configuration and related test modules for validating implementation behavior in this part of the codebase.
-> 
-
-![Organization: Hierarchical](https://img.shields.io/badge/Organization-Hierarchical-blue)
-
-## 📑 Table of Contents
+### [tests](./tests/README.md)
+Contains unit/integration test modules related to this portion of the codebase, declared to run with the Vitest testing framework.
 
 
-- [Overview](#overview)
-- [Subdirectories](#subdirectories)
-- [All Files](#all-files)
-- [Dependencies](#dependencies)
-- [Architecture Notes](#architecture-notes)
-
----
-
-## Overview
-
-The _docs directory contains a single root-level configuration module and a dedicated tests subdirectory. At the root is vitest.config.js, a JavaScript module that provides configuration for the Vitest test runner; this file centralizes settings that control how test suites are discovered and executed for the code covered by these tests. Developers will find test-runner-level options, plugin integrations, and other settings that ensure consistency when running tests locally or in CI.
-
-The tests/ subdirectory holds unit and integration test modules declared to run with Vitest. At the root of tests/ there is a single test file (fajer-parsa.test.js) that defines one or more test suites and cases to validate implementation behavior. Together, vitest.config.js and the tests/ directory form the testing surface for this portion of the repository: the config file instructs Vitest how to run tests and the tests/ directory contains the actual assertions and suites that exercise the code under test. This structure keeps test configuration separate from test code while making it straightforward to run or extend tests for this module of the project.
-
-
-### File Organization
-
-A small hierarchy: a root-level test runner configuration (vitest.config.js) and a dedicated tests/ subdirectory containing test modules. This separates runner configuration from test code so that test discovery and execution options are centralized while test suites live in a contained folder.
-
-## 📂 Subdirectories
-
-This directory contains the following subdirectories:
-
-### [📁 tests](./tests/README.md)
-
-**Purpose:** Contains unit/integration test modules related to this portion of the codebase, declared to run with the Vitest testing framework.
+This directory holds test modules that declare and run tests using the Vitest testing framework.
 
 ![Files: 1](https://img.shields.io/badge/Files-1-blue)
 
 ---
-## 📂 All Files
 
-| File | Type |
-| --- | --- |
-| [vitest.config.js](./vitest.config.js.md) | 📜 JavaScript |
+## 📊 Documentation Statistics
 
-## Dependencies
-
-### External Dependencies
-
-| Dependency | Usage |
-| --- | --- |
-| `Vitest` | Used as the test runner; vitest.config.js configures how Vitest discovers and runs the tests in the tests/ directory. |
-
-## Architecture Notes
-
-- Testing configuration is centralized in vitest.config.js to keep runner settings separate from test code.
-- Tests are colocated in a dedicated tests/ subdirectory to make test discovery predictable and to isolate test modules from implementation code.
+- **Files Documented**: 2
+- **Directories**: 2
+- **Coverage**: 14%
+- **Eligible Source Files**: 14
+- **Last Updated**: 2026-10-18
 
 ---
 
-## Navigation
+## 🧭 How to Navigate
 
-**↑ Parent Directory:** [Go up](../README.md)
-**🔗 Related:** [tests](./tests/README.md)
+> ℹ️ **INFO**
+> Each directory has its own README.md with detailed information about that section. Use the breadcrumb navigation at the top of each page to navigate back to parent directories.
+
+### Navigation Features
+
+- **Breadcrumbs** - At the top of each page, showing your current location
+- **Directory READMEs** - Each folder has a comprehensive overview
+- **File Documentation** - Click through to individual file documentation
+- **Search** - Use GitHub's search or your IDE's search functionality
 
 ---
 
-*Generated by Woden Docbot*
+## 🤖 About Woden DocBot
+
+This documentation is automatically generated and kept up-to-date by Woden DocBot, an AI-powered documentation assistant. DocBot analyzes code on every pull request and updates documentation to reflect changes.
+
+### Features
+
+- **Automatic Updates** - Documentation updates on every PR
+- **Comprehensive Coverage** - Files, functions, classes, and directories
+- **Smart Navigation** - Breadcrumbs, related files, and parent links
+- **AI-Powered** - Uses Azure GPT models for intelligent documentation generation
+
+---
+
+*Generated by Woden DocBot for fajer-parsa*
