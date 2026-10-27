@@ -18,7 +18,7 @@ export function DestinationGallery({ onSelect }: { onSelect: (selection: Selecti
     <div className="destination-grid">{visible.map((destination,index)=><Reveal key={destination.name} delay={Math.min(index*.035,.15)}>
       <article className="destination-card">
         <div className="destination-photo"><img src={destination.image} alt={destination.place+'، '+destination.name} loading="lazy" decoding="async" width="720" height="540"/><span>{destination.category}</span></div>
-        <div className="destination-copy"><span className="destination-place">{destination.place}</span><h3>{destination.name}</h3><p>{destination.desc}</p><button type="button" onClick={()=>onSelect({title:destination.name,description:destination.desc+'؛ شرایط و امکان ارائهٔ خدمت پس از بررسی با دفتر مشخص می‌شود.',image:destination.image,destination:destination.short})}>باز کردن مقصد <ArrowLeft size={16}/></button></div>
+        <div className="destination-copy"><span className="destination-place">{destination.place}</span><h3>{destination.name}</h3><p>{destination.desc}</p><button type="button" onClick={()=>onSelect({title:destination.name,description:destination.desc+'؛ شرایط و امکان ارائهٔ خدمت پس از بررسی با دفتر مشخص می‌شود.',image:destination.image,destination:destination.short})}>خدمات این مقصد <ArrowLeft size={16}/></button></div>
       </article>
     </Reveal>)}</div>
     <p className="destination-footnote">تصویرها معرفی مقصد هستند؛ قیمت، ظرفیت و امکان سفر برای هر درخواست جداگانه بررسی می‌شود.</p>

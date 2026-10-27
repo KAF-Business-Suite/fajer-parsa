@@ -82,3 +82,14 @@ footer .text-slate-400 { color:#b2c0cc; }
   .service-card,.destination-card,.journey-step,.primary-action,.cta-button,.bundle-option { transition:none; }
   .service-card:hover,.destination-card:hover,.journey-step:hover,.primary-action:active,.cta-button:active,.bundle-option:active { transform:none; }
 }
+
+/* Shared button hierarchy: primary, secondary and inline action. */
+.primary-action,.cta-button { border-radius:999px;background:var(--fp-gold-fill);color:#19242a;font-weight:750;box-shadow:none; }
+.fp-app main button.shine { border-radius:999px;box-shadow:none;background:var(--fp-gold-fill);color:#19242a; }
+.fp-app main button.shine:disabled { background:var(--fp-muted);color:var(--fp-surface);opacity:.6; }
+#track article button { border-radius:999px;box-shadow:none; }
+.bundle-option { border-radius:18px;min-height:48px; }
+.dialog-loading { position:fixed;bottom:110px;left:50%;transform:translateX(-50%);z-index:100;padding:14px 22px;border-radius:999px;background:var(--fp-surface);border:1px solid var(--fp-line);color:var(--fp-ink);font-size:14px;box-shadow:var(--fp-shadow); }
+.service-choice { display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:8px;color:var(--fp-gold);font-size:13px;font-weight:750; }
+.service-card { box-shadow:none; }
+@media (max-width:767px) { .service-card article { padding:22px; } }

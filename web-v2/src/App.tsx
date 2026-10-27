@@ -1,17 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { MenuToggle } from './components/ui/menu-toggle'
-import { useReducedMotion } from 'motion/react'
 import { ThemeToggle } from './components/ThemeToggle'
-import { TextAnimate } from './components/magicui/text-animate'
-import { ShimmerButton } from './components/magicui/shimmer-button'
 import { ScrollProgress } from './components/magicui/scroll-progress'
 import { DestinationGallery } from './components/DestinationGallery'
 import { FaqSection } from './components/FaqSection'
 import { destinations } from './content/destinations'
 import { MagicCard } from './components/magicui/magic-card'
-import { BorderBeam } from './components/magicui/border-beam'
 import { Reveal } from './components/Reveal'
-import { DetailsDialog, type Selection } from './components/DetailsDialog'
+import type { Selection, RequestContext } from './components/DetailsDialog'
+const DetailsDialog = lazy(() => import('./components/DetailsDialog').then(m => ({default:m.DetailsDialog})))
 import {
   ArrowLeft,
   BadgeCheck,
@@ -28,7 +25,7 @@ import {
   Plane,
   Search,
   ShieldCheck,
-  Sparkles,
+  CircleHelp,
   TicketCheck,
   UserRound,
   WalletCards,
@@ -62,9 +59,9 @@ function App() {
   const [selection, setSelection] = useState<Selection | null>(null)
   const [query, setQuery] = useState('')
   const [headerScrolled, setHeaderScrolled] = useState(false)
-  const reducedMotion = useReducedMotion()
-  const request = () => setSelection({ title: 'آماده‌سازی درخواست', description: 'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true })
-  const inform = (title: string, description: string) => setSelection({ title, description })
+  const openRequest = ({destination=finder.destination,purpose=finder.purpose,passport=finder.passport,service,bundle}: RequestContext = {}) => setSelection({ destination,purpose,passport,service,bundle, title: 'آماده‌سازی درخواست', description: 'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true })
+  const request = () => openRequest()
+  const inform = (title: string, description: string, context: RequestContext = {}, contactOnly = false) => setSelection({ ...finder, ...context, title, description, contactOnly })
   const [megaOpen, setMegaOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [finder, setFinder] = useState<FinderState>({ passport: 'افغانستان', destination: '', purpose: '' })
@@ -114,13 +111,13 @@ function App() {
             </button>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#destinations">کشورها</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#journey">درخواست سفر</a>
-            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#deals">پیشنهادها</a>
+            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#deals">بسته‌های خدمات</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#track">پیگیری</a>
           </nav>
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <button onClick={() => inform('ارتباط با فجر پارسا', 'واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴. کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵. برای پیگیری، اطلاعات درج‌شده در رسید را آماده کنید.')} className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> تماس</button>
+            <button onClick={() => inform('ارتباط با فجر پارسا', 'واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴. کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵. برای پیگیری، اطلاعات درج‌شده در رسید را آماده کنید.', {}, true)} className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> تماس</button>
             <button onClick={request} className="shine rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10">شروع درخواست</button>
             <MenuToggle open={mobileOpen} onToggle={() => setMobileOpen(!mobileOpen)} />
           </div>
@@ -151,7 +148,7 @@ function App() {
         {mobileOpen && (
           <nav id="mobile-navigation" aria-label="ناوبری گوشی" className="border-t border-[var(--fp-line)] bg-[var(--fp-cream)] px-4 py-4 lg:hidden">
             <div className="grid gap-2 text-sm font-bold">
-              {[['خدمات','services'],['کشورها','destinations'],['درخواست سفر','journey'],['پیشنهادها','deals'],['پیگیری پرونده','track']].map(([item,id]) => (
+              {[['خدمات','services'],['کشورها','destinations'],['درخواست سفر','journey'],['بسته‌های خدمات','deals'],['پیگیری پرونده','track']].map(([item,id]) => (
                 <a key={id} href={'#'+id} onClick={() => setMobileOpen(false)} className="rounded-xl bg-[var(--fp-surface)] px-4 py-3 text-right shadow-sm">{item}</a>
               ))}
             </div>
@@ -166,16 +163,15 @@ function App() {
           <div className="shell hero-layout">
             <div className="hero-copy">
               <p className="eyebrow">فجر پارسا؛ همراه برنامه‌ریزی سفر شما</p>
-              {reducedMotion ? <h1>سفر بعدی شما،<br/>از همین‌جا آغاز می‌شود.</h1> : <TextAnimate as="h1" by="line" animation="blurInUp" once duration={0.45}>{'سفر بعدی شما،\nاز همین‌جا آغاز می‌شود.'}</TextAnimate>}
+              <h1>سفر بعدی شما،<br/>از همین‌جا آغاز می‌شود.</h1>
               <p className="hero-description">ویزا، تکت، هتل و خدمات سفر؛ گزینه‌ها را بررسی کنید و با اطلاعات روشن، قدم بعد را با مشاور فجر پارسا بردارید.</p>
-              <div className="hero-actions"><ShimmerButton onClick={request} className="cta-button" shimmerColor="#f9e6b6" background="var(--fp-gold-fill)" shimmerDuration="5s">شروع درخواست <ArrowLeft size={17}/></ShimmerButton><a href="#destinations" className="secondary-action">دیدن مقصدها <Globe2 size={17}/></a></div>
+              <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">شروع درخواست <ArrowLeft size={17}/></button><a href="#destinations" className="secondary-action">دیدن مقصدها <Globe2 size={17}/></a></div>
               <div className="hero-services"><span>ویزا و اقامت</span><span>پرواز و هتل</span><span>سفرهای گروهی</span></div>
             </div>
             <div className="hero-caption"><span>مقصدی برای ایده گرفتن</span><strong>دبی، امارات متحده عربی</strong><a href="#destinations">کشف مقصدها <ArrowLeft size={14}/></a></div>
           </div>
         </section>
         <section id="finder" className="shell finder-section"><Reveal><div className="glass finder-panel relative overflow-hidden">
-                {!reducedMotion && <BorderBeam duration={10} colorFrom="#d9bd77" colorTo="#31b8a3" />}
                 <div className="mb-6 flex items-start justify-between gap-4">
                   <div>
                     <div className="eyebrow">انتخاب مسیر سفر</div>
@@ -199,7 +195,7 @@ function App() {
                   <select id="purpose" value={finder.purpose} onChange={(e) => setFinder({ ...finder, purpose: e.target.value })} className="w-full rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-surface)] p-3.5 text-sm outline-none transition focus:border-[#c79a42]">
                     <option value="">انتخاب هدف</option><option>سیاحت</option><option>تجارت</option><option>اقامت</option><option>زیارت</option><option>تحصیل</option><option>کار</option>
                   </select>
-                  <button onClick={() => setSelection({title: `خدمات سفر به ${finder.destination}`, description: `هدف سفر: ${finder.purpose} — تابعیت: ${finder.passport}. این فهرست برای راهنمایی اولیه است؛ امکان ارائه، شرایط و مدارک هر خدمت باید با دفتر بررسی شود.`, options: serviceGroups.filter((_, index) => ({'سیاحت':[0,2,5], 'تجارت':[0,1,2,4], 'اقامت':[0,4], 'زیارت':[2,3,5], 'تحصیل':[0,4], 'کار':[0,1,4]}[finder.purpose] || []).includes(index)).map(s => ({title:s.title, description:s.desc}))})} disabled={!finderReady} className="shine mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#09111f] px-4 py-3.5 text-sm font-black text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-40">نمایش خدمات مرتبط <ArrowLeft size={17} /></button>
+                  <button onClick={() => setSelection({...finder,title: `خدمات سفر به ${finder.destination}`, description: `هدف سفر: ${finder.purpose} — تابعیت: ${finder.passport}. این فهرست برای راهنمایی اولیه است؛ امکان ارائه، شرایط و مدارک هر خدمت باید با دفتر بررسی شود.`, options: serviceGroups.filter((_, index) => ({'سیاحت':[0,2,5], 'تجارت':[0,1,2,4], 'اقامت':[0,4], 'زیارت':[2,3,5], 'تحصیل':[0,4], 'کار':[0,1,4]}[finder.purpose] || []).includes(index)).map(s => ({title:s.title, description:s.desc}))})} disabled={!finderReady} className="shine mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#09111f] px-4 py-3.5 text-sm font-black text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-40">نمایش خدمات مرتبط <ArrowLeft size={17} /></button>
                 </div>
 
                 <div className="premium-divider my-5" />
@@ -246,7 +242,7 @@ function App() {
                 <h3 className="mt-2 text-xl font-black">{title}</h3>
                 <p className="mt-2 min-h-14 text-sm leading-7 text-[var(--fp-muted)]">{desc}</p>
                 <div className="premium-divider my-5" />
-                <button onClick={() => inform(title, desc + ' شرایط، زمان و هزینه پس از بررسی مدارک مشخص می‌شود.')} className="flex items-center gap-2 text-xs font-black text-[var(--fp-gold)]">بررسی گزینه‌ها <ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
+                <button onClick={() => inform(title, desc + ' شرایط، زمان و هزینه پس از بررسی مدارک مشخص می‌شود.', {service:title})} className="flex items-center gap-2 text-xs font-black text-[var(--fp-gold)]">بررسی گزینه‌ها <ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
               </article></MagicCard></Reveal>
             ))}
           </div>
@@ -284,8 +280,8 @@ function App() {
               <h2 className="relative mt-2 text-3xl font-black leading-[1.25]">بسته سفر خود را بسازید</h2>
               <p className="relative mt-3 text-sm leading-7 text-slate-700">ویزا + دعوتنامه + هتل + تکت + بیمه + ترانسفر. خدمات مکمل فقط وقتی پیشنهاد می‌شوند که برای سفر مربوط باشند.</p>
               <div className="relative mt-6 space-y-2">
-                {['خدمات ویزا', 'بسته سفر کاری', 'خدمات کامل سفر'].map((item) => (
-                  <button type="button" onClick={request} key={item} className="bundle-option flex items-center justify-between rounded-2xl px-4 py-3"><span className="font-latin text-xs font-extrabold">{item}</span><ArrowLeft size={14} /></button>
+                {[{label:'خدمات ویزا',service:'ویزا و اقامت'},{label:'بسته سفر کاری',service:'دعوتنامه و تجارت'},{label:'خدمات کامل سفر',service:'خدمات مکمل سفر'}].map(({label,service}) => (
+                  <button type="button" onClick={()=>openRequest({service,bundle:label})} key={label} className="bundle-option flex items-center justify-between rounded-2xl px-4 py-3"><span className="font-latin text-xs font-extrabold">{label}</span><ArrowLeft size={14} /></button>
                 ))}
               </div>
             </div></Reveal>
@@ -299,16 +295,16 @@ function App() {
               <div className="font-latin mt-6 text-[9px] font-black uppercase tracking-[.16em] text-[#d9bc75]">پشتیبانی فجر پارسا</div>
               <h2 className="mt-2 text-3xl font-black">برای ادامهٔ مسیر، همراه شما</h2>
               <p className="mt-4 max-w-xl text-sm leading-8 text-slate-300">برای پروندهٔ موجود، شمارهٔ ثبت‌شده در رسید و مدارک مورد نیاز را هنگام تماس با دفتر آماده داشته باشید.</p>
-              <button onClick={() => inform('پیگیری پرونده', 'پیگیری آنلاین در این نسخه هنوز به اطلاعات پرونده متصل نیست. برای پیگیری پروندهٔ موجود، با دفتر و شمارهٔ ثبت‌شده در رسیدتان تماس بگیرید.')} className="mt-7 flex items-center gap-2 rounded-2xl bg-[var(--fp-surface)] px-5 py-3 text-xs font-black text-[var(--fp-ink)]">پیگیری پرونده <ArrowLeft size={15} /></button>
+              <button onClick={() => inform('پیگیری پرونده', 'پیگیری آنلاین در این نسخه هنوز به اطلاعات پرونده متصل نیست. برای پیگیری پروندهٔ موجود، با دفتر و شمارهٔ ثبت‌شده در رسیدتان تماس بگیرید.', {}, true)} className="mt-7 flex items-center gap-2 rounded-2xl bg-[var(--fp-surface)] px-5 py-3 text-xs font-black text-[var(--fp-ink)]">پیگیری پرونده <ArrowLeft size={15} /></button>
             </article></Reveal>
 
             <Reveal><article className="soft-card relative overflow-hidden rounded-[32px] p-8 md:p-10">
               <div className="absolute left-0 top-0 h-44 w-44 -translate-x-12 -translate-y-16 rounded-full bg-[#e8d6aa]/30 blur-2xl" />
-              <Sparkles size={28} className="relative text-[#9a6f20]" />
+              <CircleHelp size={28} className="relative text-[#9a6f20]" />
               <div className="font-latin relative mt-6 text-[9px] font-black uppercase tracking-[.16em] text-[#9a6f20]">راهنمای خدمات</div>
               <h2 className="relative mt-2 text-3xl font-black">از کجا شروع کنیم؟</h2>
               <p className="relative mt-4 max-w-xl text-sm leading-8 text-[var(--fp-muted)]">کشور مقصد و هدف سفر را انتخاب کنید، خدمات مرتبط را بخوانید و خلاصهٔ درخواست خود را برای مشاور آماده کنید.</p>
-              <button onClick={() => inform('راهنمای خدمات', 'خدمت یا مقصد را انتخاب کنید تا توضیح آن باز شود. دستیار هوش مصنوعی هنوز متصل نشده است.')} className="relative mt-7 flex items-center gap-2 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-5 py-3 text-xs font-black shadow-sm"><MessageCircle size={15} /> راهنمای انتخاب خدمت</button>
+              <a href="#finder" className="secondary-action relative mt-7"><CircleHelp size={16}/> راهنمای انتخاب خدمت</a>
             </article></Reveal>
           </div>
         </section>
@@ -328,7 +324,7 @@ function App() {
         <FaqSection />
       </main>
 
-      <DetailsDialog selection={selection} onClose={() => setSelection(null)} onRequest={(destination) => setSelection({title: 'آماده‌سازی درخواست', description: 'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true, destination})} />
+      {selection && <Suspense fallback={<div role="status" className="dialog-loading">در حال آماده‌سازی فرم…</div>}><DetailsDialog selection={selection} onClose={() => setSelection(null)} onRequest={openRequest} /></Suspense>}
       <footer id="contact" className="bg-[#070d17] py-14 text-slate-300">
         <div className="shell grid gap-9 md:grid-cols-4">
           <div>
@@ -339,13 +335,13 @@ function App() {
             <p className="mt-4 text-xs leading-6 text-slate-400">سفر، ویزا، زیارت و تجارت در یک تجربه منظم و قابل پیگیری.</p>
           </div>
           <div><div className="text-xs font-black text-white">خدمات</div><p className="mt-4 text-xs leading-7 text-slate-400">ویزا • اقامت • دعوتنامه • پرواز • هتل • زیارت • اسناد • بیمه</p></div>
-          <div><div className="text-xs font-black text-white">ارتباط و جامعه</div><p className="mt-4 text-xs leading-7 text-slate-400"><a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer">واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴</a><br/>کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵.</p></div>
+          <div><div className="text-xs font-black text-white">راه‌های ارتباط</div><p className="mt-4 text-xs leading-7 text-slate-400"><a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer">واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴</a><br/>کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵.</p></div>
           <div><div className="text-xs font-black text-white">پشتیبانی</div><p className="footer-links"><a href="#faq">پرسش‌های رایج</a><a href="#finder">راهنمای درخواست</a><a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer">تماس با دفتر</a></p></div>
         </div>
         <div className="shell mt-10 border-t border-white/10 pt-5 text-[10px] text-[var(--fp-muted)]">فجر پارسا — خدمات سفر، ویزا و تجارت</div>
       </footer>
 
-      <button onClick={() => inform('راهنمای خدمات', 'از جستجوی خدمات یا انتخاب کشور شروع کنید. هیچ درخواست یا اطلاعاتی بدون اقدام شما ارسال نمی‌شود.')} className="floating-ai fixed bottom-24 left-4 md:bottom-5 md:left-5 z-40 flex h-15 w-15 items-center justify-center rounded-2xl border border-white/10 bg-[#09111f] text-white" aria-label="راهنمای خدمات"><Sparkles size={22} className="text-[#f0cf7f]" /></button>
+
 
       <div className="mobile-action-bar fixed inset-x-3 bottom-3 z-30 flex items-center gap-2 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-glass)] p-2 shadow-2xl backdrop-blur md:hidden">
         <button onClick={request} className="flex-1 rounded-xl bg-[#09111f] px-3 py-3 text-xs font-black text-white">شروع درخواست</button>

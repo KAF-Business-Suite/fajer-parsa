@@ -1,6 +1,7 @@
 import { useTheme } from 'next-themes'
-import { AnimatedThemeToggler } from './magicui/animated-theme-toggler'
+import { Moon, Sun } from 'lucide-react'
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
-  return <AnimatedThemeToggler className="theme-toggle" theme={theme === 'dark' ? 'dark' : 'light'} onThemeChange={setTheme} duration={320} aria-label={theme === 'dark' ? 'فعال کردن حالت روشن' : 'فعال کردن حالت تاریک'}/>
+  const dark=theme==='dark'
+  return <button type="button" className="theme-toggle" onClick={()=>setTheme(dark?'light':'dark')} aria-label={dark?'فعال کردن حالت روشن':'فعال کردن حالت تاریک'}>{dark?<Sun size={20}/>:<Moon size={20}/>}</button>
 }

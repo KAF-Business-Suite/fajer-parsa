@@ -47,7 +47,7 @@ try {
     await page.getByRole('button',{name:'بررسی گزینه‌ها',exact:true}).first().click();assert.match(await page.getByRole('dialog').innerText(),/ویزا/);await page.keyboard.press('Tab');assert.equal(await page.getByRole('dialog').evaluate(e=>e.contains(document.activeElement)),true);await page.keyboard.press('Escape')
   })
   await test('Destination details and local images',async()=>{
-    await page.getByRole('button',{name:'باز کردن مقصد',exact:true}).nth(1).click();assert.match(await page.getByRole('dialog').innerText(),/ایران/);await page.keyboard.press('Escape');await page.locator('#destinations').scrollIntoViewIfNeeded();await page.waitForFunction(()=>Array.from(document.querySelectorAll('.destination-card img')).every(e=>e.complete && e.naturalWidth>0));assert.equal(await page.locator('.destination-card img').count(),7)
+    await page.getByRole('button',{name:'خدمات این مقصد',exact:true}).nth(1).click();assert.match(await page.getByRole('dialog').innerText(),/ایران/);await page.keyboard.press('Escape');await page.locator('#destinations').scrollIntoViewIfNeeded();await page.waitForFunction(()=>Array.from(document.querySelectorAll('.destination-card img')).every(e=>e.complete && e.naturalWidth>0));assert.equal(await page.locator('.destination-card img').count(),7)
   })
   await page.screenshot({path:resolve(output,'destinations-light.png')})
   await test('Local draft download, no submitted request',async()=>{
@@ -80,7 +80,7 @@ try {
     const header=page.locator('.floating-header');const rect=await header.boundingBox();const radius=await header.evaluate(e=>parseFloat(getComputedStyle(e).borderTopRightRadius));assert.ok(radius>=rect.height/2);assert.equal(await page.locator('.hero-scene img').getAttribute('src'),'/media/hero-dubai.webp');assert.equal(await page.locator('.hero').evaluate(e=>getComputedStyle(e).backgroundImage),'none')
   })
   await test('Destination filters, search and prefilled request',async()=>{
-    await page.getByRole('button',{name:'طبیعت',exact:true}).click();assert.equal(await page.locator('.destination-card').count(),1);assert.match(await page.locator('.destination-card').innerText(),/تاجیکستان/);await page.getByRole('button',{name:'همه مقصدها',exact:true}).click();const search=page.getByRole('searchbox',{name:'جستجو در مقصدها',exact:true});await search.fill('ایران');assert.equal(await page.locator('.destination-card').count(),1);await page.getByRole('button',{name:'باز کردن مقصد',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).click();assert.equal(await page.getByRole('dialog').getByLabel('مقصد',{exact:true}).inputValue(),'ایران');await page.keyboard.press('Escape');await search.fill('')
+    await page.getByRole('button',{name:'طبیعت',exact:true}).click();assert.equal(await page.locator('.destination-card').count(),1);assert.match(await page.locator('.destination-card').innerText(),/تاجیکستان/);await page.getByRole('button',{name:'همه مقصدها',exact:true}).click();const search=page.getByRole('searchbox',{name:'جستجو در مقصدها',exact:true});await search.fill('ایران');assert.equal(await page.locator('.destination-card').count(),1);await page.getByRole('button',{name:'خدمات این مقصد',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).click();assert.equal(await page.getByRole('dialog').getByLabel('مقصد',{exact:true}).inputValue(),'ایران');await page.keyboard.press('Escape');await search.fill('')
   })
   await test('Consultant summary and explicit WhatsApp handoff',async()=>{
     await page.getByRole('button',{name:'شروع درخواست',exact:true}).first().click();const dialog=page.getByRole('dialog');await dialog.getByLabel('خدمت مورد نظر',{exact:true}).selectOption({label:'ویزا و اقامت'});await dialog.getByLabel('مقصد',{exact:true}).fill('ایران');await dialog.getByLabel('تعداد مسافران',{exact:true}).fill('2');await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();const link=dialog.getByRole('link',{name:'باز کردن واتساپ دفتر',exact:true});const target=new URL(await link.getAttribute('href'));assert.equal(target.hostname,'wa.me');assert.equal(target.pathname,'/93777377774');assert.match(target.searchParams.get('text'),/ایران/);assert.match(target.searchParams.get('text'),/2/);assert.equal(external.length,0);await page.keyboard.press('Escape')
@@ -101,6 +101,24 @@ try {
       return Math.min(...stops.map(c=>{const a=lum(foreground),b=lum(c);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05)}));
     });assert.ok(ratio>=4.5,'Dark panel contrast '+ratio);
     for(const width of [320,360,393,768,1440]) {await page.setViewportSize({width,height:852});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Dark overflow '+width)}
+  })
+  await test('Finder preserves Iran, purpose and nationality through request',async()=>{
+    await page.setViewportSize({width:1440,height:1000});await page.goto(url,{waitUntil:'networkidle'});
+    await page.getByLabel('مقصد',{exact:true}).selectOption({label:'ایران'});await page.getByLabel('هدف سفر',{exact:true}).selectOption({label:'سیاحت'});await page.getByRole('button',{name:'نمایش خدمات مرتبط',exact:true}).click();
+    await page.getByRole('dialog').getByRole('button',{name:'انتخاب این خدمت',exact:true}).first().click();const dialog=page.getByRole('dialog');
+    assert.equal(await dialog.getByLabel('مقصد',{exact:true}).inputValue(),'ایران');assert.equal(await dialog.getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'ویزا و اقامت');
+    await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();const href=await dialog.getByRole('link',{name:'باز کردن واتساپ دفتر',exact:true}).getAttribute('href');const text=new URL(href).searchParams.get('text');assert.match(text,/هدف سفر: سیاحت/);assert.match(text,/تابعیت: افغانستان/);await page.keyboard.press('Escape');
+  })
+  await test('Service and bundle choices prefill their real request',async()=>{
+    await page.getByRole('button',{name:'بررسی گزینه‌ها',exact:true}).nth(2).click();await page.getByRole('dialog').getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).click();assert.equal(await page.getByRole('dialog').getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'پرواز و هتل');await page.keyboard.press('Escape');
+    await page.getByRole('button',{name:'بسته سفر کاری',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'دعوتنامه و تجارت');await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();assert.match(await dialog.locator('.request-summary').innerText(),/بسته: بسته سفر کاری/);await page.keyboard.press('Escape');
+  })
+  await test('Contact flow offers contact rather than new-order form',async()=>{
+    await page.getByRole('button',{name:'پیگیری پرونده',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).count(),0);assert.equal(await dialog.getByRole('link',{name:'تماس با دفتر در واتساپ',exact:true}).getAttribute('href'),'https://wa.me/93777377774');await page.keyboard.press('Escape');
+    assert.equal(await page.locator('.floating-ai').count(),0);assert.equal(await page.locator('svg.lucide-sparkles').count(),0);
+  })
+  await test('Deferred dialog loads only after an explicit request',async()=>{
+    const p=page;await p.setViewportSize({width:393,height:852});const chunks=[];p.on('request',r=>{if(r.url().includes('/assets/DetailsDialog-'))chunks.push(r.url())});await p.goto(url,{waitUntil:'networkidle'});assert.equal(chunks.length,0);await p.getByRole('button',{name:'شروع درخواست',exact:true}).first().click();await p.getByRole('dialog').waitFor();assert.equal(chunks.length,1);await p.keyboard.press('Escape');
   })
   await test('No runtime errors or external asset requests',async()=>{assert.deepEqual(failures,[]);assert.deepEqual(external,[])})
 } finally {
