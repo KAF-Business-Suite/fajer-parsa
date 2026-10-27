@@ -1,0 +1,78 @@
+{
+  "results": [
+    {
+      "name": "RTL and dark default",
+      "status": "PASS"
+    },
+    {
+      "name": "Light theme and reload persistence",
+      "status": "PASS"
+    },
+    {
+      "name": "Finder validation, details, Escape and focus restoration",
+      "status": "PASS"
+    },
+    {
+      "name": "Live catalog search and empty state",
+      "status": "PASS"
+    },
+    {
+      "name": "Service details and focus trap",
+      "status": "PASS"
+    },
+    {
+      "name": "Destination details and local images",
+      "status": "PASS"
+    },
+    {
+      "name": "Local draft download, no submitted request",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop menu Escape",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 320",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 360",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 393",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 768",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 1440",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile navigation link closes menu",
+      "status": "PASS"
+    },
+    {
+      "name": "Dark toggle applies readable foreground",
+      "status": "PASS"
+    },
+    {
+      "name": "Reduced motion retains service content",
+      "status": "PASS"
+    },
+    {
+      "name": "Normal motion: ready-made pointer interaction",
+      "status": "PASS"
+    },
+    {
+      "name": "No runtime errors or external asset requests",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "external": []
+}

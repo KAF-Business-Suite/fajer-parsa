@@ -22,3 +22,16 @@
 - No Gemini/service-role secret is exposed in browser code.
 - Unknown commercial data stays quote-only/draft until verified.
 - The existing public site is not overwritten; v2 work is isolated in its own branch/path.
+
+## 2026-10-26 — Local ready-source UI candidate
+- Continued the existing web-v2 app on qa/fajr-ready-ui-light-dark-20261026.
+- Added exactly light/dark, ready-made licensed motion/dialog components, functional UI interactions and local optimized assets.
+- Clean npm ci, production build and 18 browser checks passed.
+- See WEB_V2_READY_SOURCE_QA_20261026.md for scope and limitations.
+- Account/CRM/payment/backend tracking remain unconnected. No remote push or deployment.
+
+## 2026-10-27 — Floating header refinement
+- Rounded, detached glass header with responsive gutters and sticky positioning.
+- Adapted the two-line/X menu transition from Tailark MIT source; original source and license preserved under web-v2/vendor/tailark.
+- Separate rounded menu panels, outside-click dismissal, Escape focus return and breakpoint cleanup.
+- Build and 20 browser checks PASS. Source remains on the same local QA branch; no push or deploy.
