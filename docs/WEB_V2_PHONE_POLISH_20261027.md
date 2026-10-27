@@ -12,3 +12,7 @@ Scope: QA branch only; user requested fuller type, phone sizing and motion/dark-
 Build PASS; all 25 smoke checks PASS. Includes no overflow in both light and dark at 320/360/393/768/1440, phone control font size, hidden duplicate floating button, destination heading weight, dark panel title contrast >=4.5 against each gradient endpoint, existing request/navigation behavior, reduced motion and normal pointer interaction. Zero runtime errors/external asset requests in checked flow.
 Actual new screenshots reviewed: phone hero/destinations/journey/footer and desktop sections. Samsung hardware still NOT TESTED. Existing JS main-chunk warning (~507 kB minified) remains; no warning hidden and no dependency added.
 Public preview update uses existing Direct Upload project and QA branch. No main/production/database/billing changes. Cloudflare Git integration remains disconnected; updates do not auto-deploy.
+
+## Verified publication
+Published app commit: 9d9ef8bb1f1fb4c37588a8cbc192df1bb35f75a3. Deployment: 64c87e4d-e331-4671-addc-ebc1e40dcc1c (preview, deploy success, uses_functions false).
+Stable preview: https://qa-fajr-visual-review-202610.fajr-parsa-qa.pages.dev/ . Cloud Browser reloaded this URL, verified stylesheet index-Ck4IO5Pu.css, h1 computed weight 850, four new journey-step elements, theme toggle and actual dark bundle-panel rendering. Online screenshot saved. No Samsung hardware claim.
