@@ -21,3 +21,7 @@ Desktop and phone screenshots visually reviewed. Main JS 506.68 -> 450.99 kB min
 
 ## Limits
 Previous issues such as durable request recovery/import, company legal content, real online case tracking/payment and Samsung acceptance remain separate. No standalone demo and no new service created. Current app publication uses existing Direct Upload Pages preview and does not enable push auto-deployment.
+
+## Live preview verification
+Published application commit: bc39d004d2994b338e06474ac4362ce57ecbe27c. Exact tested tree:66a1fdf2fc3074d5d16c915016a8c93a3629c5dd. Cloudflare deployment a0a3bfd5-80f1-43c0-aeaf-fc17e81a6a34, preview/success, uses_functions false.
+Stable URL: https://qa-fajr-visual-review-202610.fajr-parsa-qa.pages.dev/ . Live Cloud Browser reloaded the updated app, verified new labels and absence of the floating helper, selected Iran/tourism, chose visa service, confirmed Iran and visa prefilled and reviewed summary containing purpose and Afghanistan nationality. No WhatsApp link clicked/message sent. Actual online screenshot captured. No new production deployment or billing resource.
