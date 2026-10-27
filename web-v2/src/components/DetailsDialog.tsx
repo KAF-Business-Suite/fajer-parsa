@@ -2,14 +2,14 @@ import { useRef, useState } from 'react'
 import { ArrowLeft, Download, MessageCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
 export type RequestContext = { destination?: string; service?: string; purpose?: string; passport?: string; bundle?: string }
-export type Selection = RequestContext & { contactOnly?: boolean; title: string; description: string; request?: boolean; destination?: string; image?: string; options?: { title: string; description: string }[] }
+export type Selection = RequestContext & { contactOnly?: boolean; title: string; description: string; request?: boolean; destination?: string; image?: string; imageNote?:string; location?:string; category?:string; options?: { title: string; description: string }[] }
 export function DetailsDialog({ selection, onClose, onRequest }: { selection: Selection | null; onClose: () => void; onRequest: (context: RequestContext) => void }) {
   const returnFocus = useRef<HTMLElement | null>(null)
   const context:RequestContext={destination:selection?.destination,service:selection?.service,purpose:selection?.purpose,passport:selection?.passport,bundle:selection?.bundle}
   return <Dialog open={Boolean(selection)} onOpenChange={(open) => { if (!open) onClose() }}>
     <DialogContent dir="rtl" onOpenAutoFocus={() => { returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null }} onCloseAutoFocus={(event) => { event.preventDefault(); returnFocus.current?.focus() }}>
       <DialogHeader><DialogTitle>{selection?.title}</DialogTitle><DialogDescription>{selection?.description}</DialogDescription></DialogHeader>
-      {selection?.image && <img className="dialog-destination-image" src={selection.image} alt={selection.title} width="720" height="420"/>}
+      {selection?.image && <figure className="destination-detail"><img className="dialog-destination-image" src={selection.image} alt={selection.location ? selection.location+'، '+selection.title : selection.title} width="1440" height="960"/>{selection.imageNote && <figcaption>{selection.imageNote}</figcaption>}{selection.location && <div className="destination-detail-tags"><span>{selection.location}</span><span>{selection.category}</span></div>}</figure>}
       {selection?.options && <div className="related-services">{selection.options.map(option => <article key={option.title}><h3>{option.title}</h3><p>{option.description}</p><button type="button" className="service-choice" onClick={()=>onRequest({...context,service:option.title})}>انتخاب این خدمت <ArrowLeft size={14}/></button></article>)}</div>}
       {selection?.request ? <RequestDraft key={[selection.destination,selection.service,selection.purpose,selection.bundle].join('|')} initial={context}/> : <div className="dialog-actions"><>{selection?.contactOnly ? <a className="primary-action" href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer"><MessageCircle size={16}/> تماس با دفتر در واتساپ</a> : <button type="button" className="primary-action" onClick={()=>onRequest(context)}>آماده‌سازی درخواست <ArrowLeft size={16}/></button>}</><button type="button" className="secondary-action" onClick={onClose}>بازگشت به سایت</button></div>}
     </DialogContent>
