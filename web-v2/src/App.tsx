@@ -224,14 +224,14 @@ function App() {
         </section>
 
         <section className="shell py-20" id="services">
-          <div className="mb-9 flex items-end justify-between gap-4">
+          <Reveal><div className="mb-9 flex items-end justify-between gap-4">
             <div>
               <div className="eyebrow">خدمات فجر پارسا</div>
               <h2 className="mt-4 text-3xl font-black tracking-[-.03em] sm:text-4xl">برای هر سفر، خدمت مناسب</h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--fp-muted)]">از خدمات ویزا و اسناد تا پرواز و سفرهای گروهی، مسیر مورد نیاز خود را بررسی کنید.</p>
             </div>
             <label className="catalog-search"><Search size={18}/><input type="search" aria-label="جستجوی خدمات" placeholder="جستجو در خدمات" value={query} onChange={e => setQuery(e.target.value)}/></label>
-          </div>
+          </div></Reveal>
 
           <p className="sr-only" role="status">{visibleServices.length} خدمت پیدا شد</p>
           {visibleServices.length === 0 && <p className="py-8 text-center">خدمتی با این عبارت پیدا نشد. عبارت کوتاه‌تری بنویسید.</p>}
@@ -267,17 +267,17 @@ function App() {
                   ['۳', 'مرور درخواست', 'جزئیات را پیش از ارسال ببینید'],
                   ['۴', 'گفت‌وگو با مشاور', 'ارسال انتخابی در واتساپ و هماهنگی با دفتر'],
                 ].map(([num, title, desc]) => (
-                  <div key={num} className="rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-cream)] p-4">
+                  <Reveal key={num} delay={Number(num === '۱' ? 0 : num === '۲' ? 1 : num === '۳' ? 2 : 3) * .07}><div className="journey-step rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-cream)] p-4">
                     <div className="flex items-center gap-3">
                       <span className="font-latin flex h-8 w-8 items-center justify-center rounded-xl bg-[#09111f] text-[11px] font-black text-white">{num}</span>
                       <div><div className="text-sm font-black">{title}</div><div className="mt-1 text-[10px] leading-5 text-[var(--fp-muted)]">{desc}</div></div>
                     </div>
-                  </div>
+                  </div></Reveal>
                 ))}
               </div>
             </div>
 
-            <div id="deals" data-tone="gold" className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#d9bd77] via-[#ecd89d] to-[#f7ecd0] p-7 md:p-9">
+            <Reveal delay={.08}><div id="deals" data-tone="gold" className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#d9bd77] via-[#ecd89d] to-[#f7ecd0] p-7 md:p-9">
               <div className="absolute -left-16 -top-16 h-48 w-48 rounded-full border border-white/40" />
               <WalletCards size={28} className="relative text-[#6f511d]" />
               <div className="font-latin relative mt-5 text-[9px] font-black uppercase tracking-[.16em] text-[#7c5b20]">خدمات ترکیبی</div>
@@ -288,7 +288,7 @@ function App() {
                   <button type="button" onClick={request} key={item} className="bundle-option flex items-center justify-between rounded-2xl px-4 py-3"><span className="font-latin text-xs font-extrabold">{item}</span><ArrowLeft size={14} /></button>
                 ))}
               </div>
-            </div>
+            </div></Reveal>
           </div>
         </section>
 
@@ -314,7 +314,7 @@ function App() {
         </section>
 
         <section className="shell py-20">
-          <div data-tone="gold" className="overflow-hidden rounded-[36px] bg-gradient-to-l from-[#caa85a] via-[#e7d095] to-[#f3e7c8] p-8 md:p-12">
+          <Reveal><div data-tone="gold" className="overflow-hidden rounded-[36px] bg-gradient-to-l from-[#caa85a] via-[#e7d095] to-[#f3e7c8] p-8 md:p-12">
             <div className="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
               <div className="max-w-3xl">
                 <div className="font-latin text-[9px] font-black uppercase tracking-[.18em] text-[#75551f]">مسیر همراهی فجر پارسا</div>
@@ -323,7 +323,7 @@ function App() {
               </div>
               <button onClick={request} className="shine flex items-center justify-center gap-2 rounded-2xl bg-[#09111f] px-6 py-4 text-sm font-black text-white shadow-xl">شروع درخواست <ArrowLeft size={16} /></button>
             </div>
-          </div>
+          </div></Reveal>
         </section>
         <FaqSection />
       </main>
@@ -347,7 +347,7 @@ function App() {
 
       <button onClick={() => inform('راهنمای خدمات', 'از جستجوی خدمات یا انتخاب کشور شروع کنید. هیچ درخواست یا اطلاعاتی بدون اقدام شما ارسال نمی‌شود.')} className="floating-ai fixed bottom-24 left-4 md:bottom-5 md:left-5 z-40 flex h-15 w-15 items-center justify-center rounded-2xl border border-white/10 bg-[#09111f] text-white" aria-label="راهنمای خدمات"><Sparkles size={22} className="text-[#f0cf7f]" /></button>
 
-      <div className="fixed inset-x-3 bottom-3 z-30 flex items-center gap-2 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-glass)] p-2 shadow-2xl backdrop-blur md:hidden">
+      <div className="mobile-action-bar fixed inset-x-3 bottom-3 z-30 flex items-center gap-2 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-glass)] p-2 shadow-2xl backdrop-blur md:hidden">
         <button onClick={request} className="flex-1 rounded-xl bg-[#09111f] px-3 py-3 text-xs font-black text-white">شروع درخواست</button>
         <a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 rounded-xl border border-[var(--fp-line)] px-4 py-3 text-xs font-black"><MessageCircle size={15} /> واتساپ</a>
       </div>

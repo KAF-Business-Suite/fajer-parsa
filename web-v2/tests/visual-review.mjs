@@ -34,7 +34,7 @@ try {
  for (const width of [1440,393]) {
   await page.setViewportSize({width,height:width===1440?1000:852});
   const theme=width===1440?'light':'dark';const current=await page.locator('html').getAttribute('data-theme');if(current!==theme){await page.getByRole('button',{name:theme==='light'?'فعال کردن حالت روشن':'فعال کردن حالت تاریک',exact:true}).click();await page.waitForFunction(theme=>document.documentElement.dataset.theme===theme,theme)}
-  for (const selector of ['.hero','#finder','#services','#destinations','#journey','#track','#faq','footer']) {
+  for (const selector of ['.hero','#finder','#services','#destinations','#journey','#deals','#track','#faq','footer']) {
    await page.locator(selector).evaluate(e=>e.scrollIntoView({block:'start',behavior:'instant'}));
    await page.waitForTimeout(650);
    await page.screenshot({path:resolve(output,`after-${width}-${selector.replace(/[^a-z]/g,'')}.png`)});

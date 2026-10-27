@@ -86,6 +86,22 @@ try {
     await page.getByRole('button',{name:'شروع درخواست',exact:true}).first().click();const dialog=page.getByRole('dialog');await dialog.getByLabel('خدمت مورد نظر',{exact:true}).selectOption({label:'ویزا و اقامت'});await dialog.getByLabel('مقصد',{exact:true}).fill('ایران');await dialog.getByLabel('تعداد مسافران',{exact:true}).fill('2');await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();const link=dialog.getByRole('link',{name:'باز کردن واتساپ دفتر',exact:true});const target=new URL(await link.getAttribute('href'));assert.equal(target.hostname,'wa.me');assert.equal(target.pathname,'/93777377774');assert.match(target.searchParams.get('text'),/ایران/);assert.match(target.searchParams.get('text'),/2/);assert.equal(external.length,0);await page.keyboard.press('Escape')
   })
   await test('FAQ reveals real guidance',async()=>{const summary=page.locator('#faq summary').first();await summary.click();assert.equal(await page.locator('#faq details').first().getAttribute('open'),'');assert.match(await page.locator('#faq details').first().innerText(),/اسناد هویتی/);await summary.click()})
+  await test('Phone typography, clear controls and dark panel contrast',async()=>{
+    await page.setViewportSize({width:393,height:852});
+    if(await page.locator('html').getAttribute('data-theme')!=='dark') await page.getByRole('button',{name:'فعال کردن حالت تاریک',exact:true}).click();
+    await page.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
+    assert.ok(await page.locator('#finder select').first().evaluate(e=>parseFloat(getComputedStyle(e).fontSize))>=16);
+    assert.ok(await page.locator('.destination-copy h3').first().evaluate(e=>Number(getComputedStyle(e).fontWeight))>=800);
+    assert.equal(await page.locator('.floating-ai').isVisible(),false);
+    const ratio=await page.locator('#deals').evaluate(e=>{
+      const lum=rgb=>rgb.map(v=>{v/=255;return v<=.04045?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0);
+      const foreground=getComputedStyle(e.querySelector('h2')).color.match(/\d+(?:\.\d+)?/g).slice(0,3).map(Number);
+      const stops=[...getComputedStyle(e).backgroundImage.matchAll(/rgb\(([^)]+)\)/g)].map(m=>m[1].match(/\d+(?:\.\d+)?/g).slice(0,3).map(Number));
+      if(!stops.length) return 0;
+      return Math.min(...stops.map(c=>{const a=lum(foreground),b=lum(c);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05)}));
+    });assert.ok(ratio>=4.5,'Dark panel contrast '+ratio);
+    for(const width of [320,360,393,768,1440]) {await page.setViewportSize({width,height:852});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Dark overflow '+width)}
+  })
   await test('No runtime errors or external asset requests',async()=>{assert.deepEqual(failures,[]);assert.deepEqual(external,[])})
 } finally {
   await writeFile(resolve(output,'results.json'),JSON.stringify({results,failures,external},null,2))
