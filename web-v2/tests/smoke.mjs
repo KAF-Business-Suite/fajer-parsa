@@ -133,10 +133,17 @@ try {
   })
   await test('Confirmed country catalog carries Japan request context',async()=>{
     const finder=page.getByLabel('مقصد',{exact:true});assert.equal(await finder.locator('option').count(),16);
-    await page.getByRole('button',{name:/^جاپان/}).click();assert.match(await page.getByRole('dialog').innerText(),/یک‌ساله/);await page.getByRole('dialog').getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).click();assert.equal(await page.getByRole('dialog').getByLabel('مقصد',{exact:true}).inputValue(),'جاپان');await page.keyboard.press('Escape');
+    await page.getByRole('button',{name:'خدمات جاپان',exact:true}).click();assert.match(await page.getByRole('dialog').innerText(),/یک‌ساله/);await page.getByRole('dialog').getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).click();assert.equal(await page.getByRole('dialog').getByLabel('مقصد',{exact:true}).inputValue(),'جاپان');await page.keyboard.press('Escape');
   })
   await test('Worldwide booking retains selected bundle',async()=>{
     await page.getByRole('button',{name:'درخواست تکت و بوکینگ',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'پرواز و هتل');assert.match(await dialog.innerText(),/تکت و بوکینگ سراسری/);await page.keyboard.press('Escape');
+  })
+  await test('React Bits country cards retain keyboard operation and compact phone layout',async()=>{
+    await page.setViewportSize({width:1440,height:1000});await page.emulateMedia({reducedMotion:'no-preference'});const tilt=page.getByRole('button',{name:'خدمات ایران',exact:true});await tilt.hover({position:{x:30,y:30}});await page.waitForFunction(()=>{const e=document.querySelector('.country-depth-card .tilted-card__body');return getComputedStyle(e).transform.startsWith('matrix3d')});await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:393,height:852});assert.equal(await page.locator('.country-depth-card').count(),15);
+    const card=page.getByRole('button',{name:'خدمات ایران',exact:true});await card.focus();await page.keyboard.press('Enter');assert.match(await page.getByRole('dialog').innerText(),/دیدار خانواده/);await page.keyboard.press('Escape');
+    const cards=page.locator('.country-depth-card');const [a,b]=await cards.evaluateAll(items=>items.slice(0,2).map(item=>{const r=item.getBoundingClientRect();return {y:r.y,height:r.height}}));assert.ok(Math.abs(a.y-b.y)<2);assert.ok(a.height<=224);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+    await page.getByLabel('جستجوی کشور و خدمات',{exact:true}).fill('مالدیو');assert.equal(await cards.count(),1);await page.getByLabel('جستجوی کشور و خدمات',{exact:true}).fill('');
+    assert.equal(await page.locator('.country-depth-card .tilted-card__body').first().evaluate(e=>getComputedStyle(e).transform),'none');await page.locator('#country-services-title').scrollIntoViewIfNeeded();await page.screenshot({path:resolve(output,'reactbits-phone.png')});
   })
   await test('No runtime errors or external asset requests',async()=>{assert.deepEqual(failures,[]);assert.deepEqual(external,[])})
 } finally {
