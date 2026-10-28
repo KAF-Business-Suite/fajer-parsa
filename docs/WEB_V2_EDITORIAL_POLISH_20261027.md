@@ -19,3 +19,11 @@ Main JS ~453.37 kB minified/145.13 kB gzip versus previous450.99/144.33: less th
 Use case: photorealistic-natural. ONE premium travel website landscape inspired by Hunza Valley, northern Pakistan: plausible Karakoram peaks, emerald-turquoise river, terraced autumn orchards and a few authentic small stone-and-timber village houses. Elevated editorial 35mm photography, natural atmospheric depth, realistic rock textures, restrained cinematic grading, warm early-morning light, airy sky, deep teal water/gold foliage, real proportions. Landscape3:2, legible on destination card. No people, text, watermark, UI, border, logo, collage, invented resort or excessive saturation. An AI destination illustration, not a documentary claim of a hotel or tour.
 
 Main/production/database/billing untouched; source persists in existing GitHub QA branch, publication uses existing Direct Upload preview only.
+
+## Published preview and live verification — 2026-10-28
+- Application source commit: d077039cfc675d768523c862c1f48e5b9ad26ab5; full source tree: db2bc6d9f8e883c0b628c0142dba83f2fc648f48.
+- Cloudflare deployment: ca0c7e4c-25a6-40eb-a1e6-3a9078c6099b; environment preview; deploy successful; no Functions.
+- Stable preview: https://qa-fajr-visual-review-202610.fajr-parsa-qa.pages.dev/
+- Live browser verified favorite add, persistence after reload, removal, destination modal, honest AI illustration caption, and large image loaded at 1440px.
+- Existing 32 automated checks passed; actual Samsung hardware and field performance remain NOT TESTED.
+- Direct Upload remains isolated from Git push auto-deployment. No production, main, database, billing or dependency changes.
