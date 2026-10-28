@@ -1,0 +1,154 @@
+{
+  "results": [
+    {
+      "name": "RTL and light default",
+      "status": "PASS"
+    },
+    {
+      "name": "Light theme and reload persistence",
+      "status": "PASS"
+    },
+    {
+      "name": "Finder validation, details, Escape and focus restoration",
+      "status": "PASS"
+    },
+    {
+      "name": "Live catalog search and empty state",
+      "status": "PASS"
+    },
+    {
+      "name": "Service details and focus trap",
+      "status": "PASS"
+    },
+    {
+      "name": "Destination details and local images",
+      "status": "PASS"
+    },
+    {
+      "name": "Local draft download, no submitted request",
+      "status": "PASS"
+    },
+    {
+      "name": "Desktop menu Escape",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 320",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 360",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 393",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 768",
+      "status": "PASS"
+    },
+    {
+      "name": "No horizontal overflow at 1440",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile navigation link closes menu",
+      "status": "PASS"
+    },
+    {
+      "name": "Dark toggle applies readable foreground",
+      "status": "PASS"
+    },
+    {
+      "name": "Reduced motion retains service content",
+      "status": "PASS"
+    },
+    {
+      "name": "Normal motion: ready-made pointer interaction",
+      "status": "PASS"
+    },
+    {
+      "name": "Detached rounded header remains sticky",
+      "status": "PASS"
+    },
+    {
+      "name": "Floating menu outside click and Escape restore focus",
+      "status": "PASS"
+    },
+    {
+      "name": "Reference capsule geometry and bright local hero",
+      "status": "PASS"
+    },
+    {
+      "name": "Destination filters, search and prefilled request",
+      "status": "PASS"
+    },
+    {
+      "name": "Consultant summary and explicit WhatsApp handoff",
+      "status": "PASS"
+    },
+    {
+      "name": "FAQ reveals real guidance",
+      "status": "PASS"
+    },
+    {
+      "name": "Phone typography, clear controls and dark panel contrast",
+      "status": "PASS"
+    },
+    {
+      "name": "Finder preserves Iran, purpose and nationality through request",
+      "status": "PASS"
+    },
+    {
+      "name": "Service and bundle choices prefill their real request",
+      "status": "PASS"
+    },
+    {
+      "name": "Contact flow offers contact rather than new-order form",
+      "status": "PASS"
+    },
+    {
+      "name": "Deferred dialog loads only after an explicit request",
+      "status": "PASS"
+    },
+    {
+      "name": "Destination favorites persist and remain removable",
+      "status": "PASS"
+    },
+    {
+      "name": "Editorial photo opens honest image detail and preserves destination",
+      "status": "PASS"
+    },
+    {
+      "name": "Featured photo and favorites controls fit phone widths",
+      "status": "PASS"
+    },
+    {
+      "name": "Confirmed country catalog carries Japan request context",
+      "status": "PASS"
+    },
+    {
+      "name": "Worldwide booking retains selected bundle",
+      "status": "PASS"
+    },
+    {
+      "name": "React Bits country cards retain keyboard operation and compact phone layout",
+      "status": "PASS"
+    },
+    {
+      "name": "All 15 country cards have local destination photos and clear service labels",
+      "status": "PASS"
+    },
+    {
+      "name": "Grouped mobile navigation exposes real targets and quick service request",
+      "status": "PASS"
+    },
+    {
+      "name": "No runtime errors or external asset requests",
+      "status": "PASS"
+    }
+  ],
+  "failures": [],
+  "external": []
+}

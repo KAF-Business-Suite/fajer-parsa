@@ -98,7 +98,7 @@ function App() {
             <button aria-expanded={megaOpen} aria-controls="services-mega" onClick={() => setMegaOpen(!megaOpen)} className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5">
               خدمات <ChevronDown size={15} className={megaOpen ? 'rotate-180 transition' : 'transition'} />
             </button>
-            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#destinations">کشورها</a>
+            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#country-services">کشورها</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#journey">درخواست سفر</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#deals">بسته‌های خدمات</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#track">پیگیری</a>
@@ -135,12 +135,14 @@ function App() {
         )}
 
         {mobileOpen && (
-          <nav id="mobile-navigation" aria-label="ناوبری گوشی" className="border-t border-[var(--fp-line)] bg-[var(--fp-cream)] px-4 py-4 lg:hidden">
-            <div className="grid gap-2 text-sm font-bold">
-              {[['خدمات','services'],['کشورها','destinations'],['درخواست سفر','journey'],['بسته‌های خدمات','deals'],['پیگیری پرونده','track']].map(([item,id]) => (
-                <a key={id} href={'#'+id} onClick={() => setMobileOpen(false)} className="rounded-xl bg-[var(--fp-surface)] px-4 py-3 text-right shadow-sm">{item}</a>
-              ))}
-            </div>
+          <nav id="mobile-navigation" aria-label="ناوبری گوشی" className="mobile-navigation-panel lg:hidden">
+            <div className="mobile-nav-group"><p>سفر خود را برنامه‌ریزی کنید</p><div className="mobile-nav-links">
+              {[['کشورها','country-services'],['خدمات','services'],['تکت و بوکینگ سراسری','worldwide-booking'],['بسته‌های خدمات','deals']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
+            </div></div>
+            <div className="mobile-nav-group"><p>انتخاب سریع خدمت</p><div className="mobile-service-links">{serviceGroups.map(({title,icon:Icon,desc})=><button type="button" key={title} onClick={()=>{setMobileOpen(false);inform(title,desc+' شرایط و هزینه با دفتر بررسی می‌شود.',{service:title})}}><Icon size={18}/><span>{title}</span></button>)}</div></div>
+            <div className="mobile-nav-group"><p>راهنما و ارتباط</p><div className="mobile-nav-links">
+              {[['راهنمای انتخاب خدمت','finder'],['درخواست سفر','journey'],['الهام سفر','destinations'],['پرسش‌های رایج','faq'],['پیگیری پرونده','track'],['معرفی و تماس دفتر','contact']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
+            </div></div>
           </nav>
         )}
       </header>

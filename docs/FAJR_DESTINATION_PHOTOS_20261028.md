@@ -1,0 +1,12 @@
+# Fajr destination photographs — 2026-10-28
+
+Eight real photographs downloaded from their Pexels photo pages. Pexels License: https://www.pexels.com/license/ permits website use and modification. No implied photographer/landmark endorsement, no resale as stock, no specific tour/hotel/job availability claim. Locally optimized WebP files; no external image requests at runtime. Pakistan existing AI illustration disclosure remains.
+
+- ازبکستان, سمرقند: AXP Photography — https://www.pexels.com/photo/registan-square-in-samarkand-in-uzbekistan-19439125/ ; `web-v2/public/media/uzbekistan-destination.webp`; 89256 bytes; SHA256 058248e60191dc52d577db4c4bd6e869e6a85be49813d139634a2e5841ca4a76.
+- قزاقستان, آلماتی: Aibek Skakov — https://www.pexels.com/photo/urban-skyline-view-of-almaty-kazakhstan-28931915/ ; `web-v2/public/media/kazakhstan-destination.webp`; 66534 bytes; SHA256 eb5280e1578a26c38fada9e9532b9a9df4d76c8bd09418be62392eae949da79f.
+- روسیه, مسکو: Vitali Adutskevich — https://www.pexels.com/photo/sunset-sunlight-over-saint-basils-cathedral-in-moscow-12900781/ ; `web-v2/public/media/russia-destination.webp`; 31474 bytes; SHA256 7e1a13be651f4b8b3691c529aba66ba77aa5b051f356c63ee183665225dfe04f.
+- چین, پکن: Kaca Pic — https://www.pexels.com/photo/beijing-skyline-featuring-modern-skyscrapers-37506202/ ; `web-v2/public/media/china-destination.webp`; 91072 bytes; SHA256 b0b4f2a9d3e4e54b03a10ea9fae0ce4dfe433313f22a75511faf258726d23f56.
+- هند, آگرا: Yash Rai — https://www.pexels.com/photo/majestic-view-of-the-iconic-taj-mahal-in-agra-31372009/ ; `web-v2/public/media/india-destination.webp`; 38626 bytes; SHA256 6592d3ae7d241a06cc3103a5447e018b4203feed0bd6b7013280369d3f5faede.
+- مالیزیا, کوالالامپور: Airlangga Jati — https://www.pexels.com/photo/kuala-lumpur-skyline-featuring-petronas-towers-32644036/ ; `web-v2/public/media/malaysia-destination.webp`; 79840 bytes; SHA256 f90c6a0904dbd919b25f8e9b74ba88afbaef96834cfb7c01ba2415a7977b17ee.
+- مالدیو, جزایر مالدیو: Asad Photo Maldives — https://www.pexels.com/photo/stunning-aerial-view-of-maldives-island-paradise-28859944/ ; `web-v2/public/media/maldives-destination.webp`; 50160 bytes; SHA256 f0508456106605dd05eb2bc087d6221d6f6ace9aacf388219066ff3aa540eef5.
+- جاپان, کوه فوجی: Lorenzo Castellino — https://www.pexels.com/photo/majestic-mount-fuji-with-serene-lake-view-33229965/ ; `web-v2/public/media/japan-destination.webp`; 101284 bytes; SHA256 7f11d651abaeed3ee573a85ae34b18f4e68f58760844f3dc3382787bbfec0664.
