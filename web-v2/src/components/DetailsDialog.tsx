@@ -1,3 +1,4 @@
+import { serviceNames } from '../content/services'
 import { useRef, useState } from 'react'
 import { ArrowLeft, Download, MessageCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
@@ -33,7 +34,7 @@ function RequestDraft({initial}: {initial:RequestContext}) {
   }
   return <form ref={formRef} className="request-draft" onSubmit={e=>{e.preventDefault();setReviewed(true)}}>
     {initial.bundle && <p className="draft-note">بستهٔ انتخاب‌شده: <strong>{initial.bundle}</strong></p>}
-    <div className="draft-field"><label htmlFor="draft-service">خدمت مورد نظر</label><select id="draft-service" required value={service} onChange={e=>{setService(e.target.value);changed()}}><option value="">انتخاب خدمت</option>{['ویزا و اقامت','دعوتنامه و تجارت','پرواز و هتل','زیارت و کاروان','اسناد و کنسولی','خدمات مکمل سفر'].map(x=><option key={x}>{x}</option>)}</select></div>
+    <div className="draft-field"><label htmlFor="draft-service">خدمت مورد نظر</label><select id="draft-service" required value={service} onChange={e=>{setService(e.target.value);changed()}}><option value="">انتخاب خدمت</option>{serviceNames.map(x=><option key={x}>{x}</option>)}</select></div>
     <div className="draft-field"><label htmlFor="draft-destination">مقصد</label><input id="draft-destination" required value={destination} maxLength={80} onChange={e=>{setDestination(e.target.value);changed()}} placeholder="نام کشور یا شهر"/></div>
     <div className="draft-row"><div className="draft-field"><label htmlFor="draft-date">زمان تقریبی سفر (اختیاری)</label><input id="draft-date" type="date" value={date} onChange={e=>{setDate(e.target.value);changed()}}/></div><div className="draft-field"><label htmlFor="draft-travelers">تعداد مسافران</label><input id="draft-travelers" type="number" min="1" max="99" required value={travelers} onChange={e=>{setTravelers(e.target.value);changed()}}/></div></div>
     <p className="draft-note">پیش از ارسال، خلاصه را مرور کنید. این فرم تصویر اسناد یا اطلاعات هویتی نمی‌خواهد و پیام را خودکار ارسال نمی‌کند.</p>
