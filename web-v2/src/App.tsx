@@ -1,3 +1,4 @@
+import { countryServices } from './content/countries'
 import { serviceGroups } from './content/services'
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { MenuToggle } from './components/ui/menu-toggle'
@@ -5,7 +6,6 @@ import { ThemeToggle } from './components/ThemeToggle'
 import { ScrollProgress } from './components/magicui/scroll-progress'
 import { DestinationGallery } from './components/DestinationGallery'
 import { FaqSection } from './components/FaqSection'
-import { destinations } from './content/destinations'
 import { MagicCard } from './components/magicui/magic-card'
 import { Reveal } from './components/Reveal'
 import type { Selection, RequestContext } from './components/DetailsDialog'
@@ -34,7 +34,7 @@ type FinderState = {
 
 
 
-const moreDestinations = ['چین', 'ازبکستان', 'قزاقستان']
+
 
 const trustItems = [
   ['انتخاب آگاهانه', 'خدمت و شرایط را بررسی کنید'],
@@ -177,7 +177,7 @@ function App() {
                   <label htmlFor="destination" className="mt-1 text-[11px] font-black text-[var(--fp-muted)]">مقصد</label>
                   <select id="destination" value={finder.destination} onChange={(e) => setFinder({ ...finder, destination: e.target.value })} className="w-full rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-surface)] p-3.5 text-sm outline-none transition focus:border-[#c79a42]">
                     <option value="">انتخاب مقصد</option>
-                    {[...destinations.map((d) => d.short), ...moreDestinations].map((name) => <option key={name}>{name}</option>)}
+                    {countryServices.map(country => country.name).map((name) => <option key={name}>{name}</option>)}
                   </select>
                   <label htmlFor="purpose" className="mt-1 text-[11px] font-black text-[var(--fp-muted)]">هدف سفر</label>
                   <select id="purpose" value={finder.purpose} onChange={(e) => setFinder({ ...finder, purpose: e.target.value })} className="w-full rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-surface)] p-3.5 text-sm outline-none transition focus:border-[#c79a42]">
@@ -234,6 +234,14 @@ function App() {
               </article></MagicCard></Reveal>
             ))}
           </div>
+        </section>
+
+        <section className="shell py-12" aria-labelledby="country-services-title">
+          <Reveal><div className="eyebrow">خدمات واقعی فجر پارسا</div><h2 id="country-services-title" className="mt-4 text-3xl font-black">کشور شما، خدمت مورد نیاز شما</h2><p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--fp-muted)]">خدمات هر کشور را ببینید و برای بررسی شرایط درخواست بدهید. فهرست خدمات به‌مرور تکمیل می‌شود؛ زمان، هزینه و امکان ارائه با دفتر مشخص می‌شود.</p></Reveal>
+          <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {countryServices.map(country => <button type="button" key={country.name} className="soft-card rounded-3xl p-5 text-right transition hover:border-[var(--fp-gold)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--fp-gold)]" onClick={() => setSelection({destination:country.name,title:'خدمات '+country.name,description:country.services.join(' • ')+' — ارائهٔ خدمات پس از بررسی شرایط درخواست و تأیید دفتر است؛ صدور ویزا تضمین نمی‌شود.'})}><span className="flex items-center justify-between gap-3"><span className="text-lg font-black">{country.name}</span><ArrowLeft size={17} aria-hidden="true"/></span><span className="mt-3 block text-sm leading-7 text-[var(--fp-muted)]">{country.services.join(' • ')}</span><span className="mt-4 block text-xs font-bold text-[var(--fp-gold)]">بررسی و درخواست خدمات</span></button>)}
+          </div>
+          <div className="soft-card mt-6 rounded-[28px] p-6 sm:flex sm:items-center sm:justify-between sm:gap-6"><div><h3 className="text-xl font-black">تکت و بوکینگ سراسری</h3><p className="mt-2 text-sm leading-7 text-[var(--fp-muted)]">درخواست تکت و بوکینگ برای مسیرهای سراسر جهان؛ موجودی، مسیر و شرایط رزرو با دفتر بررسی می‌شود.</p></div><button type="button" className="primary-action mt-4 shrink-0 sm:mt-0" onClick={() => openRequest({destination:'',service:'پرواز و هتل',bundle:'تکت و بوکینگ سراسری'})}>درخواست تکت و بوکینگ <ArrowLeft size={16}/></button></div>
         </section>
 
         <DestinationGallery onSelect={setSelection} />

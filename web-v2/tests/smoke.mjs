@@ -131,6 +131,13 @@ try {
   await test('Featured photo and favorites controls fit phone widths',async()=>{
     for(const width of [320,393,768,1440]) {await page.setViewportSize({width,height:852});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Photo overflow '+width);const favorite=page.getByRole('button',{name:'افزودن پاکستان به منتخب‌ها',exact:true});const box=await favorite.boundingBox();assert.ok(box.width>=44 && box.height>=44)}
   })
+  await test('Confirmed country catalog carries Japan request context',async()=>{
+    const finder=page.getByLabel('مقصد',{exact:true});assert.equal(await finder.locator('option').count(),16);
+    await page.getByRole('button',{name:/^جاپان/}).click();assert.match(await page.getByRole('dialog').innerText(),/یک‌ساله/);await page.getByRole('dialog').getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).click();assert.equal(await page.getByRole('dialog').getByLabel('مقصد',{exact:true}).inputValue(),'جاپان');await page.keyboard.press('Escape');
+  })
+  await test('Worldwide booking retains selected bundle',async()=>{
+    await page.getByRole('button',{name:'درخواست تکت و بوکینگ',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'پرواز و هتل');assert.match(await dialog.innerText(),/تکت و بوکینگ سراسری/);await page.keyboard.press('Escape');
+  })
   await test('No runtime errors or external asset requests',async()=>{assert.deepEqual(failures,[]);assert.deepEqual(external,[])})
 } finally {
   await writeFile(resolve(output,'results.json'),JSON.stringify({results,failures,external},null,2))
