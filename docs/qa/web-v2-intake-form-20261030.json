@@ -1,0 +1,34 @@
+{
+  "scope": "Local browser with intercepted API/widget; not live central intake",
+  "results": [
+    {
+      "name": "Consent required before any HTTP submission",
+      "status": "PASS"
+    },
+    {
+      "name": "Contact validation blocks invalid submission",
+      "status": "PASS"
+    },
+    {
+      "name": "Outage shows uncertainty, freezes the submitted payload and makes no receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "Retry retains request ID, refreshes challenge and shows only server receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "Receipt layout fits 320/393/768/1440",
+      "status": "PASS"
+    },
+    {
+      "name": "Malformed success is rejected without a fake receipt",
+      "status": "PASS"
+    },
+    {
+      "name": "No runtime errors",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

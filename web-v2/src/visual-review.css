@@ -176,3 +176,10 @@ html[data-magicui-theme-vt="active"]::view-transition-new(root) { clip-path:var(
 .request-summary-text { width:100%; min-height:220px; resize:vertical; padding:14px; border:1px solid var(--fp-line); border-radius:16px; background:var(--fp-surface); color:var(--fp-ink); font:inherit; font-size:14px; line-height:1.9; direction:rtl; }
 .request-summary-text:focus-visible { outline:2px solid var(--fp-gold); outline-offset:3px; }
 .request-summary label { display:block; font-size:13px; font-weight:600; }
+
+.central-request { display:grid; gap:14px; padding:18px; border:1px solid var(--fp-line); border-radius:18px; background:var(--fp-surface); overflow-wrap:anywhere; }
+.central-request input[type="text"] { width:100%; min-height:48px; padding:12px; border:1px solid var(--fp-line); border-radius:12px; color:var(--fp-ink); background:var(--fp-glass); }
+.intake-consent { display:flex; gap:10px; align-items:flex-start; font-size:13px; line-height:1.8; }
+.intake-consent input { width:20px; height:20px; flex:none; margin-top:3px; }
+.central-request button:disabled { opacity:.6; cursor:wait; }
+.central-request [role="alert"] { color:var(--fp-ink); font-size:13px; line-height:1.9; }

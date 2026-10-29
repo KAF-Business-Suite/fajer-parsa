@@ -1,0 +1,52 @@
+import {useEffect,useRef,useState} from 'react'
+import {submitIntake,intakeErrorMessage} from '../lib/intake-client'
+type Widget={render:(el:HTMLElement,options:Record<string,unknown>)=>string;remove:(id:string)=>void;reset:(id:string)=>void}
+declare global {interface Window{turnstile?:Widget}}
+let scriptPromise:Promise<void>|undefined
+function loadWidget(){
+  if(window.turnstile)return Promise.resolve()
+  if(scriptPromise)return scriptPromise
+  scriptPromise=new Promise<void>((resolve,reject)=>{
+    const script=document.createElement('script');script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';script.async=true
+    const timeout=setTimeout(()=>{script.remove();reject(new Error('widget_timeout'))},15000)
+    script.onload=()=>{clearTimeout(timeout);window.turnstile?resolve():reject(new Error('widget_missing'))}
+    script.onerror=()=>{clearTimeout(timeout);script.remove();reject(new Error('widget_failed'))}
+    document.head.appendChild(script)
+  }).catch(error=>{scriptPromise=undefined;throw error})
+  return scriptPromise
+}
+export function CentralRequest({service,destination,variant,onLock}:{service:string;destination:string;variant:string;onLock:()=>void}){
+  const [contact,setContact]=useState('');const [consent,setConsent]=useState(false);const [token,setToken]=useState('')
+  const [busy,setBusy]=useState(false);const [started,setStarted]=useState(false);const [error,setError]=useState('');const [receipt,setReceipt]=useState('')
+  const requestId=useRef(crypto.randomUUID());const container=useRef<HTMLDivElement>(null);const widget=useRef<string|undefined>(undefined);const sending=useRef(false)
+  const active=useRef(true)
+  const sitekey=(import.meta.env as Record<string,string>).VITE_FAJR_TURNSTILE_SITEKEY
+  useEffect(()=>{active.current=true;let canceled=false
+    loadWidget().then(()=>{if(canceled||!container.current)return;widget.current=window.turnstile!.render(container.current,{sitekey,action:'fajr_intake',size:'flexible',callback:(value:string)=>{if(active.current)setToken(value)},'expired-callback':()=>{if(active.current)setToken('')},'error-callback':()=>{if(active.current){setToken('');setError('تأیید امنیتی بارگذاری نشد؛ دوباره تلاش کنید.')}}})}).catch(()=>{if(!canceled)setError('تأیید امنیتی در دسترس نیست؛ فعلاً از راه تماس دفتر استفاده کنید.')})
+    return()=>{canceled=true;active.current=false;if(widget.current)window.turnstile?.remove(widget.current)}
+  },[sitekey])
+  async function send(){
+    if(sending.current||receipt)return
+    if(!consent){setError('برای ثبت، رضایت تماس را تأیید کنید.');return}
+    const value=contact.trim()
+    if(value.length<7||value.length>120||(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)&&!/^\+?[0-9 ()-]{7,24}$/.test(value))){setError('شماره تماس یا ایمیل معتبر بنویسید.');return}
+    if(!token){setError('ابتدا تأیید امنیتی را کامل کنید.');return}
+    sending.current=true;setBusy(true);setStarted(true);setError('');onLock()
+    let completed=false
+    try{const result=await submitIntake({requestId:requestId.current,service,destination,variant,contact:value,consent:true,challenge:token,website:''});completed=true;if(active.current)setReceipt(result.receipt)}
+    catch(reason){if(active.current)setError(intakeErrorMessage(reason))}
+    finally{sending.current=false;if(active.current){setBusy(false);setToken('');if(!completed&&widget.current)window.turnstile?.reset(widget.current)}}
+  }
+  return <section className="central-request" aria-labelledby="central-request-title">
+    <h3 id="central-request-title">ثبت بررسی اولیه در دفتر</h3>
+    <p className="draft-note">آزمایشی: فقط اطلاعات ساختگی وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.</p>
+    {receipt?<div role="status"><strong>درخواست اولیه ثبت شد</strong><p>رسید ثبت: <bdi>{receipt}</bdi></p><small>این رسید تأیید ویزا یا نتیجهٔ بررسی نیست. برای پیگیری آن را نگه دارید.</small></div>:<>
+      <label htmlFor="intake-contact">شماره تماس یا ایمیل</label><input id="intake-contact" type="text" dir="auto" maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
+      <label className="intake-consent"><input type="checkbox" checked={consent} disabled={started} onChange={event=>setConsent(event.target.checked)}/> رضایت دارم اطلاعات همین درخواست برای بررسی و تماس دفتر ذخیره شود.</label>
+      <div ref={container}/><button type="button" className="primary-action" disabled={busy||!token} onClick={send}>{busy?'در حال ثبت…':started?'بررسی دوبارهٔ همین درخواست':'ثبت درخواست اولیه'}</button>
+      {started&&<p className="draft-note">برای جلوگیری از ثبت تکراری، اطلاعات این تلاش ثابت مانده است. تازه‌کردن صفحه یا شروع فرم جدید ممکن است درخواست دیگری ایجاد کند.</p>}
+    </>}
+    {error&&<p role="alert">{error}</p>}
+  </section>
+}
+export const centralIntakeEnabled=(import.meta.env as Record<string,string>).VITE_FAJR_INTAKE_ENABLED==='true'&&Boolean((import.meta.env as Record<string,string>).VITE_FAJR_TURNSTILE_SITEKEY)

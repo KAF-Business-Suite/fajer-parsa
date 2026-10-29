@@ -1,3 +1,4 @@
+import {CentralRequest,centralIntakeEnabled} from './CentralRequest'
 import { serviceNames } from '../content/services'
 import { useRef, useState } from 'react'
 import { ArrowLeft, Copy, Download, MessageCircle } from 'lucide-react'
@@ -24,6 +25,7 @@ function RequestDraft({initial}: {initial:RequestContext}) {
   const [travelers, setTravelers] = useState('1')
   const [saved, setSaved] = useState(false)
   const [reviewed, setReviewed] = useState(false)
+  const [submissionLocked,setSubmissionLocked]=useState(false)
   const [copyStatus,setCopyStatus] = useState('')
   const summaryRef=useRef<HTMLTextAreaElement>(null)
   const formRef=useRef<HTMLFormElement>(null)
@@ -48,13 +50,14 @@ function RequestDraft({initial}: {initial:RequestContext}) {
   return <form ref={formRef} className="request-draft" onSubmit={e=>{e.preventDefault();setReviewed(true)}}>
     {variant && <p className="draft-note">خدمت انتخاب‌شده: <strong>{variant}</strong></p>}
     {initial.bundle && <p className="draft-note">بستهٔ انتخاب‌شده: <strong>{initial.bundle}</strong></p>}
-    <div className="draft-field"><label htmlFor="draft-service">خدمت مورد نظر</label><select id="draft-service" required value={service} onChange={e=>{setService(e.target.value);if(initial.service && e.target.value!==initial.service)setVariant('');changed()}}><option value="">انتخاب خدمت</option>{serviceNames.map(x=><option key={x}>{x}</option>)}</select></div>
-    <div className="draft-field"><label htmlFor="draft-destination">مقصد</label><input id="draft-destination" required value={destination} maxLength={80} onChange={e=>{setDestination(e.target.value);if(e.target.value!==initial.destination)setVariant('');changed()}} placeholder="نام کشور یا شهر"/></div>
-    <div className="draft-row"><div className="draft-field"><label htmlFor="draft-date">زمان تقریبی سفر (اختیاری)</label><input id="draft-date" type="date" value={date} onChange={e=>{setDate(e.target.value);changed()}}/></div><div className="draft-field"><label htmlFor="draft-travelers">تعداد مسافران</label><input id="draft-travelers" type="number" min="1" max="99" required value={travelers} onChange={e=>{setTravelers(e.target.value);changed()}}/></div></div>
+    <div className="draft-field"><label htmlFor="draft-service">خدمت مورد نظر</label><select id="draft-service" disabled={submissionLocked} required value={service} onChange={e=>{setService(e.target.value);if(initial.service && e.target.value!==initial.service)setVariant('');changed()}}><option value="">انتخاب خدمت</option>{serviceNames.map(x=><option key={x}>{x}</option>)}</select></div>
+    <div className="draft-field"><label htmlFor="draft-destination">مقصد</label><input id="draft-destination" disabled={submissionLocked} required value={destination} maxLength={80} onChange={e=>{setDestination(e.target.value);if(e.target.value!==initial.destination)setVariant('');changed()}} placeholder="نام کشور یا شهر"/></div>
+    <div className="draft-row"><div className="draft-field"><label htmlFor="draft-date">زمان تقریبی سفر (اختیاری)</label><input id="draft-date" disabled={submissionLocked} type="date" value={date} onChange={e=>{setDate(e.target.value);changed()}}/></div><div className="draft-field"><label htmlFor="draft-travelers">تعداد مسافران</label><input id="draft-travelers" disabled={submissionLocked} type="number" min="1" max="99" required value={travelers} onChange={e=>{setTravelers(e.target.value);changed()}}/></div></div>
     <p className="draft-note">پیش از ارسال، خلاصه را مرور کنید. این فرم تصویر اسناد یا اطلاعات هویتی نمی‌خواهد و پیام را خودکار ارسال نمی‌کند.</p>
-    <button type="submit" className="primary-action">مرور پیام درخواست <ArrowLeft size={16}/></button>
-    {reviewed && <div className="request-summary" aria-live="polite"><h3>خلاصه برای مشاور</h3><label htmlFor="request-summary-text">متن آمادهٔ درخواست</label><textarea id="request-summary-text" ref={summaryRef} className="request-summary-text" readOnly value={summary} rows={9}/><button type="button" className="secondary-action" onClick={copySummary}><Copy size={16}/> کپی خلاصهٔ درخواست</button><div role="status">{copyStatus}</div><small>می‌توانید متن را در ایمیل یا پیام‌رسان دلخواه بفرستید. این صفحه درخواست را در دفتر ثبت نمی‌کند.</small><a className="primary-action" href={'https://wa.me/93777377774?text='+encodeURIComponent(summary)} target="_blank" rel="noopener noreferrer"><MessageCircle size={17}/> باز کردن واتساپ دفتر</a><small>پیام تنها پس از انتخاب «ارسال» در واتساپ فرستاده می‌شود.</small></div>}
-    <button type="button" className="draft-download" onClick={download}><Download size={15}/> دریافت پیش‌نویس</button>
+    <button type="submit" disabled={submissionLocked} className="primary-action">مرور پیام درخواست <ArrowLeft size={16}/></button>
+    {reviewed && <div className="request-summary" aria-live="polite"><h3>خلاصه برای مشاور</h3><label htmlFor="request-summary-text">متن آمادهٔ درخواست</label><textarea id="request-summary-text" ref={summaryRef} className="request-summary-text" readOnly value={summary} rows={9}/><button type="button" className="secondary-action" onClick={copySummary}><Copy size={16}/> کپی خلاصهٔ درخواست</button><div role="status">{copyStatus}</div><small>{centralIntakeEnabled ? 'کپی متن یا باز کردن واتساپ به معنی ثبت مرکزی نیست؛ نتیجهٔ ثبت در بخش پایین نمایش داده می‌شود.' : 'می‌توانید متن را در ایمیل یا پیام‌رسان دلخواه بفرستید. این صفحه درخواست را در دفتر ثبت نمی‌کند.'}</small><a className="primary-action" href={'https://wa.me/93777377774?text='+encodeURIComponent(summary)} target="_blank" rel="noopener noreferrer"><MessageCircle size={17}/> باز کردن واتساپ دفتر</a><small>پیام تنها پس از انتخاب «ارسال» در واتساپ فرستاده می‌شود.</small></div>}
+    {reviewed && centralIntakeEnabled && <CentralRequest service={service} destination={destination} variant={variant} onLock={()=>setSubmissionLocked(true)}/>}
+    <button type="button" className="draft-download" disabled={submissionLocked} onClick={download}><Download size={15}/> دریافت پیش‌نویس</button>
     <div role="status">{saved ? 'فایل پیش‌نویس آمادهٔ دریافت شد؛ درخواست به دفتر ارسال نشده است.' : ''}</div>
   </form>
 }
