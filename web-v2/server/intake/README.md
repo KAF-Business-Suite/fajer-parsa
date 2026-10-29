@@ -1,3 +1,15 @@
+# Fajr central intake — current execution path
+
+The active QA server is Supabase Edge Function `fajr-web-intake-qa`, using `edge-entry.ts`, `edge.ts`, `handler.ts` and `adapters.ts`. It reuses runtime-injected Supabase server credentials. The Turnstile credential is stored in encrypted Supabase Vault, returned only through a service-role-only, fixed-purpose RPC; no secret value is in source or browser output. This avoids transferring the broad database credential to Cloudflare.
+
+The existing Supabase organization plan was verified `free/tier_free` through get_organization. No project, paid branch, paid Worker, upgrade or billing change was created. One free Turnstile widget is restricted to the exact QA hostname. Configuration is in `web-v2/config/intake-qa.json` (public identifiers only).
+
+The private database gate is deny-by-default and uses a serialized GLOBAL cap of 12 attempts/minute and 100/day. It is not per-IP. A service-only switch can disable the server immediately. Daily windows use database UTC. QA accepts only synthetic `@example.invalid` contacts; production origin is refused. Data API public reads/writes remain denied. No customer tracking/office authorization has been exposed.
+
+`pages-entry.ts` is an inactive alternative, kept outside `functions/`; do not deploy it or configure Cloudflare server keys for the selected Supabase path. Historical instructions below are superseded by this section.
+
+See `docs/FAJR_EDGE_INTAKE_20261030.md` for current proof and remaining live acceptance. Never confuse local mocked browser tests with real HTTPS receipt proof.
+
 # Prepared server intake — NOT DEPLOYED
 
 These server files are intentionally outside `functions/` and Vite `src/`. A normal static build cannot expose them. No client UI calls this endpoint yet, and the isolated table/RPC migration has now been applied with owner approval. See docs/FAJR_INTAKE_DATABASE_QA_20261030.md.

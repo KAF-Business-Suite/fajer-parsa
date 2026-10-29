@@ -21,6 +21,7 @@ export function CentralRequest({service,destination,variant,onLock}:{service:str
   const requestId=useRef(crypto.randomUUID());const container=useRef<HTMLDivElement>(null);const widget=useRef<string|undefined>(undefined);const sending=useRef(false)
   const active=useRef(true)
   const sitekey=(import.meta.env as Record<string,string>).VITE_FAJR_TURNSTILE_SITEKEY
+  const endpoint=(import.meta.env as Record<string,string>).VITE_FAJR_INTAKE_ENDPOINT||'/api/requests'
   useEffect(()=>{active.current=true;let canceled=false
     loadWidget().then(()=>{if(canceled||!container.current)return;widget.current=window.turnstile!.render(container.current,{sitekey,action:'fajr_intake',size:'flexible',callback:(value:string)=>{if(active.current)setToken(value)},'expired-callback':()=>{if(active.current)setToken('')},'error-callback':()=>{if(active.current){setToken('');setError('تأیید امنیتی بارگذاری نشد؛ دوباره تلاش کنید.')}}})}).catch(()=>{if(!canceled)setError('تأیید امنیتی در دسترس نیست؛ فعلاً از راه تماس دفتر استفاده کنید.')})
     return()=>{canceled=true;active.current=false;if(widget.current)window.turnstile?.remove(widget.current)}
@@ -29,17 +30,17 @@ export function CentralRequest({service,destination,variant,onLock}:{service:str
     if(sending.current||receipt)return
     if(!consent){setError('برای ثبت، رضایت تماس را تأیید کنید.');return}
     const value=contact.trim()
-    if(value.length<7||value.length>120||(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)&&!/^\+?[0-9 ()-]{7,24}$/.test(value))){setError('شماره تماس یا ایمیل معتبر بنویسید.');return}
+    if(!value.endsWith('@example.invalid')||value.length<7||value.length>120||(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)&&!/^\+?[0-9 ()-]{7,24}$/.test(value))){setError('برای آزمون، ایمیل ساختگی مانند qa@example.invalid بنویسید.');return}
     if(!token){setError('ابتدا تأیید امنیتی را کامل کنید.');return}
     sending.current=true;setBusy(true);setStarted(true);setError('');onLock()
     let completed=false
-    try{const result=await submitIntake({requestId:requestId.current,service,destination,variant,contact:value,consent:true,challenge:token,website:''});completed=true;if(active.current)setReceipt(result.receipt)}
+    try{const result=await submitIntake({requestId:requestId.current,service,destination,variant,contact:value,consent:true,challenge:token,website:''},fetch,endpoint);completed=true;if(active.current)setReceipt(result.receipt)}
     catch(reason){if(active.current)setError(intakeErrorMessage(reason))}
     finally{sending.current=false;if(active.current){setBusy(false);setToken('');if(!completed&&widget.current)window.turnstile?.reset(widget.current)}}
   }
   return <section className="central-request" aria-labelledby="central-request-title">
     <h3 id="central-request-title">ثبت بررسی اولیه در دفتر</h3>
-    <p className="draft-note">آزمایشی: فقط اطلاعات ساختگی وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.</p>
+    <p className="draft-note">بررسی اتصال: فقط ایمیل ساختگی با پایان @example.invalid وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.</p>
     {receipt?<div role="status"><strong>درخواست اولیه ثبت شد</strong><p>رسید ثبت: <bdi>{receipt}</bdi></p><small>این رسید تأیید ویزا یا نتیجهٔ بررسی نیست. برای پیگیری آن را نگه دارید.</small></div>:<>
       <label htmlFor="intake-contact">شماره تماس یا ایمیل</label><input id="intake-contact" type="text" dir="auto" maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
       <label className="intake-consent"><input type="checkbox" checked={consent} disabled={started} onChange={event=>setConsent(event.target.checked)}/> رضایت دارم اطلاعات همین درخواست برای بررسی و تماس دفتر ذخیره شود.</label>
@@ -49,4 +50,4 @@ export function CentralRequest({service,destination,variant,onLock}:{service:str
     {error&&<p role="alert">{error}</p>}
   </section>
 }
-export const centralIntakeEnabled=(import.meta.env as Record<string,string>).VITE_FAJR_INTAKE_ENABLED==='true'&&Boolean((import.meta.env as Record<string,string>).VITE_FAJR_TURNSTILE_SITEKEY)
+export const centralIntakeEnabled=(location.origin==='https://qa-fajr-visual-review-202610.fajr-parsa-qa.pages.dev'||location.hostname==='127.0.0.1')&&(import.meta.env as Record<string,string>).VITE_FAJR_INTAKE_ENABLED==='true'&&Boolean((import.meta.env as Record<string,string>).VITE_FAJR_TURNSTILE_SITEKEY)

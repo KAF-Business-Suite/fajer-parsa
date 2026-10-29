@@ -2,7 +2,7 @@ import type { Intake } from './handler.ts'
 // All configuration here belongs to server secrets/bindings, never VITE_* variables.
 export function turnstileVerifier(secret:string,hostname:string,fetcher:typeof fetch=fetch) {
   return async(token:string,ip:string)=>{
-    const response=await fetcher('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',body:new URLSearchParams({secret,response:token,remoteip:ip}),signal:AbortSignal.timeout(5000)})
+    const response=await fetcher('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',body:new URLSearchParams({secret,response:token,...(ip?{remoteip:ip}:{})}),signal:AbortSignal.timeout(5000)})
     if(!response.ok)return false
     const data=await response.json() as {success?:boolean;hostname?:string;action?:string}
     return data.success===true&&data.hostname===hostname&&data.action==='fajr_intake'

@@ -1,0 +1,7 @@
+{
+  "origin": "https://qa-fajr-visual-review-202610.fajr-parsa-qa.pages.dev",
+  "endpoint": "https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-web-intake-qa",
+  "sitekey": "0x4AAAAAAFrqV6izkeFDGOwS",
+  "syntheticOnly": true,
+  "productionEnabled": false
+}

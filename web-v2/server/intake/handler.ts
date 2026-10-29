@@ -2,6 +2,7 @@
 export type Intake = { requestId:string; service:string; destination:string; variant:string; contact:string; consent:true }
 export type Dependencies = {
   enabled:boolean; origin:string;
+  isContactAllowed?:(contact:string)=>boolean;
   rateLimit:(ip:string)=>Promise<boolean>;
   verifyChallenge:(token:string,ip:string)=>Promise<boolean>;
   save:(data:Intake)=>Promise<{receipt:string;replayed:boolean}>;
@@ -31,6 +32,7 @@ export async function handleIntake(request:Request,ip:string,deps:Dependencies):
     const text=(key:string,max:number)=>typeof body[key]==='string' && (body[key] as string).length<=max && !/[\u0000-\u001f\u007f]/.test(body[key] as string)
     if(!text('requestId',36)||!uuid.test(body.requestId as string)||!text('service',50)||!services.includes(body.service as string)||!text('destination',80)||!(body.destination as string).trim()||!text('variant',120)||!text('contact',120)||!text('challenge',2048)||!(body.challenge as string).trim()||body.consent!==true||body.website!=='')return reply(400,{error:'invalid_request'})
     const contact=(body.contact as string).trim()
+    if(deps.isContactAllowed&&!deps.isContactAllowed(contact))return reply(400,{error:'qa_synthetic_contact_required'})
     if(contact.length<7)return reply(400,{error:'invalid_contact'})
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) && !/^\+?[0-9 ()-]{7,24}$/.test(contact))return reply(400,{error:'invalid_contact'})
     if(!await deps.verifyChallenge(body.challenge as string,ip))return reply(403,{error:'challenge_failed'})

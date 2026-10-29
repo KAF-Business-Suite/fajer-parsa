@@ -25,3 +25,5 @@ test('prepared entrypoint fails closed without server bindings or on production 
  const {onRequest}=await import('./pages-entry.ts')
  for(const url of ['https://qa-fajr-visual-review-202610.fajr-parsa-qa.pages.dev/api/requests','https://fajr-parsa-qa.pages.dev/api/requests']){const r=await onRequest({request:new Request(url),env:{FAJR_INTAKE_ENABLED:'true'}});assert.equal(r.status,503);assert.deepEqual(await r.json(),{error:'intake_not_enabled'})}
 })
+
+test('QA contact policy rejects real contact before challenge/storage',async()=>{const s=setup({isContactAllowed:contact=>contact.endsWith('@example.invalid')});const r=await handleIntake(req({...valid,contact:'person@example.com'}),'test-ip',s.deps);assert.equal(r.status,400);assert.equal((await r.json()).error,'qa_synthetic_contact_required');assert.equal(s.writes(),0)})

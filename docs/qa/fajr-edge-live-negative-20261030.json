@@ -1,0 +1,30 @@
+[
+  {
+    "name": "preflight",
+    "status": 204,
+    "expected": 204,
+    "pass": true,
+    "response": ""
+  },
+  {
+    "name": "invalid_challenge",
+    "status": 403,
+    "expected": 403,
+    "pass": true,
+    "response": "{\"error\":\"challenge_failed\"}"
+  },
+  {
+    "name": "missing_fields",
+    "status": 400,
+    "expected": 400,
+    "pass": true,
+    "response": "{\"error\":\"invalid_request\"}"
+  },
+  {
+    "name": "production_origin_denied",
+    "status": 403,
+    "expected": 403,
+    "pass": true,
+    "response": "{\"error\":\"origin_denied\"}"
+  }
+]
