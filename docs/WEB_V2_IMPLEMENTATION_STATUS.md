@@ -1,37 +1,48 @@
-# Fajr Parsa Web v2 — Implementation Status
+# فجر پارسا — وضعیت فعلی و مرجع ادامهٔ کار
 
-## Executed
-- Created production-oriented web-v2 React + TypeScript + Vite + Tailwind foundation.
-- Added premium light travel-commerce design system.
-- Implemented homepage shell, desktop mega menu, service finder, destination hubs, commerce bundles, tracking/account teaser and floating AI entry.
-- Reused the existing Fajr Parsa logo and travel imagery as temporary assets.
-- Added first Supabase service-catalog migration.
-- Added RLS-safe public-read policies for published catalog data.
-- Added structure-only seeds for countries and service categories.
-- Intentionally did not seed unverified prices or service availability.
+به‌روزرسانی: ۳۰ اکتوبر ۲۰۲۶، به وقت کابل. این سند مرجع فعلی است؛ گزارش‌های تاریخ‌دار قبلی شواهد تاریخی‌اند و جایگزین این وضعیت نمی‌شوند.
 
-## Next implementation slice
-1. Connect the finder/home cards to Supabase catalog reads.
-2. Build country hub + service detail route/template.
-3. Build Smart Request Builder and lead creation.
-4. Connect lead output to KAF CRM.
-5. Add real Gemini server endpoint after catalog/knowledge grounding.
+## نسخهٔ اصلی تأییدشده
+- نشانی اصلی: https://fajr-parsa-qa.pages.dev/
+- مالک در همین گفتگو آخرین نسخه را تأیید و انتشار اصلی را صریحاً مجاز کرد.
+- Cloudflare environment: production؛ deploy: success.
+- Deployment ID: 0b742f3b-a6d9-463e-9900-ad9669da3046
+- منبع دقیق برنامه: 94891bba02354fef36a6af292de9435872568c02
+- درخت دقیق سورس: f90e43fd4007f42b7fbfe1fd19c1bf001a9775dc
+- ورودی زندهٔ تطبیق‌شده: /assets/index-SrFHfNZv.js
+- نام fajr-parsa-qa در دامنه، نام تاریخی پروژه است؛ ریشهٔ این دامنه اکنون نسخهٔ اصلی تأییدشده است، نه لینک شاخهٔ آزمایشی.
+- نسخهٔ اصلی قبلی برای شناسایی بازگشت: 18c04074-6b1f-4a03-bf07-a9855944361f، سورس 267db7628d1b5ef96e2800bd1062fd1a4b10124c. بازگشتی اجرا نشد.
 
-## Safety decisions
-- No anonymous write policies were added.
-- No Gemini/service-role secret is exposed in browser code.
-- Unknown commercial data stays quote-only/draft until verified.
-- The existing public site is not overwritten; v2 work is isolated in its own branch/path.
+## انجام شده؛ تکرار نشود
+- همان پروژهٔ web-v2 با برند و لوگوی موجود، حالت روشن/تاریک، هدر جدا و گرد، فونت و تصاویر محلی و حرکت‌های آمادهٔ دارای مجوز.
+- فهرست ۱۵ کشور با تصویر؛ برای هر کشور صفحهٔ جدا و مسیر درخواست. ایران ۱۳ انتخاب خدمت دارد.
+- خدمات اصلی و تکت/بوکینگ سراسری، فیلتر و جستجو، انتخاب مقصد و حفظ نوع خدمت در درخواست.
+- مرور خلاصه، کپی متن، دریافت پیش‌نویس و بازکردن انتخابی واتساپ. ارسال پیام با خود مشتری است.
+- جدول مستقل ثبت اولیه در سوپابیس و آزمون واقعی با فقط یک رکورد ساختگی. دسترسی عمومی و خواندن عادی کاربران بسته است.
+- کد ثبت مرکزی، رضایت/تماس، رسید معتبر، رفتار خطا و تلاش دوباره آماده است ولی در برنامهٔ عمومی خاموش است.
 
-## 2026-10-26 — Local ready-source UI candidate
-- Continued the existing web-v2 app on qa/fajr-ready-ui-light-dark-20261026.
-- Added exactly light/dark, ready-made licensed motion/dialog components, functional UI interactions and local optimized assets.
-- Clean npm ci, production build and 18 browser checks passed.
-- See WEB_V2_READY_SOURCE_QA_20261026.md for scope and limitations.
-- Account/CRM/payment/backend tracking remain unconnected. No remote push or deployment.
+## همگام‌سازی واقعی
+- مخزن رسمی: KAF-Business-Suite/fajer-parsa؛ سورس فعلی از شاخهٔ qa/fajr-visual-review-20261027 خوانده شد. نام قدیمی شاخه به معنی آزمایشی‌بودن انتشار تأییدشده نیست.
+- انتشار با Direct Upload انجام شد. متادیتای branch=main مربوط به انتخاب محیط production کلادفلر است؛ Git main تغییر یا Merge نشده است.
+- Git push به‌تنهایی انتشار خودکار نمی‌کند. اتصال Git اتوماتیک هنوز برقرار نیست؛ در گزارش‌ها آن را فعال اعلام نکنید.
+- انتشار برنامه از commit مشخص بالا انجام شده؛ commit بعدیِ صرفاً مستندات نباید با نسخهٔ جدید برنامه اشتباه شود.
+- هر بار ابتدا همین سند، HEAD واقعی مخزن و canonical deployment کلادفلر تطبیق داده شوند؛ بازیابی و ساخت دوباره از صفر تکرار نشود.
 
-## 2026-10-27 — Floating header refinement
-- Rounded, detached glass header with responsive gutters and sticky positioning.
-- Adapted the two-line/X menu transition from Tailark MIT source; original source and license preserved under web-v2/vendor/tailark.
-- Separate rounded menu panels, outside-click dismissal, Escape focus return and breakpoint cleanup.
-- Build and 20 browser checks PASS. Source remains on the same local QA branch; no push or deploy.
+## بررسی این انتشار
+- Checkout پیش از کار تمیز بود و به HEAD واقعی مخزن منتقل شد.
+- Build از سورس واقعی: PASS. خروجی تمیز با ۳۶ فایل؛ فایل سرور، secret یا mock در انتشار نیست.
+- ۲۰ آزمون کد در این انتشار: PASS. همان سورس قبلاً ۴۱ آزمون رابط پیش‌فرض و ۷ آزمون رابط ثبت مرکزی با سرور شبیه‌سازی‌شده را گذرانده است؛ برای جلوگیری از مصرف تکراری همهٔ آن‌ها دوباره اجرا نشدند.
+- مرورگر روی نشانی اصلی: صفحهٔ خانه، ۱۵ کشور، صفحهٔ ایران، فرم نوع خدمت و خلاصهٔ قابل کپی مشاهده و تطبیق شدند. فایل اجرایی زنده با خروجی Build تطبیق داشت.
+- ثبت عمومی واقعی از مرورگر تا دیتابیس: NOT ENABLED / NOT TESTED. آزمون ۷تایی با mock، اثبات اتصال زنده نیست.
+- Samsung واقعی: NOT TESTED. ارسال به مشتری یا ثبت دادهٔ واقعی انجام نشد.
+
+## اولویت‌های بعدی
+1. تکمیل اتصال امن ثبت اولیه: محیط اجرای سرور با هزینهٔ صفر تأییدشده، کلید فقط سمت سرور، ضدربات واقعی، محدودکنندهٔ معتبر، سپس آزمون HTTPS تا رسید واقعی. کد یا جدول دوباره از صفر ساخته نشود.
+2. تکمیل جزئیات خدمات هر کشور با تأیید گروهی مالک؛ هیچ قیمت، زمان، مدرک یا تضمین ساختگی اضافه نشود.
+3. زبان‌های جداگانهٔ فارسی، انگلیسی، ترکی، پشتو و جرمنی؛ سپس دسترسی مجاز کارمندان، پیگیری مشتری و اتوماسیون.
+
+## موارد باز و محدودیت‌ها
+- محیط کلادفلر هنوز متغیر محرمانه/اتصال سرور موردنیاز ثبت مرکزی ندارد. وضعیت پلن از اتصال فعلی قابل خواندن نیست: Billing API پاسخ 403 می‌دهد؛ usage_model=standard اثبات رایگان‌بودن نیست. هزینه یا پلن جدید مجاز نشده است.
+- ثبت مرکزی خاموش است؛ نباید با کلیک کپی/واتساپ ادعای ذخیره در دفتر شود. سیستم فعلی فرم پیگیری آنلاین پرونده ندارد.
+- noindex قبلی حفظ شد؛ انتشار اصلی به معنی فعال‌شدن نمایه‌سازی گوگل یا تکمیل SEO نیست.
+- در این انتشار دیتابیس، پیام‌رسان، Production پروژه‌های دیگر، تنظیمات هزینه، دامنه یا Git main تغییر نکردند. فقط انتشار اصلی همین سایت با تأیید صریح مالک انجام شد.
