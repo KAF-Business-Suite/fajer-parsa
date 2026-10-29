@@ -1,0 +1,16 @@
+{
+  "date_kabul": "2026-10-30",
+  "qa_deployment": "394e17b6-433f-4c4b-95ce-d4e2a4e5de6c",
+  "source_commit": "1260b1dbbfdf0ebe5860950e982db822e7a7a3db",
+  "edge_function": "fajr-web-intake-qa",
+  "edge_version": 3,
+  "mode": "synthetic_only",
+  "browser_to_database": "PASS",
+  "real_turnstile": "PASS",
+  "receipt": "38949594-f6af-48af-9f57-a47371f9f46d",
+  "matching_synthetic_rows": 1,
+  "database_replay": "PASS",
+  "production_unchanged": "0b742f3b-a6d9-463e-9900-ad9669da3046",
+  "samsung": "NOT TESTED",
+  "real_customer_intake": "NOT ENABLED"
+}

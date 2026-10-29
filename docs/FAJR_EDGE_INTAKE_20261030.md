@@ -18,8 +18,17 @@ Owner authorization: isolated intake, QA-only server/anti-bot configuration and 
 - First live request exposed the internal HTTP runtime URL behind the Supabase HTTPS proxy. The Edge adapter now normalizes to its fixed canonical HTTPS endpoint only after exact-origin validation; a regression test covers it. No browser TLS warning was bypassed.
 - Security advisors: two INFO findings for RLS enabled with no policies (the private control table and service-only intake table). Intentional deny-by-default; public policies were not added to silence them. Other existing project findings were not changed.
 
-## Pending final publication/acceptance record
-Live QA deployment, actual Turnstile pass and stored receipt reconciliation will be recorded after verification. Production `0b742f3b-a6d9-463e-9900-ad9669da3046` remains the owner-approved website; central intake stays off there. No production server permission is implied.
+## Live publication and acceptance
+- QA deployment: 394e17b6-433f-4c4b-95ce-d4e2a4e5de6c, preview success; application source 1260b1dbbfdf0ebe5860950e982db822e7a7a3db, source tree ff7b4e32b9115b8c73007e5a6e41da1aad75eb31. Public build flags were enabled only for this QA build; production defaults remain off.
+- URL: https://qa-fajr-visual-review-202610.fajr-parsa-qa.pages.dev/#/country/ir
+- Real HTTP negative checks PASS: exact QA preflight 204, invalid Turnstile 403 challenge_failed, missing fields 400, production origin 403 origin_denied.
+- Browser used the real, non-interactive Turnstile widget without mock/interception or a manual challenge solve. Clicked Iran tourist visa, reviewed, entered only a reserved synthetic email, checked consent, submitted via the live Edge endpoint.
+- Browser displayed database receipt 38949594-f6af-48af-9f57-a47371f9f46d. Database read independently reconciled the same receipt, request ID 3c7beb58-a847-47e9-8efb-59b2ab41269c, Iran/tourist visa, consent=true, status=received and exactly one matching synthetic row. Stored at 2026-10-29T20:49:46.547121Z (30 October Kabul).
+- Replaying that exact payload through the real database RPC returned the same receipt and replayed=true, without another row. This is database replay proof, not a claimed second live browser HTTP replay.
+- Actual browser → real Turnstile → live Edge → persisted database → visible receipt: PASS. No real customer data or message was sent.
+- Production remains 0b742f3b-a6d9-463e-9900-ad9669da3046. This phase does not activate real customer intake or change production origin authorization.
+- Samsung hardware, HTTP retry after ambiguous delivery, spent-token replay and authorized staff/case integration remain NOT TESTED / unfinished. Synthetic-only mode must not be marketed as customer intake.
+
 
 ## Sources
 - https://developers.cloudflare.com/turnstile/plans/
