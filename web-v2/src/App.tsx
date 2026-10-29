@@ -1,3 +1,4 @@
+import { countryPresentation } from './content/country-presentation'
 import { CountryExplorer } from './components/CountryExplorer'
 import { countryServices } from './content/countries'
 import { serviceGroups } from './content/services'
@@ -10,6 +11,7 @@ import { FaqSection } from './components/FaqSection'
 import { MagicCard } from './components/magicui/magic-card'
 import { Reveal } from './components/Reveal'
 import type { Selection, RequestContext } from './components/DetailsDialog'
+const CountryPage = lazy(() => import('./components/CountryPage').then(module => ({default:module.CountryPage})))
 const DetailsDialog = lazy(() => import('./components/DetailsDialog').then(m => ({default:m.DetailsDialog})))
 import {
   ArrowLeft,
@@ -45,10 +47,16 @@ const trustItems = [
 ]
 function App() {
   const headerRef = useRef<HTMLElement>(null)
+  const [routeHash,setRouteHash] = useState(window.location.hash)
+  const isCountryRoute = routeHash.startsWith('#/country/')
+  const routeCode = isCountryRoute ? routeHash.slice('#/country/'.length).toUpperCase() : null
+  const selectedCountry = countryServices.find(country=>countryPresentation[country.name]?.code===routeCode)
+  const openCountry = (name:string) => { const code=countryPresentation[name]?.code; if(code) window.location.hash='/country/'+code.toLowerCase() }
+
   const [selection, setSelection] = useState<Selection | null>(null)
   const [query, setQuery] = useState('')
   const [headerScrolled, setHeaderScrolled] = useState(false)
-  const openRequest = ({destination=finder.destination,purpose=finder.purpose,passport=finder.passport,service,bundle}: RequestContext = {}) => setSelection({ destination,purpose,passport,service,bundle, title: 'آماده‌سازی درخواست', description: 'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true })
+  const openRequest = ({destination=selectedCountry?.name || finder.destination,purpose=selectedCountry ? undefined : finder.purpose,passport=finder.passport,service,bundle,variant}: RequestContext = {}) => setSelection({ destination,purpose,passport,service,bundle,variant, title: 'آماده‌سازی درخواست', description: 'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true })
   const request = () => openRequest()
   const inform = (title: string, description: string, context: RequestContext = {}, contactOnly = false) => setSelection({ ...finder, ...context, title, description, contactOnly })
   const [megaOpen, setMegaOpen] = useState(false)
@@ -56,6 +64,18 @@ function App() {
   const [finder, setFinder] = useState<FinderState>({ passport: 'افغانستان', destination: '', purpose: '' })
   const finderReady = useMemo(() => Boolean(finder.destination && finder.purpose), [finder])
 
+  useEffect(()=>{
+    const sync=()=>{setRouteHash(window.location.hash);setMegaOpen(false);setMobileOpen(false);setSelection(null)}
+    window.addEventListener('hashchange',sync)
+    return ()=>window.removeEventListener('hashchange',sync)
+  },[])
+  useEffect(()=>{
+    document.title=selectedCountry ? 'خدمات '+selectedCountry.name+' | فجر پارسا' : isCountryRoute ? 'مقصد پیدا نشد | فجر پارسا' : 'فجر پارسا | سفر، ویزا و تجارت'
+    if(!isCountryRoute && routeHash.length>1) {
+      const frame=requestAnimationFrame(()=>document.getElementById(routeHash.slice(1))?.scrollIntoView())
+      return ()=>cancelAnimationFrame(frame)
+    }
+  },[routeHash,selectedCountry,isCountryRoute])
   const visibleServices = useMemo(() => serviceGroups.filter(s => (s.title + ' ' + s.desc).includes(query.trim())), [query])
   useEffect(() => {
     const sync = () => setHeaderScrolled(window.scrollY > 24)
@@ -149,6 +169,7 @@ function App() {
 
       <a className="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
       <main id="main-content">
+        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : <>
         <section className="hero scenic-hero">
           <picture className="hero-scene"><source media="(max-width: 767px)" srcSet="/media/hero-dubai-mobile.webp"/><img src="/media/hero-dubai.webp" alt="چشم‌انداز روشن دبی و برج خلیفه" width="1800" height="1350" fetchPriority="high" decoding="async"/></picture>
           <div className="shell hero-layout">
@@ -239,7 +260,7 @@ function App() {
           </div>
         </section>
 
-        <CountryExplorer onSelect={setSelection} onRequest={openRequest} />
+        <CountryExplorer onOpenCountry={openCountry} onRequest={openRequest} />
 
         <DestinationGallery onSelect={setSelection} />
 
@@ -315,6 +336,7 @@ function App() {
           </div></Reveal>
         </section>
         <FaqSection />
+        </>}
       </main>
 
       {selection && <Suspense fallback={<div role="status" className="dialog-loading">در حال آماده‌سازی فرم…</div>}><DetailsDialog selection={selection} onClose={() => setSelection(null)} onRequest={openRequest} /></Suspense>}
