@@ -111,7 +111,7 @@ try {
   })
   await test('Service and bundle choices prefill their real request',async()=>{
     await page.getByRole('button',{name:'بررسی گزینه‌ها',exact:true}).nth(2).click();await page.getByRole('dialog').getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).click();assert.equal(await page.getByRole('dialog').getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'پرواز و هتل');await page.keyboard.press('Escape');
-    await page.getByRole('button',{name:'بسته سفر کاری',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'دعوتنامه و تجارت');await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();assert.match(await dialog.locator('.request-summary').innerText(),/بسته: بسته سفر کاری/);await page.keyboard.press('Escape');
+    await page.getByRole('button',{name:'بسته سفر کاری',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'دعوتنامه و تجارت');await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();assert.match(await dialog.getByLabel('متن آمادهٔ درخواست',{exact:true}).inputValue(),/بسته: بسته سفر کاری/);await page.keyboard.press('Escape');
   })
   await test('Contact flow offers contact rather than new-order form',async()=>{
     await page.getByRole('button',{name:'پیگیری پرونده',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).count(),0);assert.equal(await dialog.getByRole('link',{name:'تماس با دفتر در واتساپ',exact:true}).getAttribute('href'),'https://wa.me/93777377774');await page.keyboard.press('Escape');
@@ -166,6 +166,16 @@ try {
     await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();let link=dialog.getByRole('link',{name:'باز کردن واتساپ دفتر',exact:true});assert.match(new URL(await link.getAttribute('href')).searchParams.get('text'),/نوع خدمت: ویزای درمانی/);
     const downloading=page.waitForEvent('download');await dialog.getByRole('button',{name:'دریافت پیش‌نویس',exact:true}).click();const download=await downloading;const draft=JSON.parse(await readFile(await download.path(),'utf8'));assert.equal(draft.variant,'ویزای درمانی');assert.equal(draft.status,'not-submitted');
     await dialog.getByLabel('خدمت مورد نظر',{exact:true}).selectOption({label:'پرواز و هتل'});await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();assert.doesNotMatch(new URL(await link.getAttribute('href')).searchParams.get('text'),/نوع خدمت:/);await page.keyboard.press('Escape');
+  })
+  await test('Reviewed request can be copied with an honest manual fallback',async()=>{
+    await page.getByRole('button',{name:'درخواست ویزای درمانی',exact:true}).click();const dialog=page.getByRole('dialog');
+    assert.equal(await dialog.getByRole('button',{name:'کپی خلاصهٔ درخواست',exact:true}).count(),0);
+    await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();
+    const text=dialog.getByLabel('متن آمادهٔ درخواست',{exact:true});assert.match(await text.inputValue(),/نوع خدمت: ویزای درمانی/);assert.equal(await text.getAttribute('readonly'),'');
+    await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async text=>{window.__copiedRequest=text}}}));
+    await dialog.getByRole('button',{name:'کپی خلاصهٔ درخواست',exact:true}).click();await dialog.getByText('خلاصه کپی شد؛ هنوز به دفتر ارسال نشده است.',{exact:true}).waitFor();assert.equal(await page.evaluate(()=>window.__copiedRequest),await text.inputValue());await page.setViewportSize({width:393,height:852});await page.screenshot({path:resolve(output,'request-copy-phone.png')});
+    await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('denied')}}}));await dialog.getByRole('button',{name:'کپی خلاصهٔ درخواست',exact:true}).click();await dialog.getByText('کپی خودکار ممکن نشد. متن انتخاب‌شده را با گزینهٔ کپی دستگاه بردارید.',{exact:true}).waitFor();assert.equal(await text.evaluate(e=>e===document.activeElement&&e.selectionEnd===e.value.length&&e.selectionStart===0),true);
+    await dialog.getByLabel('مقصد',{exact:true}).fill('کابل');assert.equal(await text.count(),0);await page.keyboard.press('Escape');
   })
   await test('Country pages fit both themes and unknown routes recover',async()=>{
     for(const theme of ['light','dark']) {await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);for(const width of [320,393,768,1440]) {await page.setViewportSize({width,height:852});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Country page overflow '+theme+' '+width)}}
