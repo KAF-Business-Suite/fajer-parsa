@@ -53,3 +53,6 @@ https://github.com/KAF-Business-Suite/fajer-parsa/pull/6
 - برای جلوگیری از مصرف دوبارهٔ سهمیه، workflow قدیمی `.github/workflows/testdriver.yml` در این PR فقط **دستی** و با Variable `FAJR_ENABLE_LEGACY_TESTDRIVER=enabled` قابل اجراست. به‌طور پیش‌فرض کار نمی‌کند؛ تست قدیمی تا بازنویسی مبتنی بر لینک کنونی نباید PASS تلقی شود.
 - در صورت وجود **required check** بر TestDriver در تنظیمات Branch Protection، پیش از Merge باید مدیر مخزن آن را بررسی و به تست رایگان معتبر تغییر دهد؛ ابزار فعلی تأیید این تنظیم را ارائه نکرده است.
 - هیچ ارتقا، خرید یا استفادهٔ دوباره از سهمیهٔ TestDriver انجام نشد.
+
+## کنترل اضافه‌شده بعد از آزمون رایگان (۳۰ اکتوبر)
+پیش از هر انتشار PR #8، همان Chromium browser QA و فرم آزمایشی که در [PR #9](https://github.com/KAF-Business-Suite/fajer-parsa/pull/9) با [Run 41085426093](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/41085426093) موفق شدند نیز اجرا می‌شوند. این محافظ جلوی انتشار را در صورت شکست آزمون می‌گیرد. همچنین قبل از نیاز به Secret، کمک‌دستور Wrangler در CI بررسی می‌شود؛ این آزمایش هیچ سایتی را نشر نمی‌کند. با این‌همه آزمون واقعی Deploy و Android هنوز انجام نشده است.
