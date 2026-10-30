@@ -1,3 +1,33 @@
+# فجر پارسا — وضعیت تطبیق‌شدهٔ ۳۰ اکتوبر ۲۰۲۶
+
+این بخش بر اساس خواندن مستقیم GitHub، Linear، Cloudflare و Supabase در همین تاریخ است. متن قدیمی پایین فقط سابقهٔ تاریخی است.
+
+## مرجع امروز
+- شاخهٔ اصلی GitHub: `main`؛ SHA مشاهده‌شده: `3948338a1558bcdde1f4bd53cd0ef95ab5422052`.
+- PRهای #6 و #8 و #11 وارد main شده‌اند؛ تست سه سناریوی ساختگی اکنون در دستور test:intake موجود است.
+- Cloudflare canonical deployment: `0b742f3b-a6d9-463e-9900-ad9669da3046`، production/success، سورس `94891bba02354fef36a6af292de9435872568c02`.
+- نشانی رسمی فعلی: https://fajr-parsa-qa.pages.dev/ . ادغام Git به معنی انتشار Cloudflare نیست.
+- مسیر انتشار امن در main موجود است؛ انتشار خودکار هنوز اثبات/فعال نشده. KAF-31 دو Secret خصوصی و Preview، Samsung و نخستین انتشار دستی را باز نگه داشته است. تنظیم Secret طبق آخرین یادداشت KAF-22 به بعد موکول شده؛ از کاربر توکن در چت نخواهید.
+- GitHub Pages نیز در CI سایت جدا منتشر کرده؛ آن را با نشانی رسمی Cloudflare اشتباه نگیرید. حذف یا تغییر آن در این بررسی انجام نشده.
+
+## دفتر؛ از نو ساخته نشود
+- PR #7: https://github.com/KAF-Business-Suite/fajer-parsa/pull/7 — open/Draft.
+- HEAD مشاهده‌شده: `f6f44317c6da367358876a32eb8741dad5a3a841`.
+- مبنای PR هنوز `qa/fajr-visual-review-20261027` است؛ انتقال به main نیازمند تطبیق تغییرات و CI دوباره است، نه overwrite یا merge کور.
+- CI https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/41106677186 موفق است. طبق شواهد PR: ۱۹ آزمون handler/adapter، ۲۸ intake و هفت گروه آزمون PostgreSQL موقت موفق‌اند. آزمون زنده، هویت مدیر یا Samsung با این نتایج ثابت نمی‌شود.
+- Supabase موجود ACTIVE_HEALTHY است. جدول‌های business_members، business_role_permissions و profiles وجود دارند؛ business_members شامل workspace_id، user_id، role، companies و status است.
+- جدول خصوصی عضویت/سابقهٔ دفتر در فهرست بررسی‌شده وجود ندارد؛ SQL دفتر هنوز پیشنهاد است. هویت مدیر و نگاشت شرکت/فضای کاری باید با قواعد موجود کاف تطبیق داده شود، نه صرفاً ایمیل یا نام نمایشی.
+- اولویت ادامه: تطبیق PR #7 با main و مجوزهای موجود؛ رابط دفتر با پیش‌نمایش/تأیید تغییر وضعیت؛ سپس آزمون زندهٔ مجاز با داده ساختگی. حساب مشتری، SMS و فعال‌سازی دریافت مشتری واقعی جدا باقی‌اند.
+
+## برند و محتوا
+- مرجع برند موجود خوانده شد: فایل اصلی لوگو در Drive با ID `1klmq61spIQCDEGUA0qj9wx6xep7kMCWe`؛ بدون بازطراحی یا تغییر رنگ استفاده شود.
+- برنامهٔ هفت‌روزهٔ محتوا پیش‌نویس است و تأیید خدمات، تماس و زمان‌بندی انتشار را ثابت نمی‌کند.
+- هیچ secret، مجوز کارمند، migration، ارسال مشتری، هزینه یا انتشار Cloudflare در این بررسی تغییر نکرد.
+
+---
+
+## سابقهٔ قدیمی؛ مرجع وضعیت فعلی نیست
+
 # Fajr Parsa Web v2 — Implementation Status
 
 ## Executed
