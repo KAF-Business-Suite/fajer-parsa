@@ -31,6 +31,8 @@ jobs:
       - run: npm run test:intake
       - run: npm run test:office
       - run: npm run typecheck:office
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/office-preview.mjs
       - run: npm run build
 
   office-postgres:
