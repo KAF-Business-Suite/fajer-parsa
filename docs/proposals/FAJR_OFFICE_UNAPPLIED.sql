@@ -51,8 +51,9 @@ grant execute on function public.fajr_office_take_slot(uuid) to service_role;
 create function public.fajr_office_list(actor uuid,row_offset integer default 0)
 returns jsonb language plpgsql security definer set search_path='' as $$
 begin
- if not exists(select 1 from fajr_private.office_members where user_id=actor and enabled) then raise sqlstate '42501' using message='Office access denied';end if;
- if row_offset<0 or row_offset>999999 then raise exception 'Invalid offset';end if;
+ perform 1 from fajr_private.office_members where user_id=actor and enabled for share;
+ if not found then raise sqlstate '42501' using message='Office access denied';end if;
+ if row_offset is null or row_offset<0 or row_offset>999999 then raise exception 'Invalid offset';end if;
  return coalesce((select jsonb_agg(to_jsonb(r)) from (
  select id,service,destination,variant,contact,status,created_at
  from public.fajr_web_requests order by created_at desc,id desc limit 25 offset row_offset
@@ -62,7 +63,8 @@ create function public.fajr_office_change(actor uuid,request_uuid uuid,expected_
 returns jsonb language plpgsql security definer set search_path='' as $$
 declare current_status text;
 begin
- if not exists(select 1 from fajr_private.office_members where user_id=actor and enabled and can_update) then raise sqlstate '42501' using message='Office access denied';end if;
+ perform 1 from fajr_private.office_members where user_id=actor and enabled and can_update for share;
+ if not found then raise sqlstate '42501' using message='Office access denied';end if;
  if next_status is null or next_status not in ('received','reviewing','contacted','closed') then raise exception 'Invalid status';end if;
  select status into current_status from public.fajr_web_requests where id=request_uuid for update;
  if not found or current_status is distinct from expected_status then raise sqlstate '40001' using message='Refresh required';end if;
