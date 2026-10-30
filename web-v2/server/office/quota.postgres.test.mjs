@@ -5,11 +5,17 @@ import { promisify } from 'node:util'
 const exec = promisify(execFile)
 const connection = new URL(process.env.OFFICE_TEST_DATABASE_URL || 'invalid:')
 if (!['localhost','127.0.0.1','[::1]'].includes(connection.hostname)
- || connection.pathname !== '/fajr_office_test' || connection.protocol !== 'postgresql:') {
+ || connection.pathname !== '/fajr_office_test' || connection.protocol !== 'postgresql:'
+ || connection.search || connection.hash) {
  throw new Error('A disposable loopback fajr_office_test database is required')
 }
 // Pass the synthetic connection in the environment, never in process arguments/output.
-const env = { ...process.env, PGDATABASE: connection.toString() }
+const env = { ...process.env, PGHOST: connection.hostname.replace(/^\[|\]$/g,''),
+ PGPORT: connection.port || '5432', PGDATABASE: 'fajr_office_test',
+ PGUSER: decodeURIComponent(connection.username), PGPASSWORD: decodeURIComponent(connection.password),
+ PGCONNECT_TIMEOUT: '5' }
+delete env.PGSERVICE
+delete env.PGHOSTADDR
 const sql = async text => (await exec('psql',['-XAt','-v','ON_ERROR_STOP=1','-c',text],{env})).stdout.trim()
 const actor='d5072836-0d50-4dfa-88dc-596e9befd276'
 const other='19eb0b58-dee3-4db7-898e-f57f01c72ade'
