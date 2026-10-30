@@ -10,7 +10,7 @@
     "typecheck": "tsc -b",
     "test:smoke": "node tests/smoke.mjs",
     "export:preview": "node scripts/export-preview.mjs",
-    "test:intake": "node --test tests/intake-client.test.mjs server/intake/handler.test.mjs",
+    "test:intake": "node --test tests/intake-client.test.mjs server/intake/handler.test.mjs server/intake/fp04-scenarios.test.mjs",
     "test:intake-form": "node tests/intake-form.mjs"
   },
   "dependencies": {
