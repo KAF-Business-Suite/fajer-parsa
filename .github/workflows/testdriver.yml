@@ -1,47 +1,46 @@
-name: TestDriver.ai Tests
-
+name: TestDriver.ai Tests (optional / manual)
+# Legacy TestDriver scenario currently targets a previous site and its Free minutes
+# are exhausted. Do not consume quota or block routine source/build checks.
+# The current free test/build gate is fajr-pages-safe-release.yml.
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
-
+permissions:
+  contents: read
 jobs:
-  test:
+  legacy-testdriver:
+    # Explicit opt-in after the outdated scenario and quota are reviewed.
+    if: ${{ vars.FAJR_ENABLE_LEGACY_TESTDRIVER == 'enabled' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
-      id-token: write   # required to mint the OIDC token for auth
+      id-token: write
       contents: read
-
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-
-    - name: Install dependencies
-      run: npm ci
-
-    # Authenticate to TestDriver via GitHub OIDC (no stored secret needed once the
-    # TestDriver GitHub App is authorized for your org). Falls back to a TD_API_KEY
-    # secret if you set one. Exports TD_API_KEY for the test step below.
-    - name: Authenticate to TestDriver
-      uses: testdriverai/action@canary
-      with:
-        channel: canary
-        api-key: ${{ secrets.TD_API_KEY }}
-
-    - name: Run TestDriver.ai tests
-      run: npx vitest run
-
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: test-results/
-        retention-days: 30
+      - name: Checkout (no persisted credentials)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20.19.0'
+          cache: npm
+      - name: Install locked legacy dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Authenticate to TestDriver
+        uses: testdriverai/action@canary
+        with:
+          channel: canary
+          api-key: ${{ secrets.TD_API_KEY }}
+      - name: Run ONLY the legacy TestDriver browser scenario
+        # Avoid Vitest collecting unrelated node:test files in web-v2, which
+        # otherwise report misleading 'No test suite found' errors.
+        run: npx vitest run tests/fajer-parsa.test.js
+      - name: Upload legacy test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-testdriver-results
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
