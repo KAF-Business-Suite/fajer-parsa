@@ -1,0 +1,45 @@
+{
+  "name": "fajr-parsa-qa",
+  "production_branch": "main",
+  "build_config": {
+    "root_dir": "web-v2",
+    "build_command": "npm run build",
+    "destination_dir": "dist",
+    "build_caching": true
+  },
+  "source": {
+    "type": "github",
+    "config": {
+      "owner": "KAF-Business-Suite",
+      "owner_id": "339678992",
+      "repo_name": "fajer-parsa",
+      "repo_id": "1313543103",
+      "production_branch": "main",
+      "production_deployments_enabled": false,
+      "preview_deployment_setting": "custom",
+      "preview_branch_includes": [
+        "qa/fajr-visual-review-20261027"
+      ],
+      "preview_branch_excludes": [],
+      "path_includes": [
+        "web-v2/*"
+      ],
+      "path_excludes": [],
+      "pr_comments_enabled": false
+    }
+  },
+  "deployment_configs": {
+    "preview": {
+      "env_vars": {
+        "NODE_VERSION": {
+          "type": "plain_text",
+          "value": "24.22.1"
+        },
+        "NPM_VERSION": {
+          "type": "plain_text",
+          "value": "11.9.0"
+        }
+      }
+    }
+  }
+}

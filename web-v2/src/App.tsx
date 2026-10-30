@@ -1,26 +1,32 @@
-import { useMemo, useState } from 'react'
+import { countryPresentation } from './content/country-presentation'
+import { CountryExplorer } from './components/CountryExplorer'
+import { countryServices } from './content/countries'
+import { serviceGroups } from './content/services'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
+import { MenuToggle } from './components/ui/menu-toggle'
+import { ThemeToggle } from './components/ThemeToggle'
+import { ScrollProgress } from './components/magicui/scroll-progress'
+import { DestinationGallery } from './components/DestinationGallery'
+import { FaqSection } from './components/FaqSection'
+import { MagicCard } from './components/magicui/magic-card'
+import { Reveal } from './components/Reveal'
+import type { Selection, RequestContext } from './components/DetailsDialog'
+const CountryPage = lazy(() => import('./components/CountryPage').then(module => ({default:module.CountryPage})))
+const DetailsDialog = lazy(() => import('./components/DetailsDialog').then(m => ({default:m.DetailsDialog})))
 import {
   ArrowLeft,
   BadgeCheck,
-  BriefcaseBusiness,
-  Building2,
   CheckCircle2,
   ChevronDown,
   Clock3,
-  FileText,
   Globe2,
   Headphones,
   Languages,
-  Menu,
   MessageCircle,
-  Plane,
   Search,
-  ShieldCheck,
-  Sparkles,
-  TicketCheck,
+  CircleHelp,
   UserRound,
   WalletCards,
-  X,
 } from 'lucide-react'
 
 type FinderState = {
@@ -29,99 +35,118 @@ type FinderState = {
   purpose: string
 }
 
-const serviceGroups = [
-  { title: 'ویزا و اقامت', icon: TicketCheck, desc: 'توریستی، تجاری، تحصیلی، کاری، زیارتی، تمدید، تغییر وضعیت و اقامت.', label: 'Visa & Residency' },
-  { title: 'دعوتنامه و تجارت', icon: BriefcaseBusiness, desc: 'دعوتنامه تجاری، نمایشگاه، سفر کاری، جلسات و خدمات شرکتی.', label: 'Business Travel' },
-  { title: 'پرواز و هتل', icon: Plane, desc: 'درخواست بلیت، رزرو هتل، مسیر سفر و بسته‌های ترکیبی.', label: 'Flights & Hotels' },
-  { title: 'زیارت و کاروان', icon: Building2, desc: 'عمره، کربلا، ایران و خدمات گروهی و زیارتی.', label: 'Pilgrimage' },
-  { title: 'اسناد و کنسولی', icon: FileText, desc: 'ترجمه، تصدیق، فرم، وقت سفارت و آماده‌سازی پرونده.', label: 'Documents' },
-  { title: 'خدمات مکمل سفر', icon: ShieldCheck, desc: 'بیمه، ترانسفر، بررسی اسناد و خدمات پشتیبان سفر.', label: 'Travel Add-ons' },
-]
 
-const destinations = [
-  { name: 'امارات متحده عربی', short: 'امارات', desc: 'ویزا، اقامت، تجارت، هتل و پرواز', image: 'https://raw.githubusercontent.com/khwajaprn/fajer-parsa/main/arab.jpg' },
-  { name: 'ایران', short: 'ایران', desc: 'سیاحتی، زیارتی، تجاری و خدمات اسناد', image: 'https://raw.githubusercontent.com/khwajaprn/fajer-parsa/main/iran.jpg' },
-  { name: 'عراق و عتبات', short: 'عراق', desc: 'کربلا، نجف و خدمات گروهی زیارتی', image: 'https://raw.githubusercontent.com/khwajaprn/fajer-parsa/main/karbala.jpg' },
-  { name: 'پاکستان', short: 'پاکستان', desc: 'سفر، خدمات کنسولی و درخواست‌های مرتبط', image: 'https://raw.githubusercontent.com/khwajaprn/fajer-parsa/main/pakistan.jpg' },
-]
 
-const moreDestinations = ['ترکیه', 'چین', 'عربستان سعودی', 'ازبکستان', 'قزاقستان', 'تاجیکستان']
-const quickChips = ['ویزای ۳۰ روزه', 'ویزای ۹۰ روزه', 'دعوتنامه تجاری', 'تمدید ویزا', 'اقامت', 'عمره', 'هتل', 'تکت']
+
+
 const trustItems = [
-  ['درخواست آنلاین', 'فرم کوتاه و مرحله‌ای'],
-  ['پیگیری پرونده', 'وضعیت و مدارک مورد نیاز'],
-  ['پشتیبانی انسانی', 'واتساپ و مشاور فجر پارسا'],
-  ['اسناد منظم', 'رسید، قرارداد و فایل‌های پرونده'],
+  ['انتخاب آگاهانه', 'خدمت و شرایط را بررسی کنید'],
+  ['هماهنگی انسانی', 'مستقیم با دفتر در تماس باشید'],
+  ['درخواست کوتاه', 'جزئیات سفر را یک‌جا آماده کنید'],
+  ['پیگیری از دفتر', 'اطلاعات رسید را همراه داشته باشید'],
 ]
-
 function App() {
+  const headerRef = useRef<HTMLElement>(null)
+  const [routeHash,setRouteHash] = useState(window.location.hash)
+  const isCountryRoute = routeHash.startsWith('#/country/')
+  const routeCode = isCountryRoute ? routeHash.slice('#/country/'.length).toUpperCase() : null
+  const selectedCountry = countryServices.find(country=>countryPresentation[country.name]?.code===routeCode)
+  const openCountry = (name:string) => { const code=countryPresentation[name]?.code; if(code) window.location.hash='/country/'+code.toLowerCase() }
+
+  const [selection, setSelection] = useState<Selection | null>(null)
+  const [query, setQuery] = useState('')
+  const [headerScrolled, setHeaderScrolled] = useState(false)
+  const openRequest = ({destination=selectedCountry?.name || finder.destination,purpose=selectedCountry ? undefined : finder.purpose,passport=finder.passport,service,bundle,variant}: RequestContext = {}) => setSelection({ destination,purpose,passport,service,bundle,variant, title: 'آماده‌سازی درخواست', description: 'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true })
+  const request = () => openRequest()
+  const inform = (title: string, description: string, context: RequestContext = {}, contactOnly = false) => setSelection({ ...finder, ...context, title, description, contactOnly })
   const [megaOpen, setMegaOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [finder, setFinder] = useState<FinderState>({ passport: 'افغانستان', destination: '', purpose: '' })
   const finderReady = useMemo(() => Boolean(finder.destination && finder.purpose), [finder])
 
+  useEffect(()=>{
+    const sync=()=>{setRouteHash(window.location.hash);setMegaOpen(false);setMobileOpen(false);setSelection(null)}
+    window.addEventListener('hashchange',sync)
+    return ()=>window.removeEventListener('hashchange',sync)
+  },[])
+  useEffect(()=>{
+    document.title=selectedCountry ? 'خدمات '+selectedCountry.name+' | فجر پارسا' : isCountryRoute ? 'مقصد پیدا نشد | فجر پارسا' : 'فجر پارسا | سفر، ویزا و تجارت'
+    if(!isCountryRoute && routeHash.length>1) {
+      const frame=requestAnimationFrame(()=>document.getElementById(routeHash.slice(1))?.scrollIntoView())
+      return ()=>cancelAnimationFrame(frame)
+    }
+  },[routeHash,selectedCountry,isCountryRoute])
+  const visibleServices = useMemo(() => serviceGroups.filter(s => (s.title + ' ' + s.desc).includes(query.trim())), [query])
+  useEffect(() => {
+    const sync = () => setHeaderScrolled(window.scrollY > 24)
+    sync(); window.addEventListener('scroll', sync, { passive: true })
+    return () => window.removeEventListener('scroll', sync)
+  }, [])
+  useEffect(() => {
+    const escape = (e: KeyboardEvent) => { if (e.key === 'Escape') { headerRef.current?.querySelector<HTMLElement>('[aria-expanded="true"]')?.focus(); setMegaOpen(false); setMobileOpen(false) } }
+    window.addEventListener('keydown', escape)
+    return () => window.removeEventListener('keydown', escape)
+  }, [])
+  useEffect(() => {
+    if (!megaOpen && !mobileOpen) return
+    const outside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !headerRef.current?.contains(event.target)) { setMegaOpen(false); setMobileOpen(false) }
+    }
+    const desktop = window.matchMedia('(min-width: 1024px)')
+    const resize = () => { setMegaOpen(false); setMobileOpen(false) }
+    document.addEventListener('pointerdown', outside)
+    desktop.addEventListener('change', resize)
+    return () => { document.removeEventListener('pointerdown', outside); desktop.removeEventListener('change', resize) }
+  }, [megaOpen, mobileOpen])
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#f7f4ec] text-slate-900">
-      <div className="bg-[#09111f] text-white">
-        <div className="shell flex min-h-9 items-center justify-between gap-3 py-2 text-[11px] text-slate-300">
-          <div className="flex items-center gap-2">
-            <BadgeCheck size={14} className="text-[#e6c77d]" />
-            <span>خدمات سفر و ویزا با مسیر شفاف درخواست و پیگیری</span>
-          </div>
-          <div className="hidden items-center gap-5 sm:flex">
-            <span className="font-latin text-[10px] tracking-[.12em] text-slate-400">FAJR PARSA TRAVEL COMMERCE</span>
-            <button className="flex items-center gap-1.5 text-white"><Languages size={13} /> دری</button>
-          </div>
-        </div>
-      </div>
-
-      <header className="sticky top-0 z-50 border-b border-slate-900/5 bg-[#fffdf8]/90 backdrop-blur-2xl">
+    <div className="min-h-screen overflow-x-clip fp-app bg-[var(--fp-ivory)] text-[var(--fp-ink)]">
+      <ScrollProgress className="fp-scroll-progress" aria-hidden="true" />
+      <header ref={headerRef} data-scrolled={headerScrolled} className="floating-header" aria-label="سربرگ فجر پارسا">
         <div className="shell flex h-[74px] items-center justify-between gap-4">
           <a href="#" className="flex items-center gap-3">
             <div className="relative">
-              <img src="https://raw.githubusercontent.com/khwajaprn/fajer-parsa/main/logo.png" alt="لوگوی فجر پارسا" className="h-12 w-12 rounded-[15px] border border-slate-900/5 bg-white object-contain p-1 shadow-sm" />
-              <span className="absolute -bottom-1 -left-1 h-3 w-3 rounded-full border-2 border-[#fffdf8] bg-emerald-500" />
+              <img src="/media/logo.png" alt="لوگوی فجر پارسا" className="h-12 w-12 rounded-[15px] border border-[var(--fp-line)] bg-[var(--fp-surface)] object-contain p-1 shadow-sm" />
+
             </div>
             <div>
               <div className="text-[17px] font-black tracking-[-.02em]">فجر پارسا</div>
-              <div className="font-latin text-[9px] font-bold tracking-[.16em] text-slate-400">TRAVEL • VISA • BUSINESS</div>
+              <div className="font-latin text-[9px] font-bold tracking-[.16em] text-slate-400">سفر • ویزا • تجارت</div>
             </div>
           </a>
 
           <nav className="hidden items-center gap-1 text-[13px] font-extrabold lg:flex">
-            <button onClick={() => setMegaOpen(!megaOpen)} className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5">
+            <button aria-expanded={megaOpen} aria-controls="services-mega" onClick={() => setMegaOpen(!megaOpen)} className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5">
               خدمات <ChevronDown size={15} className={megaOpen ? 'rotate-180 transition' : 'transition'} />
             </button>
-            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#destinations">کشورها</a>
-            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#journey">رزرو و درخواست</a>
-            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#deals">پیشنهادها</a>
+            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#country-services">کشورها</a>
+            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#journey">درخواست سفر</a>
+            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#deals">بسته‌های خدمات</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#track">پیگیری</a>
           </nav>
 
           <div className="flex items-center gap-2">
-            <button className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><UserRound size={16} /> حساب من</button>
-            <button className="shine rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10">شروع درخواست</button>
-            <button onClick={() => setMobileOpen(!mobileOpen)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white lg:hidden" aria-label="منوی موبایل">
-              {mobileOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
+            <ThemeToggle />
+            <button onClick={() => inform('ارتباط با فجر پارسا', 'واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴. کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵. برای پیگیری، اطلاعات درج‌شده در رسید را آماده کنید.', {}, true)} className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> تماس</button>
+            <button onClick={request} className="shine rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10">شروع درخواست</button>
+            <MenuToggle open={mobileOpen} onToggle={() => setMobileOpen(!mobileOpen)} />
           </div>
         </div>
 
         {megaOpen && (
-          <div className="absolute inset-x-0 top-full hidden border-t border-slate-900/5 bg-[#fffdf8]/98 shadow-2xl lg:block">
+          <div id="services-mega" className="absolute inset-x-0 top-full hidden border-t border-[var(--fp-line)] bg-[var(--fp-cream)] shadow-2xl lg:block">
             <div className="shell grid grid-cols-[1.25fr_2.75fr] gap-6 py-7">
               <div className="rounded-3xl bg-[#09111f] p-6 text-white">
-                <div className="eyebrow !border-white/10 !bg-white/5 !text-[#f2d99e]">همه خدمات</div>
+                <div className="eyebrow !border-white/10 !bg-[var(--fp-surface)]/5 !text-[#f2d99e]">همه خدمات</div>
                 <h3 className="mt-4 text-2xl font-black leading-9">از یک خدمت تا بسته کامل سفر</h3>
-                <p className="mt-3 text-xs leading-6 text-slate-300">کشور، هدف سفر و نوع خدمت را انتخاب کنید. ساختار جدید برای ده‌ها و صدها خدمت توسعه‌پذیر است.</p>
-                <button className="mt-5 flex items-center gap-2 text-xs font-black text-[#f0cf7f]">مشاهده کاتالوگ کامل <ArrowLeft size={14} /></button>
+                <p className="mt-3 text-xs leading-6 text-slate-300">کشور، هدف سفر و نوع خدمت را انتخاب کنید و گزینه‌های مربوط به سفر خود را بررسی کنید.</p>
+                <a href="#services" onClick={() => setMegaOpen(false)} className="mt-5 flex items-center gap-2 text-xs font-black text-[#f0cf7f]">مشاهده خدمات <ArrowLeft size={14} /></a>
               </div>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {serviceGroups.map(({ title, icon: Icon, desc }) => (
-                  <a key={title} href="#services" onClick={() => setMegaOpen(false)} className="action-card rounded-2xl border border-slate-200 bg-white p-4">
+                  <a key={title} href="#services" onClick={() => setMegaOpen(false)} className="action-card rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-surface)] p-4">
                     <Icon size={20} className="mb-3 text-[#9a6f20]" />
                     <div className="text-sm font-black">{title}</div>
-                    <div className="mt-1 text-[10px] leading-5 text-slate-500">{desc}</div>
+                    <div className="mt-1 text-[10px] leading-5 text-[var(--fp-muted)]">{desc}</div>
                   </a>
                 ))}
               </div>
@@ -130,88 +155,76 @@ function App() {
         )}
 
         {mobileOpen && (
-          <div className="border-t border-slate-900/5 bg-[#fffdf8] px-4 py-4 lg:hidden">
-            <div className="grid gap-2 text-sm font-bold">
-              {['خدمات', 'کشورها', 'رزرو و درخواست', 'پیشنهادها', 'پیگیری پرونده', 'حساب من'].map((item) => (
-                <button key={item} className="rounded-xl bg-white px-4 py-3 text-right shadow-sm">{item}</button>
-              ))}
-            </div>
-          </div>
+          <nav id="mobile-navigation" aria-label="ناوبری گوشی" className="mobile-navigation-panel lg:hidden">
+            <div className="mobile-nav-group"><p>سفر خود را برنامه‌ریزی کنید</p><div className="mobile-nav-links">
+              {[['کشورها','country-services'],['خدمات','services'],['تکت و بوکینگ سراسری','worldwide-booking'],['بسته‌های خدمات','deals']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
+            </div></div>
+            <div className="mobile-nav-group"><p>انتخاب سریع خدمت</p><div className="mobile-service-links">{serviceGroups.map(({title,icon:Icon,desc})=><button type="button" key={title} onClick={()=>{setMobileOpen(false);inform(title,desc+' شرایط و هزینه با دفتر بررسی می‌شود.',{service:title})}}><Icon size={18}/><span>{title}</span></button>)}</div></div>
+            <div className="mobile-nav-group"><p>راهنما و ارتباط</p><div className="mobile-nav-links">
+              {[['راهنمای انتخاب خدمت','finder'],['درخواست سفر','journey'],['الهام سفر','destinations'],['پرسش‌های رایج','faq'],['پیگیری پرونده','track'],['معرفی و تماس دفتر','contact']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
+            </div></div>
+          </nav>
         )}
       </header>
 
-      <main>
-        <section className="hero min-h-[720px] text-white">
-          <div className="shell grid min-h-[720px] items-center gap-10 py-16 lg:grid-cols-[1.08fr_.92fr]">
-            <div className="max-w-3xl">
-              <div className="eyebrow"><Sparkles size={15} /> پلتفرم خدمات سفر، ویزا و تجارت</div>
-              <h1 className="text-balance mt-6 text-[42px] font-black leading-[1.18] tracking-[-.035em] sm:text-5xl lg:text-[68px]">
-                سفر بعدی شما،
-                <span className="block bg-gradient-to-l from-[#ffe6a9] via-[#e6c77d] to-[#fff3cf] bg-clip-text text-transparent">واضح‌تر، سریع‌تر، حرفه‌ای‌تر</span>
-              </h1>
-              <p className="mt-6 max-w-2xl text-[14px] font-medium leading-8 text-slate-200 sm:text-[15px]">
-                ویزا، اقامت، دعوتنامه، سفر تجاری، زیارت، پرواز، هتل، اسناد و خدمات مکمل؛ از کشف خدمت تا ثبت درخواست و پیگیری پرونده در یک تجربه منظم.
-              </p>
-              <div className="mt-7 flex flex-wrap gap-2">
-                {quickChips.map((chip) => <span key={chip} className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-[11px] font-bold backdrop-blur">{chip}</span>)}
-              </div>
-              <div className="mt-9 flex flex-wrap items-center gap-5">
-                <button className="shine flex items-center gap-2 rounded-2xl bg-white px-5 py-3.5 text-sm font-black text-[#09111f] shadow-xl shadow-black/10">جستجوی خدمات <ArrowLeft size={17} /></button>
-                <div className="flex items-center gap-2 text-xs text-slate-300"><CheckCircle2 size={16} className="text-emerald-400" /> بدون نمایش قیمت یا وعده تأییدنشده</div>
-              </div>
+      <a className="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
+      <main id="main-content">
+        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : <>
+        <section className="hero scenic-hero">
+          <picture className="hero-scene"><source media="(max-width: 767px)" srcSet="/media/hero-dubai-mobile.webp"/><img src="/media/hero-dubai.webp" alt="چشم‌انداز روشن دبی و برج خلیفه" width="1800" height="1350" fetchPriority="high" decoding="async"/></picture>
+          <div className="shell hero-layout">
+            <div className="hero-copy">
+              <p className="eyebrow">فجر پارسا؛ همراه برنامه‌ریزی سفر شما</p>
+              <h1>سفر بعدی شما،<br/>از همین‌جا آغاز می‌شود.</h1>
+              <p className="hero-description">ویزا، تکت، هتل و خدمات سفر؛ گزینه‌ها را بررسی کنید و با اطلاعات روشن، قدم بعد را با مشاور فجر پارسا بردارید.</p>
+              <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">شروع درخواست <ArrowLeft size={17}/></button><a href="#destinations" className="secondary-action">دیدن مقصدها <Globe2 size={17}/></a></div>
+              <div className="hero-services"><span>ویزا و اقامت</span><span>پرواز و هتل</span><span>سفرهای گروهی</span></div>
             </div>
-
-            <div className="relative">
-              <div className="glass rounded-[32px] p-5 text-slate-900 md:p-7">
+            <div className="hero-caption"><span>مقصدی برای ایده گرفتن</span><strong>دبی، امارات متحده عربی</strong><a href="#destinations">کشف مقصدها <ArrowLeft size={14}/></a></div>
+          </div>
+        </section>
+        <section id="finder" className="shell finder-section"><Reveal><div className="glass finder-panel relative overflow-hidden">
                 <div className="mb-6 flex items-start justify-between gap-4">
                   <div>
-                    <div className="eyebrow">Service Finder</div>
-                    <h2 className="mt-3 text-xl font-black">خدمت مناسب خود را پیدا کنید</h2>
-                    <p className="mt-1 text-xs leading-6 text-slate-500">سه انتخاب کوتاه؛ سپس گزینه‌های مرتبط را می‌بینید.</p>
+                    <div className="eyebrow">انتخاب مسیر سفر</div>
+                    <h2 className="mt-3 text-xl font-black">مسیر سفرتان را مشخص کنید</h2>
+                    <p className="mt-1 text-xs leading-6 text-[var(--fp-muted)]">سه انتخاب کوتاه؛ سپس گزینه‌های مرتبط را می‌بینید.</p>
                   </div>
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f1e7d1] text-[#8a6423]"><Search size={20} /></div>
                 </div>
 
-                <div className="grid gap-3">
-                  <label className="text-[11px] font-black text-slate-600">پاسپورت / تابعیت</label>
-                  <select value={finder.passport} onChange={(e) => setFinder({ ...finder, passport: e.target.value })} className="w-full rounded-2xl border border-slate-200 bg-white p-3.5 text-sm outline-none transition focus:border-[#c79a42]">
+                <div className="finder-fields">
+                  <label htmlFor="passport" className="text-[11px] font-black text-[var(--fp-muted)]">پاسپورت / تابعیت</label>
+                  <select id="passport" value={finder.passport} onChange={(e) => setFinder({ ...finder, passport: e.target.value })} className="w-full rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-surface)] p-3.5 text-sm outline-none transition focus:border-[#c79a42]">
                     <option>افغانستان</option><option>کشور دیگر</option>
                   </select>
-                  <label className="mt-1 text-[11px] font-black text-slate-600">مقصد</label>
-                  <select value={finder.destination} onChange={(e) => setFinder({ ...finder, destination: e.target.value })} className="w-full rounded-2xl border border-slate-200 bg-white p-3.5 text-sm outline-none transition focus:border-[#c79a42]">
+                  <label htmlFor="destination" className="mt-1 text-[11px] font-black text-[var(--fp-muted)]">مقصد</label>
+                  <select id="destination" value={finder.destination} onChange={(e) => setFinder({ ...finder, destination: e.target.value })} className="w-full rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-surface)] p-3.5 text-sm outline-none transition focus:border-[#c79a42]">
                     <option value="">انتخاب مقصد</option>
-                    {[...destinations.map((d) => d.short), ...moreDestinations].map((name) => <option key={name}>{name}</option>)}
+                    {countryServices.map(country => country.name).map((name) => <option key={name}>{name}</option>)}
                   </select>
-                  <label className="mt-1 text-[11px] font-black text-slate-600">هدف سفر</label>
-                  <select value={finder.purpose} onChange={(e) => setFinder({ ...finder, purpose: e.target.value })} className="w-full rounded-2xl border border-slate-200 bg-white p-3.5 text-sm outline-none transition focus:border-[#c79a42]">
+                  <label htmlFor="purpose" className="mt-1 text-[11px] font-black text-[var(--fp-muted)]">هدف سفر</label>
+                  <select id="purpose" value={finder.purpose} onChange={(e) => setFinder({ ...finder, purpose: e.target.value })} className="w-full rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-surface)] p-3.5 text-sm outline-none transition focus:border-[#c79a42]">
                     <option value="">انتخاب هدف</option><option>سیاحت</option><option>تجارت</option><option>اقامت</option><option>زیارت</option><option>تحصیل</option><option>کار</option>
                   </select>
-                  <button disabled={!finderReady} className="shine mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#09111f] px-4 py-3.5 text-sm font-black text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-40">نمایش خدمات مرتبط <ArrowLeft size={17} /></button>
+                  <button onClick={() => setSelection({...finder,title: `خدمات سفر به ${finder.destination}`, description: `هدف سفر: ${finder.purpose} — تابعیت: ${finder.passport}. این فهرست برای راهنمایی اولیه است؛ امکان ارائه، شرایط و مدارک هر خدمت باید با دفتر بررسی شود.`, options: serviceGroups.filter((_, index) => ({'سیاحت':[0,2,5], 'تجارت':[0,1,2,4], 'اقامت':[0,4], 'زیارت':[2,3,5], 'تحصیل':[0,4], 'کار':[0,1,4]}[finder.purpose] || []).includes(index)).map(s => ({title:s.title, description:s.desc}))})} disabled={!finderReady} className="shine mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#09111f] px-4 py-3.5 text-sm font-black text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-40">نمایش خدمات مرتبط <ArrowLeft size={17} /></button>
                 </div>
 
                 <div className="premium-divider my-5" />
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded-2xl bg-white/75 p-3"><Globe2 size={16} className="mx-auto text-[#9a6f20]" /><div className="mt-2 text-[10px] font-black">کشورمحور</div></div>
-                  <div className="rounded-2xl bg-white/75 p-3"><Clock3 size={16} className="mx-auto text-[#9a6f20]" /><div className="mt-2 text-[10px] font-black">مرحله‌ای</div></div>
-                  <div className="rounded-2xl bg-white/75 p-3"><MessageCircle size={16} className="mx-auto text-[#9a6f20]" /><div className="mt-2 text-[10px] font-black">پشتیبانی</div></div>
+                  <div className="rounded-2xl bg-[var(--fp-cream)] p-3"><Globe2 size={16} className="mx-auto text-[#9a6f20]" /><div className="mt-2 text-[10px] font-black">کشورمحور</div></div>
+                  <div className="rounded-2xl bg-[var(--fp-cream)] p-3"><Clock3 size={16} className="mx-auto text-[#9a6f20]" /><div className="mt-2 text-[10px] font-black">مرحله‌ای</div></div>
+                  <div className="rounded-2xl bg-[var(--fp-cream)] p-3"><MessageCircle size={16} className="mx-auto text-[#9a6f20]" /><div className="mt-2 text-[10px] font-black">پشتیبانی</div></div>
                 </div>
-              </div>
+              </div></Reveal></section>
 
-              <div className="absolute -left-4 top-12 hidden rounded-2xl border border-white/15 bg-[#0d1a2d]/90 px-4 py-3 text-white shadow-2xl backdrop-blur-xl xl:block">
-                <div className="font-latin text-[9px] tracking-[.16em] text-[#e6c77d]">SMART ROUTE</div>
-                <div className="mt-1 text-xs font-black">Visa • Hotel • Flight</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="relative z-10 -mt-9">
+        <section className="assurance-section">
           <div className="shell">
-            <div className="grid overflow-hidden rounded-[28px] border border-white bg-white shadow-[0_20px_70px_rgba(10,18,32,.11)] sm:grid-cols-2 lg:grid-cols-4">
+            <div className="assurance-strip grid sm:grid-cols-2 lg:grid-cols-4">
               {trustItems.map(([title, text], index) => (
-                <div key={title} className={`p-5 ${index ? 'border-t border-slate-100 sm:border-r sm:border-t-0' : ''}`}>
+                <div key={title} className={`p-5 ${index ? 'border-t border-[var(--fp-line)] sm:border-r sm:border-t-0' : ''}`}>
                   <div className="flex items-center gap-2"><CheckCircle2 size={16} className="text-emerald-600" /><div className="text-xs font-black">{title}</div></div>
-                  <div className="mt-2 pr-6 text-[11px] leading-5 text-slate-500">{text}</div>
+                  <div className="mt-2 pr-6 text-[11px] leading-5 text-[var(--fp-muted)]">{text}</div>
                 </div>
               ))}
             </div>
@@ -219,155 +232,135 @@ function App() {
         </section>
 
         <section className="shell py-20" id="services">
-          <div className="mb-9 flex items-end justify-between gap-4">
+          <Reveal><div className="mb-9 flex items-end justify-between gap-4">
             <div>
-              <div className="eyebrow">Services</div>
-              <h2 className="mt-4 text-3xl font-black tracking-[-.03em] sm:text-4xl">یک کاتالوگ؛ ده‌ها مسیر سفر و خدمت</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">معماری خدمات طوری طراحی شده که بعداً بدون بازنویسی سایت، کشورها، ویزاها، مدت‌ها و خدمات جدید اضافه شوند.</p>
+              <div className="eyebrow">خدمات فجر پارسا</div>
+              <h2 className="mt-4 text-3xl font-black tracking-[-.03em] sm:text-4xl">برای هر سفر، خدمت مناسب</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--fp-muted)]">از خدمات ویزا و اسناد تا پرواز و سفرهای گروهی، مسیر مورد نیاز خود را بررسی کنید.</p>
             </div>
-            <button className="hidden items-center gap-2 text-sm font-black text-[#7d5b20] md:flex">مشاهده کاتالوگ <ArrowLeft size={16} /></button>
-          </div>
+            <label className="catalog-search"><Search size={18}/><input type="search" aria-label="جستجوی خدمات" placeholder="جستجو در خدمات" value={query} onChange={e => setQuery(e.target.value)}/></label>
+          </div></Reveal>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {serviceGroups.map(({ title, icon: Icon, desc, label }, index) => (
-              <article key={title} className="service-card soft-card group rounded-[28px] p-6">
+          <p className="sr-only" role="status">{visibleServices.length} خدمت پیدا شد</p>
+          {visibleServices.length === 0 && <p className="py-8 text-center">خدمتی با این عبارت پیدا نشد. عبارت کوتاه‌تری بنویسید.</p>}
+          <div className="service-grid grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {visibleServices.map(({ title, icon: Icon, desc, label }, index) => (
+              <Reveal key={title} delay={index * 0.04}><MagicCard className="service-card rounded-[28px]" gradientFrom="#c9a75a" gradientTo="#35a994" gradientColor="var(--fp-glow)" gradientOpacity={0.25}><article className="group p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f4ead5] to-[#fbf7ee] text-[#8a6423] shadow-inner"><Icon size={22} /></div>
                   <span className="font-latin text-[9px] font-bold uppercase tracking-[.12em] text-slate-300">0{index + 1}</span>
                 </div>
                 <div className="font-latin mt-6 text-[9px] font-extrabold uppercase tracking-[.15em] text-[#9b7730]">{label}</div>
                 <h3 className="mt-2 text-xl font-black">{title}</h3>
-                <p className="mt-2 min-h-14 text-sm leading-7 text-slate-500">{desc}</p>
+                <p className="mt-2 min-h-14 text-sm leading-7 text-[var(--fp-muted)]">{desc}</p>
                 <div className="premium-divider my-5" />
-                <button className="flex items-center gap-2 text-xs font-black text-[#75551d]">بررسی گزینه‌ها <ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
-              </article>
+                <button onClick={() => inform(title, desc + ' شرایط، زمان و هزینه پس از بررسی مدارک مشخص می‌شود.', {service:title})} className="flex items-center gap-2 text-xs font-black text-[var(--fp-gold)]">بررسی گزینه‌ها <ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
+              </article></MagicCard></Reveal>
             ))}
           </div>
         </section>
 
-        <section id="destinations" className="bg-[#09111f] py-20 text-white">
-          <div className="shell">
-            <div className="mb-9 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-              <div>
-                <div className="eyebrow !border-white/10 !bg-white/5 !text-[#efd38e]">Destinations</div>
-                <h2 className="mt-4 text-3xl font-black tracking-[-.03em] sm:text-4xl">با مقصد شروع کنید</h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-400">هر کشور Hub اختصاصی خود را دارد: ویزا، اقامت، تجارت، زیارت، رزرو و خدمات مکمل.</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {moreDestinations.slice(0, 4).map((name) => <button key={name} className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-bold text-slate-300">{name}</button>)}
-              </div>
-            </div>
+        <CountryExplorer onOpenCountry={openCountry} onRequest={openRequest} />
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {destinations.map((destination) => (
-                <article key={destination.name} className="destination-card p-6">
-                  <img src={destination.image} alt={destination.name} loading="lazy" />
-                  <div className="flex h-full flex-col justify-end">
-                    <div className="text-[10px] font-bold text-[#f1d58f]">DESTINATION HUB</div>
-                    <h3 className="mt-1 text-xl font-black">{destination.name}</h3>
-                    <p className="mt-2 text-xs leading-6 text-slate-200">{destination.desc}</p>
-                    <button className="mt-4 flex items-center gap-2 text-xs font-black text-white">باز کردن مقصد <ArrowLeft size={14} /></button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+        <DestinationGallery onSelect={setSelection} />
 
         <section className="shell py-20" id="journey">
           <div className="grid gap-5 lg:grid-cols-[1.12fr_.88fr]">
             <div className="soft-card dot-grid rounded-[32px] p-7 md:p-9">
-              <div className="eyebrow">Smart Request</div>
-              <h2 className="mt-4 text-3xl font-black tracking-[-.03em]">فرم ثابت نه؛ مسیر هوشمند درخواست</h2>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-500">سؤال‌ها بر اساس کشور و خدمت تغییر می‌کنند. درخواست ویزا، عمره، دعوتنامه تجاری یا رزرو هتل هر کدام مسیر مناسب خود را دارند.</p>
+              <div className="eyebrow">مسیر درخواست</div>
+              <h2 className="mt-4 text-3xl font-black tracking-[-.03em]">از انتخاب خدمت تا آماده‌سازی درخواست</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--fp-muted)]">ابتدا کشور و خدمت را مشخص کنید. سپس شرایط و مدارک لازم را با دفتر بررسی کنید.</p>
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 {[
                   ['۱', 'انتخاب خدمت', 'کشور، نوع خدمت و گزینه مناسب'],
-                  ['۲', 'اطلاعات مسافر', 'تماس، تابعیت و شرایط پایه'],
-                  ['۳', 'جزئیات اختصاصی', 'سؤال‌های مخصوص همان خدمت'],
-                  ['۴', 'ثبت و پیگیری', 'Case ID و ادامه در حساب مشتری'],
+                  ['۲', 'زمان و تعداد مسافران', 'زمان تقریبی و تعداد همراهان'],
+                  ['۳', 'مرور درخواست', 'جزئیات را پیش از ارسال ببینید'],
+                  ['۴', 'گفت‌وگو با مشاور', 'ارسال انتخابی در واتساپ و هماهنگی با دفتر'],
                 ].map(([num, title, desc]) => (
-                  <div key={num} className="rounded-2xl border border-slate-200 bg-white/85 p-4">
+                  <Reveal key={num} delay={Number(num === '۱' ? 0 : num === '۲' ? 1 : num === '۳' ? 2 : 3) * .07}><div className="journey-step rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-cream)] p-4">
                     <div className="flex items-center gap-3">
                       <span className="font-latin flex h-8 w-8 items-center justify-center rounded-xl bg-[#09111f] text-[11px] font-black text-white">{num}</span>
-                      <div><div className="text-sm font-black">{title}</div><div className="mt-1 text-[10px] leading-5 text-slate-500">{desc}</div></div>
+                      <div><div className="text-sm font-black">{title}</div><div className="mt-1 text-[10px] leading-5 text-[var(--fp-muted)]">{desc}</div></div>
                     </div>
-                  </div>
+                  </div></Reveal>
                 ))}
               </div>
             </div>
 
-            <div id="deals" className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#d9bd77] via-[#ecd89d] to-[#f7ecd0] p-7 md:p-9">
+            <Reveal delay={.08}><div id="deals" data-tone="gold" className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#d9bd77] via-[#ecd89d] to-[#f7ecd0] p-7 md:p-9">
               <div className="absolute -left-16 -top-16 h-48 w-48 rounded-full border border-white/40" />
               <WalletCards size={28} className="relative text-[#6f511d]" />
-              <div className="font-latin relative mt-5 text-[9px] font-black uppercase tracking-[.16em] text-[#7c5b20]">Bundles & Offers</div>
+              <div className="font-latin relative mt-5 text-[9px] font-black uppercase tracking-[.16em] text-[#7c5b20]">خدمات ترکیبی</div>
               <h2 className="relative mt-2 text-3xl font-black leading-[1.25]">بسته سفر خود را بسازید</h2>
               <p className="relative mt-3 text-sm leading-7 text-slate-700">ویزا + دعوتنامه + هتل + تکت + بیمه + ترانسفر. خدمات مکمل فقط وقتی پیشنهاد می‌شوند که برای سفر مربوط باشند.</p>
               <div className="relative mt-6 space-y-2">
-                {['Visa Only', 'Business Bundle', 'Complete Travel'].map((item) => (
-                  <div key={item} className="flex items-center justify-between rounded-2xl bg-white/55 px-4 py-3 backdrop-blur"><span className="font-latin text-xs font-extrabold">{item}</span><ArrowLeft size={14} /></div>
+                {[{label:'خدمات ویزا',service:'ویزا و اقامت'},{label:'بسته سفر کاری',service:'دعوتنامه و تجارت'},{label:'خدمات کامل سفر',service:'خدمات مکمل سفر'}].map(({label,service}) => (
+                  <button type="button" onClick={()=>openRequest({service,bundle:label})} key={label} className="bundle-option flex items-center justify-between rounded-2xl px-4 py-3"><span className="font-latin text-xs font-extrabold">{label}</span><ArrowLeft size={14} /></button>
                 ))}
               </div>
-            </div>
+            </div></Reveal>
           </div>
         </section>
 
-        <section id="track" className="bg-white py-20">
+        <section id="track" className="bg-[var(--fp-surface)] py-20">
           <div className="shell grid gap-5 lg:grid-cols-2">
-            <article className="shine overflow-hidden rounded-[32px] bg-[#09111f] p-8 text-white md:p-10">
+            <Reveal><article className="shine overflow-hidden rounded-[32px] bg-[#09111f] p-8 text-white md:p-10">
               <Headphones size={28} className="text-[#f0cf7f]" />
-              <div className="font-latin mt-6 text-[9px] font-black uppercase tracking-[.16em] text-[#d9bc75]">My Fajr Parsa</div>
-              <h2 className="mt-2 text-3xl font-black">حساب مشتری و پیگیری واقعی پرونده</h2>
-              <p className="mt-4 max-w-xl text-sm leading-8 text-slate-300">Case ID، مرحله فعلی، مدارک کمبود، رسیدها، قراردادها، پیام‌ها و ادامه درخواست از یک حساب واحد.</p>
-              <button className="mt-7 flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-xs font-black text-[#09111f]">پیگیری پرونده <ArrowLeft size={15} /></button>
-            </article>
+              <div className="font-latin mt-6 text-[9px] font-black uppercase tracking-[.16em] text-[#d9bc75]">پشتیبانی فجر پارسا</div>
+              <h2 className="mt-2 text-3xl font-black">برای ادامهٔ مسیر، همراه شما</h2>
+              <p className="mt-4 max-w-xl text-sm leading-8 text-slate-300">برای پروندهٔ موجود، شمارهٔ ثبت‌شده در رسید و مدارک مورد نیاز را هنگام تماس با دفتر آماده داشته باشید.</p>
+              <button onClick={() => inform('پیگیری پرونده', 'پیگیری آنلاین در این نسخه هنوز به اطلاعات پرونده متصل نیست. برای پیگیری پروندهٔ موجود، با دفتر و شمارهٔ ثبت‌شده در رسیدتان تماس بگیرید.', {}, true)} className="mt-7 flex items-center gap-2 rounded-2xl bg-[var(--fp-surface)] px-5 py-3 text-xs font-black text-[var(--fp-ink)]">پیگیری پرونده <ArrowLeft size={15} /></button>
+            </article></Reveal>
 
-            <article className="soft-card relative overflow-hidden rounded-[32px] p-8 md:p-10">
+            <Reveal><article className="soft-card relative overflow-hidden rounded-[32px] p-8 md:p-10">
               <div className="absolute left-0 top-0 h-44 w-44 -translate-x-12 -translate-y-16 rounded-full bg-[#e8d6aa]/30 blur-2xl" />
-              <Sparkles size={28} className="relative text-[#9a6f20]" />
-              <div className="font-latin relative mt-6 text-[9px] font-black uppercase tracking-[.16em] text-[#9a6f20]">Gemini Powered</div>
-              <h2 className="relative mt-2 text-3xl font-black">Fajr Parsa AI Assistant</h2>
-              <p className="relative mt-4 max-w-xl text-sm leading-8 text-slate-600">دستیار گوشه سایت برای جستجوی خدمت، مدارک، مقایسه گزینه‌ها، شروع درخواست و تحویل به پشتیبانی انسانی — بر اساس اطلاعات تأییدشده فجر پارسا.</p>
-              <button className="relative mt-7 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-xs font-black shadow-sm"><MessageCircle size={15} /> گفت‌وگو با دستیار</button>
-            </article>
+              <CircleHelp size={28} className="relative text-[#9a6f20]" />
+              <div className="font-latin relative mt-6 text-[9px] font-black uppercase tracking-[.16em] text-[#9a6f20]">راهنمای خدمات</div>
+              <h2 className="relative mt-2 text-3xl font-black">از کجا شروع کنیم؟</h2>
+              <p className="relative mt-4 max-w-xl text-sm leading-8 text-[var(--fp-muted)]">کشور مقصد و هدف سفر را انتخاب کنید، خدمات مرتبط را بخوانید و خلاصهٔ درخواست خود را برای مشاور آماده کنید.</p>
+              <a href="#finder" className="secondary-action relative mt-7"><CircleHelp size={16}/> راهنمای انتخاب خدمت</a>
+            </article></Reveal>
           </div>
         </section>
 
         <section className="shell py-20">
-          <div className="overflow-hidden rounded-[36px] bg-gradient-to-l from-[#caa85a] via-[#e7d095] to-[#f3e7c8] p-8 md:p-12">
+          <Reveal><div data-tone="gold" className="overflow-hidden rounded-[36px] bg-gradient-to-l from-[#caa85a] via-[#e7d095] to-[#f3e7c8] p-8 md:p-12">
             <div className="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
               <div className="max-w-3xl">
-                <div className="font-latin text-[9px] font-black uppercase tracking-[.18em] text-[#75551f]">FAJR PARSA CUSTOMER JOURNEY</div>
-                <h2 className="mt-3 text-3xl font-black tracking-[-.03em] md:text-4xl">کشف → انتخاب → درخواست → پیگیری</h2>
-                <p className="mt-4 text-sm leading-8 text-slate-700">هر بازدید باید به یک اقدام روشن برسد: بررسی خدمت، درخواست قیمت، ثبت درخواست، واتساپ یا پیگیری پرونده.</p>
+                <div className="font-latin text-[9px] font-black uppercase tracking-[.18em] text-[#75551f]">مسیر همراهی فجر پارسا</div>
+                <h2 className="mt-3 text-3xl font-black tracking-[-.03em] md:text-4xl">برای سفر بعدی‌تان، قدم اول را بردارید</h2>
+                <p className="mt-4 text-sm leading-8 text-slate-700">مقصد و خدمت را مشخص کنید؛ جزئیات را با دفتر در میان بگذارید و دربارهٔ شرایط و قیمت سؤال کنید.</p>
               </div>
-              <button className="shine flex items-center justify-center gap-2 rounded-2xl bg-[#09111f] px-6 py-4 text-sm font-black text-white shadow-xl">شروع درخواست <ArrowLeft size={16} /></button>
+              <button onClick={request} className="shine flex items-center justify-center gap-2 rounded-2xl bg-[#09111f] px-6 py-4 text-sm font-black text-white shadow-xl">شروع درخواست <ArrowLeft size={16} /></button>
             </div>
-          </div>
+          </div></Reveal>
         </section>
+        <FaqSection />
+        </>}
       </main>
 
-      <footer className="bg-[#070d17] py-14 text-slate-300">
+      {selection && <Suspense fallback={<div role="status" className="dialog-loading">در حال آماده‌سازی فرم…</div>}><DetailsDialog selection={selection} onClose={() => setSelection(null)} onRequest={openRequest} /></Suspense>}
+      <footer id="contact" className="bg-[#070d17] py-14 text-slate-300">
         <div className="shell grid gap-9 md:grid-cols-4">
           <div>
             <div className="flex items-center gap-3">
-              <img src="https://raw.githubusercontent.com/khwajaprn/fajer-parsa/main/logo.png" alt="" className="h-10 w-10 rounded-xl bg-white p-1 object-contain" />
-              <div><div className="font-black text-white">فجر پارسا</div><div className="font-latin text-[8px] tracking-[.14em] text-slate-500">TRAVEL COMMERCE</div></div>
+              <img src="/media/logo.png" alt="" className="h-10 w-10 rounded-xl bg-[var(--fp-surface)] p-1 object-contain" />
+              <div><div className="font-black text-white">فجر پارسا</div><div className="font-latin text-[8px] tracking-[.14em] text-[var(--fp-muted)]">TRAVEL COMMERCE</div></div>
             </div>
             <p className="mt-4 text-xs leading-6 text-slate-400">سفر، ویزا، زیارت و تجارت در یک تجربه منظم و قابل پیگیری.</p>
           </div>
           <div><div className="text-xs font-black text-white">خدمات</div><p className="mt-4 text-xs leading-7 text-slate-400">ویزا • اقامت • دعوتنامه • پرواز • هتل • زیارت • اسناد • بیمه</p></div>
-          <div><div className="text-xs font-black text-white">ارتباط و جامعه</div><p className="mt-4 text-xs leading-7 text-slate-400">WhatsApp • WhatsApp Channel • Telegram • Facebook • Instagram • Email</p></div>
-          <div><div className="text-xs font-black text-white">پشتیبانی</div><p className="mt-4 text-xs leading-7 text-slate-400">پیگیری درخواست • FAQ • تماس • دفتر • حساب مشتری</p></div>
+          <div><div className="text-xs font-black text-white">راه‌های ارتباط</div><p className="mt-4 text-xs leading-7 text-slate-400"><a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer">واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴</a><br/>کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵.</p></div>
+          <div><div className="text-xs font-black text-white">پشتیبانی</div><p className="footer-links"><a href="#faq">پرسش‌های رایج</a><a href="#finder">راهنمای درخواست</a><a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer">تماس با دفتر</a></p></div>
         </div>
-        <div className="shell mt-10 border-t border-white/10 pt-5 text-[10px] text-slate-500">Fajr Parsa Travel & Visa Services — Public web experience in active development.</div>
+        <div className="shell mt-10 border-t border-white/10 pt-5 text-[10px] text-[var(--fp-muted)]">فجر پارسا — خدمات سفر، ویزا و تجارت</div>
       </footer>
 
-      <button className="floating-ai fixed bottom-5 left-5 z-40 flex h-15 w-15 items-center justify-center rounded-2xl border border-white/10 bg-[#09111f] text-white" aria-label="Fajr Parsa AI"><Sparkles size={22} className="text-[#f0cf7f]" /></button>
 
-      <div className="fixed inset-x-3 bottom-3 z-30 flex items-center gap-2 rounded-2xl border border-slate-200 bg-white/94 p-2 shadow-2xl backdrop-blur md:hidden">
-        <button className="flex-1 rounded-xl bg-[#09111f] px-3 py-3 text-xs font-black text-white">شروع درخواست</button>
-        <button className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-4 py-3 text-xs font-black"><MessageCircle size={15} /> واتساپ</button>
+
+      <div className="mobile-action-bar fixed inset-x-3 bottom-3 z-30 flex items-center gap-2 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-glass)] p-2 shadow-2xl backdrop-blur md:hidden">
+        <button onClick={request} className="flex-1 rounded-xl bg-[#09111f] px-3 py-3 text-xs font-black text-white">شروع درخواست</button>
+        <a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 rounded-xl border border-[var(--fp-line)] px-4 py-3 text-xs font-black"><MessageCircle size={15} /> واتساپ</a>
       </div>
     </div>
   )

@@ -1,0 +1,40 @@
+.country-explorer { padding-block:48px; }
+.country-explorer h2 { margin-top:16px;font-size:clamp(26px,3vw,36px);font-weight:900;line-height:1.6; }
+.country-intro { margin-top:10px;color:var(--fp-muted);font-size:14px;line-height:2; }
+.country-results { display:flex;justify-content:space-between;margin:22px 0 16px;color:var(--fp-muted);font-size:12px; }
+.country-card-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px; }
+.country-depth-card { --tc-shadow-color:rgba(8,20,30,.3);color:#fff; }
+.country-depth-card .tilted-card__front { background:linear-gradient(135deg,#1d4550,#101d2a 70%); }
+.country-depth-card .tilted-card__img { opacity:.88; }
+.country-card-wash { position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,16,24,.1),rgba(5,16,24,.45) 40%,rgba(5,16,24,.94));pointer-events:none; }
+.country-card-content { padding:18px;display:flex;flex-direction:column;justify-content:space-between; }
+.country-card-top { display:flex;align-items:center;justify-content:space-between; }
+.country-flag { display:grid;place-items:center;width:36px;height:36px;border:1px solid #ffffff40;border-radius:50%;background:#ffffff18;font-size:21px; }
+.country-code { font-family:Manrope,sans-serif;letter-spacing:.15em;font-size:11px;color:#e7e9e8; }
+.country-card-bottom h3 { font-size:24px;font-weight:900;text-shadow:0 2px 12px #0005; }
+.country-card-tags { display:flex;gap:6px;margin-top:8px;overflow:hidden; }
+.country-card-tags span { max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:1px solid #ffffff30;border-radius:999px;padding:3px 8px;background:#08131d66;font-size:11px; }
+.country-card-action { display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:12px;font-weight:800;color:#f4dfa9; }
+.country-map-art { position:absolute;inset:0;display:flex;align-items:center;justify-content:end;opacity:.45;overflow:hidden; }
+.country-map-art svg { width:180px;height:180px;stroke-width:.5;transform:translateX(-20px) rotate(-18deg); }
+.country-map-art span { position:absolute;left:25px;top:22px;font-family:Manrope,sans-serif;font-size:72px;font-weight:900;opacity:.22; }
+.country-graphic:nth-child(3n+2) .tilted-card__front { background:linear-gradient(140deg,#665031,#172a31 70%); }
+.country-ai-note { position:absolute;left:16px;top:60px;border-radius:6px;background:#07131cb3;padding:3px 6px;color:#e6e9ec;font-size:9px; }
+.country-note { margin-top:18px;color:var(--fp-muted);font-size:12px;line-height:2; }
+.country-booking { display:flex;gap:24px;justify-content:space-between;align-items:center;margin-top:28px;padding:26px;border:1px solid var(--fp-line);border-radius:26px;background:var(--fp-surface); }
+.country-booking h3 { margin-top:12px;font-size:24px;font-weight:900; }
+.country-booking p { margin-top:8px;font-size:13px;line-height:2;color:var(--fp-muted); }
+.country-booking button { flex-shrink:0; }
+@media(max-width:767px) {
+ .country-card-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
+ .country-depth-card,.country-depth-card .tilted-card__body { height:204px!important; }
+ .country-card-content { padding:13px; }
+ .country-card-bottom h3 { font-size:20px; }
+ .country-card-tags { flex-wrap:wrap;max-height:48px; }
+ .country-card-tags span { font-size:10px; }
+ .country-card-action { font-size:11px;margin-top:10px; }
+ .country-flag { width:30px;height:30px;font-size:18px; }
+ .country-booking { flex-direction:column;align-items:stretch;padding:22px;gap:18px; }
+ .country-card-grid .tilted-card { touch-action:pan-y pinch-zoom; }
+}
+@media(prefers-reduced-motion:reduce) { .country-depth-card .tilted-card__body { transform:none!important; }.country-depth-card .tilted-card__layer { transform:none!important; } }
