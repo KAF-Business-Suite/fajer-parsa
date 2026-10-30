@@ -18,6 +18,7 @@ function loadWidget(){
 export function CentralRequest({service,destination,variant,onLock}:{service:string;destination:string;variant:string;onLock:()=>void}){
   const [contact,setContact]=useState('');const [consent,setConsent]=useState(false);const [token,setToken]=useState('')
   const [busy,setBusy]=useState(false);const [started,setStarted]=useState(false);const [error,setError]=useState('');const [receipt,setReceipt]=useState('')
+  const [copyStatus,setCopyStatus]=useState('');const receiptText=useRef<HTMLTextAreaElement>(null)
   const requestId=useRef(crypto.randomUUID());const container=useRef<HTMLDivElement>(null);const widget=useRef<string|undefined>(undefined);const sending=useRef(false)
   const active=useRef(true)
   const sitekey=(import.meta.env as Record<string,string>).VITE_FAJR_TURNSTILE_SITEKEY
@@ -38,10 +39,15 @@ export function CentralRequest({service,destination,variant,onLock}:{service:str
     catch(reason){if(active.current)setError(intakeErrorMessage(reason))}
     finally{sending.current=false;if(active.current){setBusy(false);setToken('');if(!completed&&widget.current)window.turnstile?.reset(widget.current)}}
   }
+  const receiptSummary=['فجر پارسا — رسید درخواست اولیه',`شمارهٔ کامل رسید: ${receipt}`,`مقصد: ${destination}`,`خدمت: ${variant||service}`,'این رسید تأیید ویزا یا نتیجهٔ بررسی نیست.','پیگیری آنلاین هنوز فعال نیست؛ هنگام تماس با دفتر شمارهٔ کامل رسید را ارائه کنید.'].join('\n')
+  async function copyReceipt(){
+    try{await navigator.clipboard.writeText(receiptSummary);if(active.current)setCopyStatus('رسید کپی شد.')}
+    catch{receiptText.current?.focus();receiptText.current?.select();if(active.current)setCopyStatus('کپی خودکار ممکن نشد؛ متن رسید را انتخاب و کپی کنید.')}
+  }
   return <section className="central-request" aria-labelledby="central-request-title">
     <h3 id="central-request-title">ثبت بررسی اولیه در دفتر</h3>
     <p className="draft-note">بررسی اتصال: فقط ایمیل ساختگی با پایان @example.invalid وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.</p>
-    {receipt?<div role="status"><strong>درخواست اولیه ثبت شد</strong><p>رسید ثبت: <bdi>{receipt}</bdi></p><small>این رسید تأیید ویزا یا نتیجهٔ بررسی نیست. برای پیگیری آن را نگه دارید.</small></div>:<>
+    {receipt?<div><div role="status"><strong>درخواست اولیه ثبت شد</strong></div><p>مقصد: {destination} · خدمت: {variant||service}</p><p>رسید ثبت: <bdi>{receipt}</bdi></p><label htmlFor="intake-receipt">متن رسید برای نگهداری و پیگیری</label><textarea id="intake-receipt" ref={receiptText} className="request-summary-text" readOnly rows={7} value={receiptSummary}/><button type="button" className="secondary-action" onClick={copyReceipt}>کپی رسید ثبت</button><p role="status">{copyStatus}</p><small>پیگیری آنلاین هنوز فعال نیست. هنگام تماس با دفتر شمارهٔ کامل رسید را ارائه کنید. این رسید تأیید ویزا یا نتیجهٔ بررسی نیست.</small></div>:<>
       <label htmlFor="intake-contact">شماره تماس یا ایمیل</label><input id="intake-contact" type="text" dir="auto" maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
       <label className="intake-consent"><input type="checkbox" checked={consent} disabled={started} onChange={event=>setConsent(event.target.checked)}/> رضایت دارم اطلاعات همین درخواست برای بررسی و تماس دفتر ذخیره شود.</label>
       <div ref={container}/><button type="button" className="primary-action" disabled={busy||!token} onClick={send}>{busy?'در حال ثبت…':started?'بررسی دوبارهٔ همین درخواست':'ثبت درخواست اولیه'}</button>

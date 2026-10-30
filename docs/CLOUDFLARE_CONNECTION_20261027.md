@@ -1,3 +1,5 @@
+> Historical snapshot. Superseded by [current implementation status](WEB_V2_IMPLEMENTATION_STATUS.md); do not use as current deployment configuration.
+
 # Cloudflare direct connection — 2026-10-27
 
 Verified by Cloudflare MCP whoami, account listing, Pages listing, Workers listing and Worker Build trigger API. All Cloudflare calls read-only.
