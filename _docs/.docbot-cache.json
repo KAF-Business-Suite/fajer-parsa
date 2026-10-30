@@ -1,4 +1,169 @@
 {
-  "entries": {},
+  "entries": {
+    "services/fastapi/src/app/main.py": {
+      "description": {
+        "classes": [
+          {
+            "base_classes": [
+              "logging.Filter"
+            ],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": false,
+            "is_pydantic_model": false,
+            "line_end": 26,
+            "line_start": 18,
+            "name": "RedactConsumerAuthQuery",
+            "qualified_name": "main.RedactConsumerAuthQuery",
+            "response": {
+              "purpose": "RedactConsumerAuthQuery is a logging.Filter subclass intended to process log records and apply redaction logic for consumer authentication query data. It exists to ensure sensitive information in authentication-related log entries is filtered before emission.\n",
+              "responsibilities": [
+                "Implement the filter(record) method to examine logging.LogRecord objects.",
+                "Mutate or block log records that contain consumer authentication query details to prevent sensitive data from being logged.",
+                "Integrate with the module's logging configuration so filtered records are passed to handlers in redacted form."
+              ],
+              "role_in_module": "This class provides a pluggable logging filter within the module to centralize redaction of consumer authentication query information. It is used by the module's logging setup to ensure authentication-related log entries do not expose sensitive data."
+            }
+          }
+        ],
+        "extraction_quality": "full_ast",
+        "file_path": "services/fastapi/src/app/main.py",
+        "functions": [
+          {
+            "class_name": "RedactConsumerAuthQuery",
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": true,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 26,
+            "line_start": 19,
+            "name": "filter",
+            "qualified_name": "main.RedactConsumerAuthQuery.filter",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Evaluate a logging.LogRecord and decide whether it should pass this filter. The method returns True if the record is allowed through the filter and False if it should be excluded.\n",
+              "returns_summary": null
+            },
+            "signature": "def filter(self, record: logging.LogRecord) -> bool:"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": true,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 48,
+            "line_start": 47,
+            "name": "root",
+            "qualified_name": "main.root",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Asynchronous FastAPI route function registered with app.get to handle GET requests to the application's root endpoint. It serves as the handler invoked when clients make HTTP GET requests to the root path.\n",
+              "returns_summary": null
+            },
+            "signature": "async def root():"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": true,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 53,
+            "line_start": 52,
+            "name": "dev_order",
+            "qualified_name": "main.dev_order",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Asynchronous FastAPI route handler named dev_order exposed via app.get; it serves GET requests for the development order endpoint and performs the endpoint's request handling logic.\n",
+              "returns_summary": null
+            },
+            "signature": "async def dev_order():"
+          }
+        ],
+        "language": "Python",
+        "overview": {
+          "key_responsibilities": [
+            "Instantiate the FastAPI application object (app) with a title and version.",
+            "Provide two asynchronous HTTP handlers: root and dev_order, which serve requests at application endpoints.",
+            "Declare RedactConsumerAuthQuery, a logging.Filter subclass used to alter or redact logging related to consumer authentication queries.",
+            "Import and expose multiple router modules and an adapter router to compose the API surface (billing, carriers, concierge, consumer, health, orders, shipments, shopify)."
+          ],
+          "notable_patterns": [
+            "Creates a FastAPI application instance",
+            "Defines asynchronous request handlers (async functions)",
+            "Implements a custom logging.Filter subclass for log message handling",
+            "Organizes application routes by importing multiple router modules and an adapter router"
+          ],
+          "summary": "This module defines the FastAPI application entry point for the Agentic Delivery Gateway. It creates a FastAPI instance named app with a title and version, imports a set of routers and an adapter router for composing the API, and exposes at least two asynchronous endpoint handlers: root and dev_order. The file also declares a logging filter class, RedactConsumerAuthQuery, as a specialized logging.Filter implementation intended for use within the application's logging configuration.\n\nThe module organizes application-level pieces: the FastAPI application object, routing adapters and routers, an authentication-redaction logging filter class, and two async endpoints that serve as part of the HTTP surface. The components present indicate integration points for billing, carriers, concierge, consumer, health, orders, shipments and shopify functionality via imported router modules and an adapter router from a Shopify adapter package.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 1444,
+        "tokens_output": 1166
+      },
+      "extraction_quality": "full_ast",
+      "generated_at": "2026-10-30T17:44:41Z",
+      "model": "gpt-5-mini",
+      "source_sha": "96c29bc451513543590ac9eafb52300d121f7017"
+    },
+    "web-v2/server/intake/fp04-scenarios.test.mjs": {
+      "description": {
+        "classes": [],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/intake/fp04-scenarios.test.mjs",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 14,
+            "line_start": 12,
+            "name": "request",
+            "qualified_name": "request",
+            "response": {
+              "parameters_summary": "body is the request payload to send (typically an object or JSON string representing the request body used by the test).",
+              "purpose": "Make a test HTTP request using the supplied payload. This helper function wraps sending the provided body to the system under test so test code can assert on the response.\n",
+              "returns_summary": "Returns the result of the request (usually a promise resolving to the HTTP response or response-like object) to allow test assertions."
+            },
+            "signature": "def request(body):"
+          }
+        ],
+        "language": "javascript",
+        "overview": {
+          "key_responsibilities": [
+            "Import the node:test test function and node:assert/strict for defining and asserting test cases.",
+            "Import the handleIntake implementation from the local './handler.ts' module to exercise production logic.",
+            "Provide a module-level helper function request that builds and dispatches requests against handleIntake for use in test scenarios.",
+            "Wrap calls to handleIntake with assertions using assert.strict to validate the handler's responses within test cases."
+          ],
+          "notable_patterns": [
+            "uses the node:test testing API",
+            "uses node:assert/strict for assertions",
+            "imports the handler implementation from a TypeScript module ('./handler.ts')",
+            "centralizes request construction through a single helper function for reuse in tests"
+          ],
+          "summary": "This file contains a Node.js test module that exercises the intake handling logic by importing the test harness from 'node:test', the strict assertion library from 'node:assert/strict', and the intake handler implementation from './handler.ts'. It defines a single module-level helper function named request which is used inside the tests to construct and send requests to the handleIntake function, and to capture or assert responses. The test module is organized around the standard node:test API and makes assertions using assert.strict to verify expected behavior of the intake handler.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 565,
+        "tokens_output": 522
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-30T17:53:26Z",
+      "model": "gpt-5-mini",
+      "source_sha": "018b2769c0ba7b36dffbf8f61aedf42e69e63cb4"
+    }
+  },
   "schema_version": "1.0.0"
 }
