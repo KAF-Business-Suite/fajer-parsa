@@ -1,0 +1,163 @@
+<!-- METADATA: {"source_path": "web-v2/server/office/handler.test.mjs", "source_sha": "e21dfa6d2ce98d5bbc7d7644ccfa7240cff806d8", "extraction_quality": "structural", "model": "gpt-5-mini", "generated_at": "2026-10-30T04:41:48Z", "doc_type": "file"} -->
+<details>
+<summary>Documentation Metadata (click to expand)</summary>
+
+```json
+{
+  "doc_type": "file_overview",
+  "file_path": "web-v2/server/office/handler.test.mjs",
+  "source_hash": "66127d43090b19d355aae20e0e738a00f6454cf396dafd86637d40cedc9ec398",
+  "last_updated": "2026-10-30T04:41:34.513975+00:00",
+  "git_sha": "e21dfa6d2ce98d5bbc7d7644ccfa7240cff806d8",
+  "tokens_used": 1525,
+  "complexity_score": 1,
+  "estimated_review_time_minutes": 5,
+  "external_dependencies": [
+    "node:test",
+    "node:assert/strict"
+  ]
+}
+```
+
+</details>
+
+[Documentation Home](../../../README.md) > [web-v2](../../README.md) > [server](../README.md) > [office](./README.md) > **handler.test.mjs**
+
+---
+
+# handler.test.mjs
+
+> **File:** `web-v2/server/office/handler.test.mjs`
+
+![Complexity: Low](https://img.shields.io/badge/Complexity-Low-green) ![Review Time: 5min](https://img.shields.io/badge/Review_Time-5min-blue)
+
+## 📑 Table of Contents
+
+
+- [Overview](#overview)
+- [Dependencies](#dependencies)
+- [Architecture Notes](#architecture-notes)
+- [Maintenance Notes](#maintenance-notes)
+- [Functions and Classes](#functions-and-classes)
+
+---
+
+## Overview
+
+This file contains unit tests for the office request handler exported from './handler.ts'. It uses the Node.js built-in test runner (imported from 'node:test') and the strict assertion library (node:assert/strict) to exercise the handleOffice function and the specific error classes OfficeDenied and OfficeConflict. Two module-level helper functions, req and deps, construct the mock HTTP request and dependency objects used by the test cases so that handleOffice can be invoked with controlled inputs and simulated dependency behavior.
+
+## Dependencies
+
+### External Dependencies
+
+| Module | Usage |
+| --- | --- |
+| `node:test` | import {test} from 'node:test' |
+| `node:assert/strict` | import assert from 'node:assert/strict' |
+
+### Internal Dependencies
+
+| Module | Usage |
+| --- | --- |
+| `./handler.ts` | import {handleOffice,OfficeDenied,OfficeConflict} from './handler.ts' |
+
+## 📁 Directory
+
+This file is part of the **office** directory. View the [directory index](./README.md) to see all files in this module.
+
+## Architecture Notes
+
+- uses Node.js built-in test runner ('node:test') for defining test cases
+- uses node:assert/strict for assertions
+- separates test scaffolding from assertions via small factory helpers (req and deps)
+- imports specific error classes (OfficeDenied, OfficeConflict) alongside the handler for targeted error assertions
+
+## Maintenance Notes
+
+- Provide a req(...) helper to build mock request objects passed to handleOffice in tests.
+- Provide a deps(...) helper to assemble dependency objects and stubs required by handleOffice during tests.
+- Import and invoke the handleOffice function and its associated error classes (OfficeDenied, OfficeConflict) to verify handler behavior under various conditions.
+- Use the Node.js test runner and strict assertions to define and run test cases that validate the handler's responses and error handling.
+
+
+---
+
+## Functions and Classes
+
+
+### req
+
+![Type: Sync](https://img.shields.io/badge/Type-Sync-green)
+
+#### Signature
+
+```javascript
+def req(method='GET', body, extra={}):
+```
+
+#### Description
+
+Constructs and returns a test HTTP request using the provided HTTP method, optional request body, and any additional options.
+
+It is intended to be used in tests to simulate requests to the handler under different methods, bodies, and extra configuration.
+
+#### Parameters
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `method` = `'GET'` | `Unknown` | ❌ | — |
+| `body` | `Unknown` | ✅ | — |
+| `extra` = `{}` | `Unknown` | ❌ | — |
+
+#### Complexity
+
+Not analyzed
+
+---
+
+
+
+### deps
+
+![Type: Sync](https://img.shields.io/badge/Type-Sync-green)
+
+#### Signature
+
+```javascript
+def deps(over={}):
+```
+
+#### Description
+
+Constructs and returns a dependencies object used by the test suite, allowing callers to override parts of the default dependency set.
+
+It provides a convenient way to inject mocks or substitutes for the module's collaborators during tests.
+
+
+over is an optional object of overrides that will be merged into the default dependency definitions; use it to replace specific dependencies with test doubles or custom implementations.
+
+Returns the assembled dependencies object (the merged defaults with any provided overrides).
+
+#### Parameters
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| `over` = `{}` | `Unknown` | ❌ | — |
+
+#### Complexity
+
+Not analyzed
+
+---
+
+
+
+---
+
+## Navigation
+
+**↑ Parent Directory:** [Go up](./README.md)
+
+---
+
+*This documentation was automatically generated by AI ([Woden DocBot](https://github.com/marketplace/ai-document-creator)) and may contain errors. It is the responsibility of the user to validate the accuracy and completeness of this documentation.*
