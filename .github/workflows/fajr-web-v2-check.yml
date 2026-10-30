@@ -1,9 +1,13 @@
-name: Fajr web v2 checks
+name: Fajr web v2 checks (free, independent)
 on:
   pull_request:
+    branches:
+      - main
+      - release/fajr-production-20261030
     paths:
       - 'web-v2/**'
       - '.github/workflows/fajr-web-v2-check.yml'
+      - '.github/workflows/testdriver.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -13,7 +17,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: web-v2
@@ -26,6 +30,15 @@ jobs:
           node-version-file: web-v2/.nvmrc
           cache: npm
           cache-dependency-path: web-v2/package-lock.json
-      - run: npm ci --no-audit --no-fund
-      - run: npm run test:intake
-      - run: npm run build
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run offline-safe intake server/client unit tests
+        run: npm run test:intake
+      - name: Build the static site
+        run: npm run build
+      - name: Install Chromium for local browser QA
+        run: npx playwright install --with-deps chromium
+      - name: Verify website UX with local browser and synthetic data
+        run: npm run test:smoke
+      - name: Verify optional intake form with intercepted API and synthetic challenge
+        run: npm run test:intake-form
