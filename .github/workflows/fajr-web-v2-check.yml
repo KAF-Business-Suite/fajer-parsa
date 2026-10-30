@@ -28,4 +28,6 @@ jobs:
           cache-dependency-path: web-v2/package-lock.json
       - run: npm ci --no-audit --no-fund
       - run: npm run test:intake
+      - run: npm run test:office
+      - run: npm run typecheck:office
       - run: npm run build

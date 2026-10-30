@@ -7,3 +7,15 @@
 Before activation: review existing KAF membership compatibility, approve the isolated office schema extension (the earlier approval covered synthetic intake only), identify the owner's authenticated user, test permissions and transactions in Postgres, add Auth/RPC adapters and rate limiting, build the staff UI with preview/confirmation, then test synthetic records over HTTPS. Do not enable real customer intake as a side effect.
 
 Validation: `node --test server/office/handler.test.mjs` from web-v2. Seven unit checks use stubs. They do not prove SQL security, live authentication or audit persistence. PostgreSQL tests must cover anonymous/customer/nonmember/read-only/updater, revoked membership, competing updates, rollback of audit failures and isolation from KAF cases.
+
+## Auth/RPC bridge — 30 October, prepared only
+
+`adapters.ts` now supplies the handler's dependencies through the existing project's HTTPS Auth `/auth/v1/user` and the two proposed RPCs. Auth is checked afresh for each request; user metadata, email matching, local JWT decoding and anonymous-sign-in users are not accepted as office authority. RPC permission checks still decide membership. The server key is never the caller's bearer token. Redirects are refused, calls have timeouts, and only the expected list/change fields reach the caller. This file is not imported into the client and is not a deployed route.
+
+The handler requires an injected shared atomic `rateLimit(user)` quota. Denial returns 429; missing quota, Auth outage or RPC failure fail closed. **No quota backend is implemented or provisioned here.** Do not use an in-memory counter or `async()=>true` in a real deployment. Unit fixtures may stub it. Office activation remains blocked until the quota implementation and SQL permissions/audit have been independently tested.
+
+Metadata-only database inspection found `public.business_members` with `workspace_id`, `user_id`, `role`, `companies`, `status`, plus `business_role_permissions`. It did not establish which workspace/company/role may access Fajr intake. No membership rows, customer rows or Auth identities were read; no automatic grant or KAF membership reuse was added. The live `fajr_private` schema currently contains intake control, not office membership/audit tables.
+
+Run `npm run test:office` (17 handler/adapter checks) and `npm run typecheck:office`. CI runs both. Tests use synthetic fetch responses; they do not establish live sign-in, membership authorization, rate-limit persistence, database audit or Samsung acceptance. No schema, role grant, deployment or production intake setting was changed.
+
+Primary verification reference: https://github.com/supabase/supabase/blob/master/apps/docs/content/guides/auth/jwts.mdx
