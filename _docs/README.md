@@ -1,97 +1,77 @@
-<details><summary>Directory Metadata (for smart change detection)</summary>
+# 📚 fajer-parsa Documentation
 
-```json
-{
-  "doc_type": "directory_index",
-  "directory_path": "_docs",
-  "directory_hash": "e3e66443225f90493789db7e1c6c8af676b641e1aa1eb0f8d58e17c141383550",
-  "file_count": 1,
-  "file_hashes": {
-    "vitest.config.js": "47222e684b71f4d6"
-  }
-}
-```
+Welcome to the complete documentation for this repository. This documentation is automatically generated and maintained by Woden Docbot.
 
-</details>
+![Files Documented: 6](https://img.shields.io/badge/Files_Documented-6-blue) ![Coverage: 9%](https://img.shields.io/badge/Coverage-9%-orange) ![Last Updated: 2026-10-30](https://img.shields.io/badge/Last_Updated-2026--10--30-gray)
 
-[Documentation Home](README.md)
+## 🔗 Quick Links
 
----
+[📂 tests](./tests/README.md) | [📂 web-v2](./web-v2/README.md)
+[📋 Dependencies](./DEPENDENCIES.md)
 
-# 📁 _docs
-
-> **Purpose:** Top-level project directory containing configuration, test harness configuration for Vitest, web-v2 application assets and subdirectories used to run and verify the project.
-> 
-
-![Organization: Hierarchical](https://img.shields.io/badge/Organization-Hierarchical-blue)
-
-## 📑 Table of Contents
-
-
-- [Overview](#overview)
-- [Subdirectories](#subdirectories)
-- [All Files](#all-files)
-- [Dependencies](#dependencies)
-- [Architecture Notes](#architecture-notes)
 
 ---
 
 ## Overview
 
-This repository root holds project-level configuration and entry points, including a Vitest configuration file (vitest.config.js) used to control how tests are discovered and executed. At the root there are also several static assets and metadata files (listed under "ALSO IN THIS DIRECTORY"), which provide site entry points, images, and package metadata for the project. The vitest.config.js file defines the Vitest test runner settings that the test suite uses.
+**Languages and tools:** CSS, HTML, JSX, JavaScript, Node.js, React, SQL, TypeScript, Vite, npm
 
-The root also organizes work into subdirectories that separate concerns: a tests/ directory that contains Vitest test specifications (notably fajer-parsa.test.js) used to verify behavior and guard against regressions, and a web-v2/ directory that houses the web-v2 application's root-level configuration, static assets, and a server subdirectory with server-side request handling code and tests. Together, the vitest configuration at the root and the tests/ and web-v2/ subdirectories form the testing and application organization for the project: vitest.config.js configures the test runner, tests/ contains the test cases to run, and web-v2/ contains the application code and related assets that tests may exercise.
+## 📑 Documentation Sections
 
+### [tests](./tests/README.md)
+Holds test specifications for the project; contains Vitest test files used to verify behavior and regressions in related code.
 
-### File Organization
-
-Files are organized with project-level configuration and assets at the repository root, and feature or concern-specific code grouped into subdirectories (tests/ for test specifications and web-v2/ for the web application and server code). This separation keeps test harness configuration (vitest.config.js) at the top-level so it can apply across the repository while application code and tests live in dedicated subfolders.
-
-## 📂 Subdirectories
-
-This directory contains the following subdirectories:
-
-### [📁 tests/](./tests//README.md)
-
-**Purpose:** Holds test specifications for the project; contains Vitest test files used to verify behavior and regressions in related code.
+This directory contains test specification files for the project.
 
 ![Files: 1](https://img.shields.io/badge/Files-1-blue)
 
----
+### [web-v2](./web-v2/README.md)
+Houses the web-v2 application's root-level configuration, static assets, and a server subdirectory that contains server-side request handling code and tests.
 
-### [📁 web-v2/](./web-v2//README.md)
 
-**Purpose:** Houses the web-v2 application's root-level configuration, static assets, and a server subdirectory that contains server-side request handling code and tests.
+The web-v2 directory contains the project's root-level files that provide project metadata, configuration, and static entry points plus several subdirectories that hold source code and runtime modules.
 
-![Files: 0](https://img.shields.io/badge/Files-0-blue)
+### Files at the repository root
 
----
-## 📂 All Files
-
-| File | Type |
-| --- | --- |
-| [vitest.config.js](./vitest.config.js.md) | 📜 JavaScript |
-
-## Dependencies
-
-### External Dependencies
-
-| Dependency | Usage |
-| --- | --- |
-| `Vitest` | Configured via vitest.config.js as the test runner for the repository's test specifications. |
-
-## Architecture Notes
-
-- Test runner configuration is centralized at the repository root (vitest.config.js) so tests across subdirectories (like tests/ and potentially web-v2/) use a single common configuration.
-- Application assets and server code are grouped under web-v2/ while test specifications are kept in a dedicated tests/ folder to keep responsibilities separated.
+- [vitest.config.js](./vitest.config.js.md)
 
 ---
 
-## Navigation
+## 📊 Documentation Statistics
 
-**↑ Parent Directory:** [Go up](../README.md)
-**🔗 Related:** [tests/](./tests//README.md) • [web-v2/](./web-v2//README.md)
+- **Files Documented**: 6
+- **Directories**: 5
+- **Coverage**: 9%
+- **Eligible Source Files**: 69
+- **Last Updated**: 2026-10-30
 
 ---
 
-*Generated by Woden Docbot*
+## 🧭 How to Navigate
+
+> ℹ️ **INFO**
+> Each directory has its own README.md with detailed information about that section. Use the breadcrumb navigation at the top of each page to navigate back to parent directories.
+
+### Navigation Features
+
+- **Breadcrumbs** - At the top of each page, showing your current location
+- **Directory READMEs** - Each folder has a comprehensive overview
+- **File Documentation** - Click through to individual file documentation
+- **Search** - Use GitHub's search or your IDE's search functionality
+
+---
+
+## 🤖 About Woden DocBot
+
+This documentation is automatically generated and kept up-to-date by Woden DocBot, an AI-powered documentation assistant. DocBot analyzes code on every pull request and updates documentation to reflect changes.
+
+### Features
+
+- **Automatic Updates** - Documentation updates on every PR
+- **Comprehensive Coverage** - Files, functions, classes, and directories
+- **Smart Navigation** - Breadcrumbs, related files, and parent links
+- **AI-Powered** - Uses Azure GPT models for intelligent documentation generation
+
+---
+
+*Generated by Woden DocBot for fajer-parsa*
