@@ -29,7 +29,7 @@
 **مرحلهٔ ۳ — تنظیم امن:** در Cloudflare یک API Token با دسترسی محدود به Cloudflare Pages Edit در حساب درست بسازید؛ در GitHub مخزن `KAF-Business-Suite/fajer-parsa` > Settings > Secrets and variables > Actions > Secrets دو مقدار `CLOUDFLARE_ACCOUNT_ID` و `CLOUDFLARE_API_TOKEN` را **خودتان در صفحهٔ خصوصی** وارد کنید. هیچ Token را در پیام، فایل، کد یا اسکرین‌شات قرار ندهید.
 **مرحلهٔ ۴ — آزمون:** بعد از رسیدن workflow به default branch، GitHub > Actions > Fajr Parsa | safe Pages release > Run workflow > target=preview. سپس لینک preview را روی گوشی بررسی کنید.
 **مرحلهٔ ۵ — اولین انتشار کنترل‌شده:** فقط پس از PASS QA و بررسی حفاظ‌های نسخه، انتشار production دستی از `main` با عبارت دقیق انجام شود.
-**مرحلهٔ ۶ — خودکارسازی دائمی:** GitHub > Settings > Secrets and variables > Actions > Variables > New repository variable: `FAJR_AUTO_DEPLOY` با مقدار `enabled`. از آن پس فقط Pushهای `main` شامل تغییر `web-v2/**` یا workflow، بعد از تست موفق و عبور از کنترل اختلاف نسخه، منتشر می‌شوند. در همهٔ حالت‌های دیگر توقف امن است.
+**مرحلهٔ ۶ — خودکارسازی دائمی:** GitHub > Settings > Secrets and variables > Actions > Variables > New repository variable: `FAJR_AUTO_DEPLOY` با مقدار `enabled` **و** متغیر دوم `FAJR_RELEASE_ARMED` با مقدار `verified-after-first-manual-release` (فقط بعد از موفقیت واقعی اولین انتشار دستی). از آن پس فقط Pushهای `main` شامل تغییر `web-v2/**` یا workflow، بعد از تست موفق و عبور از کنترل اختلاف نسخه، منتشر می‌شوند. در همهٔ حالت‌های دیگر توقف امن است.
 
 ## در صورت مشکل
 - انتشار خودکار را خاموش کنید: مقدار Variable بالا را حذف یا به `disabled` تغییر دهید.
@@ -56,3 +56,9 @@ https://github.com/KAF-Business-Suite/fajer-parsa/pull/6
 
 ## کنترل اضافه‌شده بعد از آزمون رایگان (۳۰ اکتوبر)
 پیش از هر انتشار PR #8، همان Chromium browser QA و فرم آزمایشی که در [PR #9](https://github.com/KAF-Business-Suite/fajer-parsa/pull/9) با [Run 41085426093](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/41085426093) موفق شدند نیز اجرا می‌شوند. این محافظ جلوی انتشار را در صورت شکست آزمون می‌گیرد. همچنین قبل از نیاز به Secret، کمک‌دستور Wrangler در CI بررسی می‌شود؛ این آزمایش هیچ سایتی را نشر نمی‌کند. با این‌همه آزمون واقعی Deploy و Android هنوز انجام نشده است.
+
+## هماهنگی آزمون‌ها و محافظ دوم
+- آزمون‌های رایگان Chromium و فرم ساختگی از PR #9 به همین شاخه (PR #8) منتقل شدند؛ از دو راه مستقل برای انتشار جلوگیری شود.
+- حفاظت اضافی انتشار خودکار: هر دو متغیر `FAJR_AUTO_DEPLOY=enabled` و `FAJR_RELEASE_ARMED=verified-after-first-manual-release` لازم‌اند. تا تست واقعی دستی PASS نشود، متغیر دوم را نسازید.
+- اجرای PR #8 در حالت عادی فقط آزمایش می‌کند؛ Production Deploy در صورت نداشتن شرایط بالا یا Secret کافی اجرا نمی‌شود.
+- TestDriver قدیمی برای آزادماندن سهمیه به حالت دستی پیش‌فرض خاموش باقی می‌ماند.
