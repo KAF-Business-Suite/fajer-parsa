@@ -86,12 +86,13 @@ jobs:
         shell: bash
         env:
           AUTO_DEPLOY: ${{ vars.FAJR_AUTO_DEPLOY }}
+          RELEASE_ARMED: ${{ vars.FAJR_RELEASE_ARMED }}
           TARGET: ${{ inputs.target }}
           CONFIRMATION: ${{ inputs.confirmation }}
         run: |
           set -euo pipefail
           deploy=none
-          if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/main && "$AUTO_DEPLOY" == enabled ]]; then
+          if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/main && "$AUTO_DEPLOY" == enabled && "$RELEASE_ARMED" == verified-after-first-manual-release ]]; then
             deploy=production
           elif [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
             if [[ "$TARGET" == preview ]]; then
