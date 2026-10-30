@@ -4,7 +4,7 @@
 
 # 📁 web-v2
 
-> **Purpose:** Houses the web-v2 application's root-level configuration, static assets, and a server subdirectory that contains server-side request handling code and tests.
+> **Purpose:** Contains the web-v2 application's frontend and server code: source-side UI code, server request handlers, and supporting project configuration and build files.
 > 
 
 ![Organization: Hierarchical](https://img.shields.io/badge/Organization-Hierarchical-blue)
@@ -21,45 +21,60 @@
 
 ## Overview
 
-The web-v2 directory contains the project's root-level files that provide project metadata, configuration, and static entry points plus several subdirectories that hold source code and runtime modules. At the root there are files such as .gitignore, .nvmrc, design-preview.html, index.html, package-lock.json, package.json, tsconfig.json, vercel.json, and vite.config.ts; the input does not provide detailed purpose information for each of these root files, but they function as the repository-level configuration and artifact files for the application.
+The web-v2 directory groups the code and assets required to build and run the web-v2 application. At the root there are repository and build/configuration files (for example: .gitignore, .nvmrc, package.json, package-lock.json, tsconfig.json, vercel.json, vite.config.ts), plus static HTML preview files (design-preview.html, office-preview.html, index.html). These root-level files are present in the directory listing but their internal responsibilities are not documented here.
 
-A prominent subdirectory is server/, which specifically groups server-side code responsible for handling requests, runtime types, and unit tests; the server directory organizes office and intake server logic and their tests. Other subdirectories are present (config, public, scripts, src, tests, vendor) but no specific purpose information for them was provided in the input. Together, the root-level configuration and static files plus the server/ submodule form the repository structure: configuration and asset files live at the top level while language-specific server logic and related tests are organized under server/ to keep server-side request handling separated from other concerns.
+Two primary subdirectories hold the implementational code. The src/ directory holds the application's source-side UI code and supporting assets, including office-specific React/TypeScript components and global entry points/styles; at the root of src it includes application entry points and global stylesheets and build/type hints (filenames are listed elsewhere but individual root-level files there are not documented here). The server/ directory contains server-side request handling code and related submodules, organizing office and intake server logic and tests. Together, the root configuration files, src UI code, and server modules form the complete web-v2 deliverable: root files configure and bootstrap builds/deployments, src provides the client application code, and server implements request handling and related runtime types and tests.
 
 
 ### File Organization
 
-Top-level contains repository and build/configuration files and static assets; language/runtime-specific code and tests are placed into focused subdirectories such as server/. Several additional subdirectories (config, public, scripts, src, tests, vendor) exist at the root but their specific roles were not provided in the input.
+The directory is split into clear root-level configuration and preview files, plus two main subdirectories: src/ for frontend source and server/ for backend request handling and tests. Root files are configuration and static previews; src and server contain the implementation code and are organized by concern (UI components and server logic, respectively). Additional subdirectories (config, public, scripts, tests, vendor) exist at the root for specific auxiliary purposes but their internal contents are not documented here.
 
 ## 📂 Subdirectories
 
 This directory contains the following subdirectories:
 
-### [📁 server](./server/README.md)
+### [📁 src/](./src//README.md)
 
-**Purpose:** Contains server-side request handling code, runtime types, and unit tests for office and intake server logic.
+**Purpose:** Holds the application's source-side UI code and supporting assets, including office-specific React/TypeScript components and global entry points/styles.
+
+![Files: 0](https://img.shields.io/badge/Files-0-blue)
+
+---
+
+### [📁 server/](./server//README.md)
+
+**Purpose:** Contains server-side request handling code and related submodules for the web-v2 application, organizing office and intake server logic and tests.
 
 ![Files: 0](https://img.shields.io/badge/Files-0-blue)
 
 ---
 ## Dependencies
 
+### External Dependencies
+
+| Dependency | Usage |
+| --- | --- |
+| `[]` | External dependencies are declared in package.json at the repository root; specific packages are not documented here. |
+
 ### Internal Dependencies
 
 | Dependency | Usage |
 | --- | --- |
-| `server` | Houses server-side modules and tests that provide request handling and runtime types used by the application. |
+| [src/](../src/.md) | Frontend source code used to build the client application and referenced by root build configuration. |
+| [server/](../server/.md) | Server-side modules that implement request handling and tests; integrated with the rest of the project for backend behavior. |
 
 ## Architecture Notes
 
-- Server-side request handling and related tests are isolated under server/ to keep server logic separated from root-level configuration and static assets.
-- Root-level files consolidate project-level configuration and static entry points, with additional subdirectories present for source code, configuration, and vendor files.
+- Code is organized with a clear separation between frontend (src/) and backend (server/) to keep UI and request handling concerns isolated.
+- Root-level configuration and preview HTML files are kept at the top-level to control build, type, and deployment settings centrally.
 
 ---
 
 ## Navigation
 
 **↑ Parent Directory:** [Go up](../README.md)
-**🔗 Related:** [server](./server/README.md)
+**🔗 Related:** [src/](./src//README.md) • [server/](./server//README.md)
 
 ---
 
