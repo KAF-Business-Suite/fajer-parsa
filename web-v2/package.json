@@ -14,6 +14,7 @@
     "test:intake-form": "node tests/intake-form.mjs",
     "build:production": "node scripts/build-release.mjs production",
     "build:qa": "node scripts/build-release.mjs qa",
+    "test:office:postgres": "node --test server/office/quota.postgres.test.mjs",
     "test:office": "node --test server/office/handler.test.mjs server/office/adapters.test.mjs",
     "typecheck:office": "tsc --noEmit --target es2022 --lib es2022,dom --module esnext --moduleResolution bundler --allowImportingTsExtensions --strict --skipLibCheck server/office/handler.ts server/office/adapters.ts"
   },

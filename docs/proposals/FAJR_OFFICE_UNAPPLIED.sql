@@ -18,6 +18,36 @@ create table fajr_private.office_audit (
 alter table fajr_private.office_members enable row level security;
 alter table fajr_private.office_audit enable row level security;
 revoke all on fajr_private.office_members,fajr_private.office_audit from public,anon,authenticated;
+-- One bounded row per explicitly provisioned member; no untrusted user can grow this table.
+create table fajr_private.office_quota (
+ user_id uuid primary key references fajr_private.office_members(user_id) on delete cascade,
+ window_started_at timestamptz not null,
+ used integer not null check (used between 1 and 60)
+);
+alter table fajr_private.office_quota enable row level security;
+revoke all on fajr_private.office_quota from public,anon,authenticated;
+-- Fixed window: at most 60 admitted requests per member per 60-second window.
+-- PostgreSQL row conflict locking serializes parallel server instances.
+create function public.fajr_office_take_slot(actor uuid)
+returns boolean language plpgsql security definer set search_path='' as $$
+declare admitted uuid; checked_at timestamptz;
+begin
+ perform 1 from fajr_private.office_members where user_id=actor and enabled for update;
+ if not found then
+  raise sqlstate '42501' using message='Office access denied';
+ end if;
+ checked_at:=clock_timestamp();
+ insert into fajr_private.office_quota as q(user_id,window_started_at,used)
+ values(actor,checked_at,1)
+ on conflict(user_id) do update set
+  window_started_at=case when q.window_started_at<=checked_at-interval '60 seconds' then checked_at else q.window_started_at end,
+  used=case when q.window_started_at<=checked_at-interval '60 seconds' then 1 else q.used+1 end
+ where q.window_started_at<=checked_at-interval '60 seconds' or q.used<60
+ returning user_id into admitted;
+ return admitted is not null;
+end;$$;
+revoke all on function public.fajr_office_take_slot(uuid) from public,anon,authenticated;
+grant execute on function public.fajr_office_take_slot(uuid) to service_role;
 create function public.fajr_office_list(actor uuid,row_offset integer default 0)
 returns jsonb language plpgsql security definer set search_path='' as $$
 begin

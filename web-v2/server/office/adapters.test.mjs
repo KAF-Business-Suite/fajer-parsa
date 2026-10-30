@@ -10,10 +10,10 @@ const request=(method='GET',body)=>new Request('https://office.example.invalid/a
 const auth=()=>Response.json({id:actor,role:'authenticated',is_anonymous:false})
 const item={id,service:'synthetic',destination:'synthetic',variant:'synthetic',contact:'qa@example.invalid',status:'received',created_at:'2026-10-30T00:00:00Z'}
 
-test('untrusted project URLs and missing shared limiter are rejected before network',()=>{
+test('untrusted project URLs and invalid limiter are rejected before network',()=>{
  for(const projectUrl of ['http://krzxajtrhvupyywovdzy.supabase.co','https://evil.invalid',project+'/path',project+'?x=1','https://user@krzxajtrhvupyywovdzy.supabase.co'])
   assert.throws(()=>officeDependencies({...config,projectUrl},async()=>true))
- assert.throws(()=>officeDependencies(config,undefined))
+ assert.throws(()=>officeDependencies(config,null))
 })
 test('disabled office makes no Auth, quota or RPC calls',async()=>{
  let calls=0;const deps=officeDependencies({...config,enabled:false},async()=>{calls++;return true},async()=>{calls++;return auth()})
@@ -65,4 +65,32 @@ test('verified actor and expected state reach change RPC; returned identity must
  assert.equal(result.status,200);assert.deepEqual(await result.json(),{id,status:'reviewing'})
  let n=0;const bad=officeDependencies(config,async()=>true,async()=>++n===1?auth():Response.json({id:actor,status:'reviewing'}))
  assert.equal((await handleOffice(request('POST',{id,expected:'received',status:'reviewing'}),bad)).status,503)
+})
+
+
+test('default database quota uses verified actor before list and accepts only boolean',async()=>{
+ for(const quota of [true,false,null,1,'true',{allowed:true}]){
+  const paths=[]
+  const deps=officeDependencies(config,undefined,async(url,init)=>{
+   const path=new URL(url).pathname;paths.push(path)
+   if(path==='/auth/v1/user')return auth()
+   if(path.endsWith('fajr_office_take_slot')){
+    assert.deepEqual(JSON.parse(init.body),{actor})
+    assert.equal(init.headers.Authorization,'Bearer synthetic-server-key')
+    return Response.json(quota)
+   }
+   return Response.json([item])
+  })
+  const result=await handleOffice(request(),deps)
+  assert.equal(result.status,quota===true?200:quota===false?429:503)
+  assert.equal(paths.length,quota===true?3:2)
+ }
+})
+test('default quota outage or membership denial blocks all record access',async()=>{
+ for(const [code,status] of [['XX000',503],['42501',403]]){
+  let calls=0
+  const deps=officeDependencies(config,undefined,async()=>++calls===1?auth():Response.json({code,message:'private'},{status:400}))
+  const result=await handleOffice(request(),deps)
+  assert.equal(result.status,status);assert.equal(calls,2);assert.doesNotMatch(await result.text(),/private/)
+ }
 })

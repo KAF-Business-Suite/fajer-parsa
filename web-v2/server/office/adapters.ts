@@ -22,12 +22,12 @@ function row(value: unknown): Row {
     status: value.status as string, created_at: value.created_at as string }
 }
 
-// takeSlot must use a reviewed shared quota; no process-local counter or permissive default.
+// Default quota is the shared atomic RPC. Injection is for tests or reviewed backends.
 // Construction does not enable or register an HTTP endpoint.
-export function officeDependencies(config: Config, takeSlot: (user: string) => Promise<boolean>, fetcher: typeof fetch = fetch) {
+export function officeDependencies(config: Config, takeSlot: ((user: string) => Promise<boolean>) | undefined = undefined, fetcher: typeof fetch = fetch) {
   const base = new URL(config.projectUrl)
   if (base.origin !== project || base.pathname !== '/' || base.search || base.hash || base.username || base.password
-    || !config.serverKey || typeof takeSlot !== 'function') throw new Error('invalid office configuration')
+    || !config.serverKey || (takeSlot !== undefined && typeof takeSlot !== 'function')) throw new Error('invalid office configuration')
   const call = async (path: string, init: RequestInit) => {
     const response = await fetcher(new URL(path, project), { ...init, redirect: 'error', signal: AbortSignal.timeout(8000) })
     return response
@@ -48,7 +48,11 @@ export function officeDependencies(config: Config, takeSlot: (user: string) => P
   return {
     enabled: config.enabled,
     origin: config.origin,
-    rateLimit: takeSlot,
+    rateLimit: takeSlot ?? (async (actor: string) => {
+      const result = await rpc('fajr_office_take_slot', { actor })
+      if (typeof result !== 'boolean') throw new Error('invalid quota response')
+      return result
+    }),
     verify: async (token: string): Promise<string | null> => {
       // A fresh Auth request, not getSession/user_metadata or a decoded JWT claim.
       const response = await call('/auth/v1/user', { method: 'GET',
