@@ -46,3 +46,10 @@
 https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/
 https://developers.cloudflare.com/pages/configuration/git-integration/
 https://github.com/KAF-Business-Suite/fajer-parsa/pull/6
+
+## وضعیت تست رایگان (بررسی تازه)
+- GitHub Actions ساخت سایت و تست‌های مستقل `web-v2` موفق هستند و نباید با TestDriver پولی اشتباه شوند.
+- در اجرای TestDriver به شناسهٔ `40954168123` سهمیهٔ رایگان ۳۰ دقیقه‌ای تمام شده بود؛ این **خطای سرویس تست** است نه اثبات خرابی سایت. همان اجرای قبلی دو فایل `node:test` را با Vitest اشتباه کشف می‌کرد و تست مرورگر URL قدیمی `kaf-business-suite.github.io/fajer-parsa/` و رابط انگلیسی قدیمی را انتظار داشت.
+- برای جلوگیری از مصرف دوبارهٔ سهمیه، workflow قدیمی `.github/workflows/testdriver.yml` در این PR فقط **دستی** و با Variable `FAJR_ENABLE_LEGACY_TESTDRIVER=enabled` قابل اجراست. به‌طور پیش‌فرض کار نمی‌کند؛ تست قدیمی تا بازنویسی مبتنی بر لینک کنونی نباید PASS تلقی شود.
+- در صورت وجود **required check** بر TestDriver در تنظیمات Branch Protection، پیش از Merge باید مدیر مخزن آن را بررسی و به تست رایگان معتبر تغییر دهد؛ ابزار فعلی تأیید این تنظیم را ارائه نکرده است.
+- هیچ ارتقا، خرید یا استفادهٔ دوباره از سهمیهٔ TestDriver انجام نشد.
