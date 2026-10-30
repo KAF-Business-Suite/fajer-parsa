@@ -54,6 +54,24 @@ jobs:
       - name: Build the exact application
         working-directory: web-v2
         run: npm run build
+      - name: Install Chromium for free browser QA
+        working-directory: web-v2
+        run: npx playwright install --with-deps chromium
+      - name: Verify production UI with local Chromium
+        working-directory: web-v2
+        run: npm run test:smoke
+      - name: Verify optional synthetic intake without live submission
+        working-directory: web-v2
+        run: npm run test:intake-form
+      - name: Verify Pages CLI supports intended flags without deployment
+        working-directory: web-v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 pages deploy --help > "$RUNNER_TEMP/fajr-wrangler-help.txt"
+          grep -Fq -- '--project-name' "$RUNNER_TEMP/fajr-wrangler-help.txt"
+          grep -Fq -- '--branch' "$RUNNER_TEMP/fajr-wrangler-help.txt"
+          grep -Fq -- '--commit-hash' "$RUNNER_TEMP/fajr-wrangler-help.txt"
       - name: Validate static-only build output
         shell: bash
         run: |
