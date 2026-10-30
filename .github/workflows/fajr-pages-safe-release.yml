@@ -1,0 +1,146 @@
+name: Fajr Parsa | safe Pages release
+on:
+  pull_request:
+    branches:
+      - main
+      - release/fajr-production-20261030
+  push:
+    branches:
+      - main
+    paths:
+      - 'web-v2/**'
+      - '.github/workflows/fajr-pages-safe-release.yml'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Deployment target; preview never replaces production'
+        type: choice
+        required: true
+        default: preview
+        options:
+          - preview
+          - production
+      confirmation:
+        description: 'Production only: type DEPLOY-FAJR-PRODUCTION'
+        type: string
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: fajr-pages-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  test-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Read the requested commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Use the pinned application Node version
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: web-v2/.nvmrc
+          cache: npm
+          cache-dependency-path: web-v2/package-lock.json
+      - name: Install exactly the locked dependencies
+        working-directory: web-v2
+        run: npm ci --no-audit --no-fund
+      - name: Test intake in isolation
+        working-directory: web-v2
+        run: npm run test:intake
+      - name: Build the exact application
+        working-directory: web-v2
+        run: npm run build
+      - name: Validate static-only build output
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s web-v2/dist/index.html
+          if [[ -e web-v2/dist/_worker.js || -e web-v2/dist/_routes.json || -d web-v2/functions ]]; then
+            echo "::error::Unexpected Pages Functions or Worker artifacts. Review before release."
+            exit 1
+          fi
+      - name: Choose release safely (default is OFF)
+        id: policy
+        shell: bash
+        env:
+          AUTO_DEPLOY: ${{ vars.FAJR_AUTO_DEPLOY }}
+          TARGET: ${{ inputs.target }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          deploy=none
+          if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/main && "$AUTO_DEPLOY" == enabled ]]; then
+            deploy=production
+          elif [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
+            if [[ "$TARGET" == preview ]]; then
+              deploy=preview
+            elif [[ "$TARGET" == production && "$GITHUB_REF" == refs/heads/main && "$CONFIRMATION" == DEPLOY-FAJR-PRODUCTION ]]; then
+              deploy=production
+            else
+              echo "::error::Production requires the main branch and exact confirmation."
+              exit 1
+            fi
+          fi
+          echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
+          echo "Selected release: $deploy"
+      - name: Check credentials and block stale production sources
+        if: steps.policy.outputs.deploy != 'none'
+        id: guard
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          RELEASE_TARGET: ${{ steps.policy.outputs.deploy }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$CLOUDFLARE_ACCOUNT_ID" || -z "$CLOUDFLARE_API_TOKEN" ]]; then
+            echo "::error::Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN as GitHub Actions secrets."
+            exit 1
+          fi
+          if [[ "$RELEASE_TARGET" == production ]]; then
+            baseline=94891bba02354fef36a6af292de9435872568c02
+            if ! git merge-base --is-ancestor "$baseline" "$GITHUB_SHA"; then
+              echo "::error::Git main does not contain the preserved live Fajr baseline. Refusing release."
+              exit 1
+            fi
+            response="$(curl --fail-with-body --silent --show-error --max-time 20 \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/fajr-parsa-qa/deployments?env=production&per_page=1")"
+            current="$(printf '%s' "$response" | jq -r '.result[0].deployment_trigger.metadata.commit_hash // empty')"
+            status="$(printf '%s' "$response" | jq -r '.result[0].latest_stage.status // empty')"
+            if [[ ! "$current" =~ ^[0-9a-f]{40}$ || "$status" != success ]]; then
+              echo "::error::Could not verify the latest successful Cloudflare production SHA."
+              exit 1
+            fi
+            if ! git merge-base --is-ancestor "$current" "$GITHUB_SHA"; then
+              echo "::error::Cloudflare production has an unrelated or newer source. Manual review required."
+              exit 1
+            fi
+            if [[ "$current" == "$GITHUB_SHA" ]]; then
+              echo "already_live=true" >> "$GITHUB_OUTPUT"
+              echo "Current commit is already live; no duplicate deployment."
+            fi
+          fi
+      - name: Deploy to the existing Pages project
+        if: steps.policy.outputs.deploy != 'none' && steps.guard.outputs.already_live != 'true'
+        working-directory: web-v2
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          RELEASE_TARGET: ${{ steps.policy.outputs.deploy }}
+        run: |
+          set -euo pipefail
+          if [[ "$RELEASE_TARGET" == production ]]; then
+            branch=main
+          else
+            branch=fajr-ci-preview
+          fi
+          npx --yes wrangler@4 pages deploy dist \
+            --project-name=fajr-parsa-qa \
+            --branch="$branch" \
+            --commit-hash="$GITHUB_SHA"
