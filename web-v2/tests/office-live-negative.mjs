@@ -27,3 +27,11 @@ test('live office API denies unauthenticated reads/writes',async()=>{
  assert.equal(post.status,401)
  assert.doesNotMatch(post.body,/contact|service_role|password|auth.users/)
 })
+
+test('public Supabase office config responds without any secret in logs',async()=>{
+ const r=await fetch('https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-office/config',{signal:AbortSignal.timeout(16000)})
+ assert.equal(r.status,200,'Supabase public browser-safe config must respond')
+ const data=await r.json()
+ assert.equal(typeof data.publishableKey,'string')
+ assert.ok(data.publishableKey.length>20)
+})
