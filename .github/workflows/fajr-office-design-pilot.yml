@@ -1,0 +1,38 @@
+name: Fajr Office | isolated design preview QA
+on:
+  push:
+    branches:
+      - design/fajr-office-pilot-20261031
+    paths:
+      - 'workers/fajr-office-qa/**'
+      - 'web-v2/tests/office-design-preview.mjs'
+      - '.github/workflows/fajr-office-design-pilot.yml'
+permissions:
+  contents: read
+concurrency:
+  group: fajr-office-design-pilot
+  cancel-in-progress: true
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: web-v2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: web-v2/.nvmrc
+          cache: npm
+          cache-dependency-path: web-v2/package-lock.json
+      - name: Validate Worker and scoped design module syntax
+        run: node --check ../workers/fajr-office-qa/worker.mjs && node --check ../workers/fajr-office-qa/design-preview.mjs
+      - name: Install locked browser testing tools
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify real HTTPS preview, mobile sizing, loading and no writes
+        run: node tests/office-design-preview.mjs
