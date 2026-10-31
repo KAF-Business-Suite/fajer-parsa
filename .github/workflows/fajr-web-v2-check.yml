@@ -49,6 +49,8 @@ jobs:
         run: npm run test:smoke
       - name: Check real Fajr office login in Chromium without sending credentials
         run: node tests/office-live-browser.mjs
+      - name: Verify scoped Fajr design preview in Chromium on HTTPS (no live writes)
+        run: node tests/office-design-preview.mjs
       - name: Verify optional intake form with intercepted API and synthetic challenge
         run: npm run test:intake-form
 
