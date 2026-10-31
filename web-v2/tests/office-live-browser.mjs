@@ -124,6 +124,8 @@ try{
  await recoveryPage.locator('#confirm-password').fill('synthetic-valid-pass-2026!')
  await recoveryPage.locator('#save-password').click()
  await recoveryPage.waitForFunction(()=>document.querySelector('#login-alert')?.textContent?.includes('رمز تازه ثبت شد'))
+ assert.equal(await recoveryPage.locator('#login-alert').getAttribute('data-kind'),'success','successful password reset must not display as error')
+ assert.equal(await recoveryPage.locator('#login-alert').evaluate(el=>getComputedStyle(el).color),'rgb(23, 102, 87)','successful password reset must have green text')
  assert.equal(changed,1)
  assert.equal(await recoveryPage.locator('#password-reset-view').isVisible(),false)
  assert.equal(await recoveryPage.locator('#login-view').isVisible(),true)
