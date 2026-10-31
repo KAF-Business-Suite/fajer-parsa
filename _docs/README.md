@@ -2,7 +2,7 @@
 
 Welcome to the complete documentation for this repository. This documentation is automatically generated and maintained by Woden Docbot.
 
-![Files Documented: 3](https://img.shields.io/badge/Files_Documented-3-blue) ![Coverage: 5%](https://img.shields.io/badge/Coverage-5%-orange) ![Last Updated: 2026-10-30](https://img.shields.io/badge/Last_Updated-2026--10--30-gray)
+![Files Documented: 14](https://img.shields.io/badge/Files_Documented-14-blue) ![Coverage: 19%](https://img.shields.io/badge/Coverage-19%-orange) ![Last Updated: 2026-10-31](https://img.shields.io/badge/Last_Updated-2026--10--31-gray)
 
 ## 🔗 Quick Links
 
@@ -12,24 +12,23 @@ Welcome to the complete documentation for this repository. This documentation is
 
 ---
 
-> A Vite-based React frontend (TypeScript/JSX) with a colocated server intake subdirectory and Vitest test specs for verifying behavior.
+> A web application repository organized around a web-v2 project with a TypeScript/React frontend, a Node.js server subtree, and a small Vitest test suite.
 
 
 
 ## 📖 Overview
 
-fajer-parsa is a web application repository centered on a versioned frontend (web-v2) and a small set of tests. The web-v2 directory contains the frontend assets, project-level build and config files, and a server/ subdirectory focused on intake handling and its tests.
-
-The repo includes a top-level tests directory of Vitest specifications intended to exercise and verify behaviors. The stack visible in the tree and manifests includes React, TypeScript/JavaScript, Vite, Tailwind-related tooling, Node.js and Vitest.
+fajer-parsa is organized around a top-level web-v2 application that groups frontend and server code alongside project configuration. The web-v2 directory contains project and build configuration (package.json, tsconfig.json, vite.config.ts, vercel.json, etc.), a src/ frontend implemented with React and TypeScript, and a server/ subtree with server-side request handling and adapters. A separate tests/ directory holds a Vitest test specification (fajer-parsa.test.js). The repository is built with Vite, TypeScript, React and standard web assets (HTML, CSS, JSX), and uses Node.js/npm for tooling and dependencies.
 
 
 ### 🧩 Key Components
 
 | Component | Purpose | Technologies |
 | --- | --- | --- |
-| **web-v2** | Holds the web application's version‑2 frontend, root configuration/build files, and a server subdirectory for intake handling. | `React`, `TypeScript`, `Vite` |
-| **web-v2/server** | Server-side intake handling implementation and its associated tests, colocated to exercise intake logic and behavior. | `Node.js`, `TypeScript`, `JavaScript` |
-| **tests** | Contains Vitest test specifications (fajer-parsa.test.js) used to verify behavior and regressions in the codebase. | `Vitest`, `JavaScript`, `Node.js` |
+| **web-v2** | Top-level project directory that contains build/config files and groups the frontend (src/) and backend (server/) code for the application. | `Vite`, `TypeScript`, `npm` |
+| **src** | Frontend source for the web-v2 application: root-level app entry files, global styles, and feature subdirectories implementing the UI. | `React`, `TypeScript`, `JSX` |
+| **server** | Server-side implementations including request handling, adapters, entrypoints, and server tests organized by feature. | `Node.js`, `TypeScript`, `JavaScript` |
+| **tests** | Contains Vitest test specifications (a flat layout with fajer-parsa.test.js) used to verify behavior and regressions. | `Vitest`, `JavaScript`, `Node.js` |
 
 
 
@@ -39,33 +38,34 @@ The repo includes a top-level tests directory of Vitest specifications intended 
 ```mermaid
 graph TD
     C0[web-v2]
-    C1[web-v2/server]
-    C2[tests]
+    C1[src]
+    C2[server]
+    C3[tests]
     C0 --> C1
     C1 --> C2
+    C2 --> C3
 ```
 
 ### 🏗️ Architecture
 
-Flat repository with a web-v2 frontend (config, entry points, assets) and a web-v2/server subdirectory for intake logic; a root tests folder holds Vitest specs to validate behavior.
+A monorepo-style layout where web-v2 is the application root: configuration and build files sit alongside src/ (frontend) and server/ (backend); tests/ holds Vitest specs at the repository level.
 
 ### 💡 Use Cases
 
-- ✦ Build and run the frontend (Vite + React)
-- ✦ Exercise and verify intake logic implemented in web-v2/server
-- ✦ Run Vitest test specifications to validate behavior and regressions
+- ✦ Build and run the web-v2 frontend and server application using Vite/Node.js
+- ✦ Execute Vitest-based tests located in the tests/ directory
 
 
 
 ### 🔧 Technologies
 
 
-**Languages:** ![TypeScript: ](https://img.shields.io/badge/TypeScript--blue) ![JavaScript: ](https://img.shields.io/badge/JavaScript--blue)
+**Languages:** ![JavaScript: ](https://img.shields.io/badge/JavaScript--blue) ![TypeScript: ](https://img.shields.io/badge/TypeScript--blue)
 
 **Frameworks:** ![React: ](https://img.shields.io/badge/React--blue)
 
 **Databases:** ![SQL: ](https://img.shields.io/badge/SQL--blue)
-![Vite: ](https://img.shields.io/badge/Vite--blue) ![Vitest: ](https://img.shields.io/badge/Vitest--blue) ![Node.js: ](https://img.shields.io/badge/Node.js--blue) ![npm: ](https://img.shields.io/badge/npm--blue) ![Tailwind CSS: ](https://img.shields.io/badge/Tailwind_CSS--blue) ![Playwright: ](https://img.shields.io/badge/Playwright--blue) ![JSX: ](https://img.shields.io/badge/JSX--blue) ![HTML: ](https://img.shields.io/badge/HTML--blue) ![CSS: ](https://img.shields.io/badge/CSS--blue)
+![CSS: ](https://img.shields.io/badge/CSS--blue) ![HTML: ](https://img.shields.io/badge/HTML--blue) ![JSX: ](https://img.shields.io/badge/JSX--blue) ![Node.js: ](https://img.shields.io/badge/Node.js--blue) ![Vite: ](https://img.shields.io/badge/Vite--blue) ![npm: ](https://img.shields.io/badge/npm--blue)
 
 ### 📦 External Dependencies
 
@@ -107,10 +107,10 @@ This directory contains test specification files for the project.
 ![Files: 1](https://img.shields.io/badge/Files-1-blue)
 
 ### [web-v2](./web-v2/README.md)
-Holds the web application's version 2 frontend assets, configuration, and a server subdirectory focused on intake handling and its tests.
+Top-level web-v2 project directory that groups frontend source (src/), server implementations (server/), and project-level configuration and deployment files to support building and running the web-v2 application.
 
 
-This directory contains the web-v2 application surface: root-level configuration and build files plus a dedicated server subdirectory for intake handling.
+The web-v2 directory is the repository root for the web-v2 application.
 
 ### Files at the repository root
 
@@ -120,11 +120,11 @@ This directory contains the web-v2 application surface: root-level configuration
 
 ## 📊 Documentation Statistics
 
-- **Files Documented**: 3
-- **Directories**: 5
-- **Coverage**: 5%
-- **Eligible Source Files**: 60
-- **Last Updated**: 2026-10-30
+- **Files Documented**: 14
+- **Directories**: 9
+- **Coverage**: 19%
+- **Eligible Source Files**: 72
+- **Last Updated**: 2026-10-31
 
 ---
 
