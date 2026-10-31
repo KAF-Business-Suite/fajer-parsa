@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
-const root='https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-office'
-const origin='https://krzxajtrhvupyywovdzy.supabase.co'
+const root='https://fajr-office-qa.khoojafahim.workers.dev'
+const origin='https://fajr-office-qa.khoojafahim.workers.dev'
 const grab=async(path,init={})=>{
  const response=await fetch(root+path,{...init,signal:AbortSignal.timeout(16000),redirect:'error'})
  return {status:response.status,type:response.headers.get('content-type')||'',body:await response.text()}
