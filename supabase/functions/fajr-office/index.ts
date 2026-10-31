@@ -5,7 +5,7 @@ import {officeDependencies} from './adapters.ts'
 // authenticated office RPCs; its gateway intentionally refuses HTML rendering.
 const officeOrigin='https://fajr-office-qa.khoojafahim.workers.dev'
 const rootOrigin='https://krzxajtrhvupyywovdzy.supabase.co'
-const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}
+const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Access-Control-Allow-Origin':officeOrigin,'Vary':'Origin'}
 const reply=(code:number,body:unknown)=>Response.json(body,{status:code,headers})
 function publishable():string{
  try{
