@@ -18,7 +18,14 @@ try{
   assert.match(await page.locator('h1').textContent(),/دفتر فجرپارسا/)
   assert.match(await page.locator('.pilot-ribbon').textContent(),/تغییر پرونده‌ها.*غیرفعال/)
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'no horizontal scrolling allowed')
-  assert.match(await page.locator('body').evaluate(el=>getComputedStyle(el).fontFamily),/Vazirmatn/)
+  const cssResponse=await page.request.get(base+'/design-preview/app.css')
+  assert.equal(cssResponse.status(),200,'pilot CSS endpoint must work')
+  const cssText=await cssResponse.text()
+  assert.match(cssText,/body\.fp-design-pilot/,'pilot CSS must include body scope')
+  await page.waitForFunction(()=>getComputedStyle(document.body).fontFamily.includes('Vazirmatn'),null,{timeout:6000}).catch(async error=>{
+   console.log('STYLE_DIAGNOSTIC',JSON.stringify({width,bodyClass:await page.locator('body').getAttribute('class'),font:await page.locator('body').evaluate(el=>getComputedStyle(el).fontFamily),cssBytes:cssText.length,headLinks:await page.locator('head link').evaluateAll(nodes=>nodes.map(n=>n.href))}))
+   throw error
+  })
   assert.equal(await page.locator('#office-view').isVisible(),false)
   let resolveLogin
   await page.route('**/auth/v1/token?grant_type=password',async route=>{
