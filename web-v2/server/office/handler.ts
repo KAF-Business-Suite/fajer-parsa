@@ -6,7 +6,9 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]
 export async function handleOffice(request:Request,deps:Dependencies):Promise<Response>{
  const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Vary':'Origin','Access-Control-Allow-Origin':deps.origin,'Access-Control-Allow-Headers':'authorization, content-type','Access-Control-Allow-Methods':'GET, POST, OPTIONS'}
  const reply=(status:number,body:unknown)=>Response.json(body,{status,headers})
- if(request.headers.get('Origin')!==deps.origin)return Response.json({error:'forbidden'},{status:403,headers:{'Cache-Control':'no-store'}})
+ const submittedOrigin=request.headers.get('Origin')
+ // Same-origin GET requests may omit Origin in browsers; writes must carry it.
+ if(submittedOrigin!==null?submittedOrigin!==deps.origin:(request.method!=='GET'||new URL(request.url).origin!==deps.origin))return Response.json({error:'forbidden'},{status:403,headers:{'Cache-Control':'no-store'}})
  if(!deps.enabled)return reply(503,{error:'office_disabled'})
  if(request.method==='OPTIONS')return new Response(null,{status:204,headers})
  if(!['GET','POST'].includes(request.method))return reply(405,{error:'method_not_allowed'})
