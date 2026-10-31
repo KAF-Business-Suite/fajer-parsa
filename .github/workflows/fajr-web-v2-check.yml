@@ -6,6 +6,7 @@ on:
       - release/fajr-production-20261030
     paths:
       - 'web-v2/**'
+      - 'docs/proposals/FAJR_OFFICE_UNAPPLIED.sql'
       - '.github/workflows/fajr-web-v2-check.yml'
       - '.github/workflows/testdriver.yml'
   workflow_dispatch:
@@ -34,6 +35,10 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Run offline-safe intake server/client unit tests
         run: npm run test:intake
+      - name: Verify office Auth, state and API contracts (synthetic)
+        run: node --test server/office/handler.test.mjs server/office/adapters.test.mjs server/office/pages-entry.test.mjs src/office/office-gateway.test.mjs
+      - name: Typecheck server-only office boundary
+        run: npx tsc --noEmit --target es2022 --lib es2022,dom --module esnext --moduleResolution bundler --allowImportingTsExtensions --strict --skipLibCheck server/office/handler.ts server/office/adapters.ts server/office/pages-entry.ts
       - name: Build the static site
         run: npm run build
       - name: Install Chromium for local browser QA
@@ -42,3 +47,34 @@ jobs:
         run: npm run test:smoke
       - name: Verify optional intake form with intercepted API and synthetic challenge
         run: npm run test:intake-form
+
+  office-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: synthetic-ci-only
+          POSTGRES_DB: fajr_office_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: web-v2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: web-v2/.nvmrc
+      - name: Verify SQL permissions, quota, audit and concurrency in disposable PostgreSQL
+        run: node --test server/office/quota.postgres.test.mjs
+        env:
+          OFFICE_TEST_DATABASE_URL: postgresql://postgres:synthetic-ci-only@127.0.0.1:5432/fajr_office_test
