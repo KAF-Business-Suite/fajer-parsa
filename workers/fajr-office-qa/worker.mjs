@@ -9,7 +9,7 @@ const CONFIG='https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-office/
 // Only a browser-safe publishable key is fetched from the public Supabase config endpoint.
 const CSP="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https://krzxajtrhvupyywovdzy.supabase.co; img-src 'self' data:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'";
 const security={'X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','X-Frame-Options':'DENY','Cache-Control':'no-store','Content-Security-Policy':CSP};
-const previewSecurity={...security,'Content-Security-Policy':CSP.replace("style-src 'self'","style-src 'self' https://fonts.googleapis.com").replace("img-src 'self' data:","font-src https://fonts.gstatic.com; img-src 'self' data:")};
+const previewSecurity={...security};
 export default {async fetch(request){
  const url=new URL(request.url);
  if(url.hostname!=='fajr-office-qa.khoojafahim.workers.dev')return new Response('Forbidden',{status:403});
