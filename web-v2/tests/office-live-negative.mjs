@@ -36,10 +36,14 @@ test('public Supabase office config responds without any secret in logs',async()
  assert.ok(data.publishableKey.length>20)
 })
 
-test('live Cloudflare office proxy forwards syntactically valid but invalid JWT to Supabase',async()=>{
- const r=await grab('/api/office?offset=0',{headers:{Authorization:'Bearer synthetic.invalid.token'}})
+test('live Supabase office API verifies signed-in JWT independently of Cloudflare',async()=>{
+ const directUrl='https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-office/api/office?offset=0';
+ const response=await fetch(directUrl,{headers:{Authorization:'Bearer synthetic.invalid.token',Origin:origin},signal:AbortSignal.timeout(16000),redirect:'error'});
+ const r={status:response.status,body:await response.text()}
  // No actual user is signed in; a healthy proxy must produce an Auth denial,
  // not an infrastructure/config failure or a misleading success.
- assert.equal(r.status,401,'Worker-to-Supabase proxy should reach Auth and reject synthetic JWT; observed HTTP '+r.status+' with '+r.body.slice(0,90))
+ assert.equal(r.status,401,'Supabase office API must validate auth and reject synthetic JWT; observed HTTP '+r.status+' with '+r.body.slice(0,90))
  assert.doesNotMatch(r.body,/service_role|contact|password|auth.users/)
 })
+
+test('unused old Cloudflare proxy is disabled',async()=>{const r=await grab('/api/office',{headers:{Authorization:'Bearer synthetic.invalid.token'}});assert.equal(r.status,410)})
