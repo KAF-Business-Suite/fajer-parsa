@@ -15,7 +15,7 @@ export default {async fetch(request){
  if(url.hostname!=='fajr-office-qa.khoojafahim.workers.dev')return new Response('Forbidden',{status:403});
  // Independent design experiment. Existing / login and operations routes are unchanged.
  if(request.method==='GET'&&(url.pathname==='/design-preview'||url.pathname==='/design-preview/'))return new Response(previewHtml(HTML),{headers:{...previewSecurity,'Content-Type':'text/html; charset=utf-8'}});
- if(request.method==='GET'&&url.pathname==='/design-preview/app.css')return new Response(CSS+'\n'+previewCss,{headers:{...previewSecurity,'Content-Type':'text/css; charset=utf-8'}});
+ if(request.method==='GET'&&url.pathname==='/design-preview/app.css')return new Response((previewCss.match(/@import[^;]+;/)?.[0]||'')+'\n'+CSS+'\n'+previewCss.replace(/@import[^;]+;/,''),{headers:{...previewSecurity,'Content-Type':'text/css; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/design-preview/app.js')return new Response(JS+'\n'+previewJs,{headers:{...previewSecurity,'Content-Type':'text/javascript; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/')return new Response(HTML,{headers:{...security,'Content-Type':'text/html; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/app.css')return new Response(CSS,{headers:{...security,'Content-Type':'text/css; charset=utf-8'}});
