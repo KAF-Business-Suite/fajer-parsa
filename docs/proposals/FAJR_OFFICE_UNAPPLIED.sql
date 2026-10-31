@@ -1,4 +1,4 @@
--- PROPOSED ONLY. Not applied. Explicit office membership must be provisioned by owner.
+-- PROPOSED ONLY. Not applied. Explicit office membership AND active KAF Fajr company membership are both required.\n-- Revoking business_members access disables office RPCs even if an office_members row remains.
 begin;
 create schema if not exists fajr_private;
 revoke all on schema fajr_private from public,anon,authenticated;
@@ -32,7 +32,8 @@ create function public.fajr_office_take_slot(actor uuid)
 returns boolean language plpgsql security definer set search_path='' as $$
 declare admitted uuid; checked_at timestamptz;
 begin
- perform 1 from fajr_private.office_members where user_id=actor and enabled for update;
+ perform 1 from fajr_private.office_members o where o.user_id=actor and o.enabled
+ and exists(select 1 from public.business_members m where m.user_id=actor and m.status='active' and 'fajr'=any(m.companies) for share) for update;
  if not found then
   raise sqlstate '42501' using message='Office access denied';
  end if;
@@ -51,7 +52,8 @@ grant execute on function public.fajr_office_take_slot(uuid) to service_role;
 create function public.fajr_office_list(actor uuid,row_offset integer default 0)
 returns jsonb language plpgsql security definer set search_path='' as $$
 begin
- perform 1 from fajr_private.office_members where user_id=actor and enabled for share;
+ perform 1 from fajr_private.office_members o where o.user_id=actor and o.enabled
+ and exists(select 1 from public.business_members m where m.user_id=actor and m.status='active' and 'fajr'=any(m.companies) for share) for share;
  if not found then raise sqlstate '42501' using message='Office access denied';end if;
  if row_offset is null or row_offset<0 or row_offset>999999 then raise exception 'Invalid offset';end if;
  return coalesce((select jsonb_agg(to_jsonb(r)) from (
@@ -63,7 +65,8 @@ create function public.fajr_office_change(actor uuid,request_uuid uuid,expected_
 returns jsonb language plpgsql security definer set search_path='' as $$
 declare current_status text;
 begin
- perform 1 from fajr_private.office_members where user_id=actor and enabled and can_update for share;
+ perform 1 from fajr_private.office_members o where o.user_id=actor and o.enabled and o.can_update
+ and exists(select 1 from public.business_members m where m.user_id=actor and m.status='active' and 'fajr'=any(m.companies) for share) for share;
  if not found then raise sqlstate '42501' using message='Office access denied';end if;
  if next_status is null or next_status not in ('received','reviewing','contacted','closed') then raise exception 'Invalid status';end if;
  select status into current_status from public.fajr_web_requests where id=request_uuid for update;
