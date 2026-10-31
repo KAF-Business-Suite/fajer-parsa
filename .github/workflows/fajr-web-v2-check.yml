@@ -39,6 +39,8 @@ jobs:
         run: node --test server/office/handler.test.mjs server/office/adapters.test.mjs server/office/pages-entry.test.mjs src/office/office-gateway.test.mjs
       - name: Typecheck server-only office boundary
         run: npx tsc --noEmit --target es2022 --lib es2022,dom --module esnext --moduleResolution bundler --allowImportingTsExtensions --strict --skipLibCheck server/office/handler.ts server/office/adapters.ts server/office/pages-entry.ts
+      - name: Verify deployed Fajr office login and anonymous denial over real HTTPS
+        run: node --test tests/office-live-negative.mjs
       - name: Build the static site
         run: npm run build
       - name: Install Chromium for local browser QA
