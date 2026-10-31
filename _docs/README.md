@@ -2,35 +2,48 @@
 
 Welcome to the complete documentation for this repository. This documentation is automatically generated and maintained by Woden Docbot.
 
-![Files Documented: 2](https://img.shields.io/badge/Files_Documented-2-blue) ![Coverage: 14%](https://img.shields.io/badge/Coverage-14%-orange) ![Last Updated: 2026-10-18](https://img.shields.io/badge/Last_Updated-2026--10--18-gray)
+![Files Documented: 6](https://img.shields.io/badge/Files_Documented-6-blue) ![Coverage: 9%](https://img.shields.io/badge/Coverage-9%-orange) ![Last Updated: 2026-10-30](https://img.shields.io/badge/Last_Updated-2026--10--30-gray)
 
 ## 🔗 Quick Links
 
-[📂 tests](./tests/README.md)
+[📂 tests](./tests/README.md) | [📂 web-v2](./web-v2/README.md)
 [📋 Dependencies](./DEPENDENCIES.md)
 
 
 ---
+
+## Overview
+
+**Languages and tools:** CSS, HTML, JSX, JavaScript, Node.js, React, SQL, TypeScript, Vite, npm
 
 ## 📑 Documentation Sections
 
 ### [tests](./tests/README.md)
 Holds test specifications for the project; contains Vitest test files used to verify behavior and regressions in related code.
 
-
 This directory contains test specification files for the project.
 
 ![Files: 1](https://img.shields.io/badge/Files-1-blue)
+
+### [web-v2](./web-v2/README.md)
+Houses the web-v2 application's root-level configuration, static assets, and a server subdirectory that contains server-side request handling code and tests.
+
+
+The web-v2 directory contains the project's root-level files that provide project metadata, configuration, and static entry points plus several subdirectories that hold source code and runtime modules.
+
+### Files at the repository root
+
+- [vitest.config.js](./vitest.config.js.md)
 
 ---
 
 ## 📊 Documentation Statistics
 
-- **Files Documented**: 2
-- **Directories**: 2
-- **Coverage**: 14%
-- **Eligible Source Files**: 14
-- **Last Updated**: 2026-10-18
+- **Files Documented**: 6
+- **Directories**: 5
+- **Coverage**: 9%
+- **Eligible Source Files**: 69
+- **Last Updated**: 2026-10-30
 
 ---
 

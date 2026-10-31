@@ -1,4 +1,4 @@
-type Dependencies={enabled:boolean;origin:string;verify:(token:string)=>Promise<string|null>;list:(user:string,offset:number)=>Promise<unknown>;change:(user:string,id:string,expected:string,status:string)=>Promise<unknown>}
+type Dependencies={enabled:boolean;origin:string;verify:(token:string)=>Promise<string|null>;rateLimit:(user:string)=>Promise<boolean>;list:(user:string,offset:number)=>Promise<unknown>;change:(user:string,id:string,expected:string,status:string)=>Promise<unknown>}
 const statuses=['received','reviewing','contacted','closed']
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 // Server-only boundary. verify must call trusted Auth; never decode a client JWT as proof.
@@ -15,6 +15,8 @@ export async function handleOffice(request:Request,deps:Dependencies):Promise<Re
  try{
   const user=await deps.verify(token)
   if(!user||!uuid.test(user))return reply(401,{error:'sign_in_required'})
+  // Must be a shared, atomic server quota. A missing or failed limiter fails closed.
+  if(!await deps.rateLimit(user))return Response.json({error:'rate_limited'},{status:429,headers:{...headers,'Retry-After':'60'}})
   const url=new URL(request.url)
   if(request.method==='GET'){
    const offset=url.searchParams.get('offset')||'0'

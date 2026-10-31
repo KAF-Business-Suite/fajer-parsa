@@ -1,4 +1,454 @@
 {
-  "entries": {},
+  "entries": {
+    "web-v2/server/office/adapters.test.mjs": {
+      "description": {
+        "classes": [],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/adapters.test.mjs",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 9,
+            "line_start": 9,
+            "name": "request",
+            "qualified_name": "request",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Makes a request using the given HTTP method and optional request body. It provides a simple interface to invoke an operation (likely an HTTP request) with a default method of 'GET'.\n",
+              "returns_summary": "Returns the result of performing the request; the specific return type and structure are not specified in the signature."
+            },
+            "signature": "def request(method='GET', body):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 10,
+            "line_start": 10,
+            "name": "auth",
+            "qualified_name": "auth",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Provides an authentication helper function used in the test suite for the web-v2 server office adapters. It encapsulates whatever setup or utilities are needed to perform authentication-related actions in those tests.\n",
+              "returns_summary": null
+            },
+            "signature": "def auth():"
+          }
+        ],
+        "language": "javascript",
+        "overview": {
+          "key_responsibilities": [
+            "Provide a request helper function to construct and send test requests to the office handler.",
+            "Provide an auth helper function to create authentication contexts or tokens used in tests.",
+            "Import and wire the officeDependencies and the handleOffice function into tests to exercise the adapter logic.",
+            "Use node:test and node:assert/strict to declare tests and perform assertions on handler behavior."
+          ],
+          "notable_patterns": [
+            "Uses the Node.js built-in test runner (node:test) for test definitions",
+            "Uses node:assert/strict for test assertions",
+            "Separates test helpers (request, auth) from the imported handler and dependency definitions"
+          ],
+          "summary": "This file is a test module for the office adapters and handler surface. It imports the Node.js built-in test runner and strict assert utilities, along with the adapter dependency definitions and the office request handler implementation from the local codebase. The module exposes two helper functions, request and auth, which are used by the test cases in this file to exercise the office handler with different request shapes and authentication contexts.\n\nThe file organizes test logic around those helpers and the imported officeDependencies and handleOffice pieces, allowing individual test cases to construct requests and auth information and assert expected behavior from the handler. The test module relies on node:test for test declarations and node:assert/strict for assertions while delegating request construction and authentication setup to the request and auth helpers.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 751,
+        "tokens_output": 722
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-30T04:41:34Z",
+      "model": "gpt-5-mini",
+      "source_sha": "fdcf2c6d50bdfe0722c46365b629a40a8e9b28bc"
+    },
+    "web-v2/server/office/adapters.ts": {
+      "description": {
+        "classes": [
+          {
+            "base_classes": [],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": true,
+            "is_pydantic_model": false,
+            "line_end": 7,
+            "line_start": 7,
+            "name": "Config",
+            "qualified_name": "Config",
+            "response": {
+              "purpose": "Config is a TypeScript interface that defines the shape of configuration data used by adapter components in the office adapters module. It provides a typed contract so code that constructs or consumes adapter configuration can rely on a consistent structure.\n",
+              "responsibilities": [
+                "Declare the expected structure for configuration objects consumed by adapters in this module.",
+                "Provide static typing to help ensure callers supply the required configuration fields at compile time.",
+                "Centralize configuration expectations so multiple adapter implementations can share the same contract.",
+                "Serve as documentation for what configuration data adapter-related code requires."
+              ],
+              "role_in_module": "Within web-v2/server/office/adapters.ts, Config acts as the canonical type used by the adapters in that file to accept and validate configuration input, enabling consistent and type-safe configuration handling across the module."
+            }
+          },
+          {
+            "base_classes": [],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": true,
+            "is_pydantic_model": false,
+            "line_end": 8,
+            "line_start": 8,
+            "name": "Row",
+            "qualified_name": "Row",
+            "response": {
+              "purpose": "Row is a TypeScript interface that defines the shape and contract for a single row entity used by the office adapter layer. It documents the expected properties and types that implementations must provide when representing row data within this part of the codebase.\n",
+              "responsibilities": [
+                "Provide a typed structure for representing a single row of data exchanged or manipulated by the office adapter.",
+                "Ensure consistent property names and types so different parts of the module can rely on a common row shape.",
+                "Serve as a compile-time contract for implementations and consumers to enforce correctness when handling row data.",
+                "Facilitate interoperability between the adapter implementations and the rest of the server office module by standardizing row representations."
+              ],
+              "role_in_module": "As an interface in web-v2/server/office/adapters.ts, Row acts as a central type definition used by the adapter layer to model row-level data. It helps the module coordinate data handling by providing a shared contract that adapter code and callers depend on."
+            }
+          }
+        ],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/adapters.ts",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 12,
+            "line_start": 10,
+            "name": "object",
+            "qualified_name": "object",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "This function is a TypeScript type guard that checks whether the provided value should be treated as an object with string keys and unknown values (Record<string, unknown>). It narrows the type of the input at compile time when used in conditional checks.\n",
+              "returns_summary": null
+            },
+            "signature": "def object(value: unknown) -> value is Record<string, unknown>:"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 23,
+            "line_start": 13,
+            "name": "row",
+            "qualified_name": "row",
+            "response": {
+              "parameters_summary": "value is an arbitrary input (unknown) that the function will interpret, validate, or transform into a Row; it may accept existing Row-like objects, plain objects, or other representations that the adapter recognizes.",
+              "purpose": "Converts or wraps an arbitrary input into the library's Row representation. It accepts any value and produces a Row instance or normalized Row structure appropriate for use by the rest of the office adapter code.\n",
+              "returns_summary": null
+            },
+            "signature": "def row(value: unknown) -> Row:"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 73,
+            "line_start": 27,
+            "name": "officeDependencies",
+            "qualified_name": "officeDependencies",
+            "response": {
+              "parameters_summary": "takeSlot is a user-facing asynchronous callback that attempts to acquire a slot for a given user and returns a boolean success value; fetcher allows dependency injection of a fetch-like HTTP function (defaults to the global fetch) for network requests. The config parameter supplies configuration values used by the returned helpers.",
+              "purpose": "Creates and returns a set of helper functions bound to the provided environment that other parts of the office adapter can use. It wires the provided configuration, a slot-acquisition callback, and an HTTP fetch implementation into two nested helpers named call and rpc so callers can perform controlled remote calls or RPCs using that context.\n",
+              "returns_summary": null
+            },
+            "signature": "def officeDependencies(config: Config, takeSlot: (user: string) = > Promise<boolean>, fetcher: typeof fetch = fetch):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": true,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 34,
+            "line_start": 31,
+            "name": "call",
+            "qualified_name": "call",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Performs an asynchronous HTTP request to the given path using the provided RequestInit options. It acts as a thin adapter around a fetch-style call to send the request and obtain the response.\n",
+              "returns_summary": "Returns a Promise that resolves to the HTTP Response resulting from the request (or rejects on network/fetch errors)."
+            },
+            "signature": "async def call(path: string, init: RequestInit):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": true,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 47,
+            "line_start": 35,
+            "name": "rpc",
+            "qualified_name": "rpc",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Performs an asynchronous remote procedure call identified by the given name, sending the provided payload to the remote endpoint and awaiting a response. It acts as a generic RPC adapter for invoking server-side or external procedures from the office adapter context.\n",
+              "returns_summary": null
+            },
+            "signature": "async def rpc(name: string, payload: object):"
+          }
+        ],
+        "language": "typescript",
+        "overview": {
+          "key_responsibilities": [
+            "Declare the Config interface to represent configuration shape used by office adapters.",
+            "Declare the Row interface to represent row-shaped data structures used by the office code.",
+            "Provide the object() function as a module-level adapter/factory for producing object-shaped values needed by the office logic.",
+            "Provide the row() function as a module-level adapter/factory for producing Row instances or row-shaped values.",
+            "Provide the officeDependencies() function to assemble or expose dependencies required by office components, referencing OfficeDenied and OfficeConflict where relevant."
+          ],
+          "notable_patterns": [
+            "Uses TypeScript interfaces to describe data shapes (Config, Row).",
+            "Exports module-level factory/adapter functions rather than class-based implementations.",
+            "Imports and references custom error/condition types (OfficeDenied, OfficeConflict) from a handler module."
+          ],
+          "summary": "This TypeScript module defines simple adapter types and factory functions used by the office server code. It declares two interfaces, Config and Row, that model configuration and row-shaped data used elsewhere in the office subsystem. The file also exports three module-level functions \u2014 object, row, and officeDependencies \u2014 that act as adapters or factories to produce values or dependency bundles consumed by the rest of the office code. The module imports two custom error/condition classes, OfficeDenied and OfficeConflict, from the handler module, indicating the adapters are aware of or compatible with those error types.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 1726,
+        "tokens_output": 1977
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-30T04:41:48Z",
+      "model": "gpt-5-mini",
+      "source_sha": "f47991473295ef7287fa8c1b69072dce32019573"
+    },
+    "web-v2/server/office/handler.test.mjs": {
+      "description": {
+        "classes": [],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/handler.test.mjs",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 5,
+            "line_start": 5,
+            "name": "req",
+            "qualified_name": "req",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Constructs and returns a test HTTP request using the provided HTTP method, optional request body, and any additional options. It is intended to be used in tests to simulate requests to the handler under different methods, bodies, and extra configuration.\n",
+              "returns_summary": null
+            },
+            "signature": "def req(method='GET', body, extra={}):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 6,
+            "line_start": 6,
+            "name": "deps",
+            "qualified_name": "deps",
+            "response": {
+              "parameters_summary": "over is an optional object of overrides that will be merged into the default dependency definitions; use it to replace specific dependencies with test doubles or custom implementations.",
+              "purpose": "Constructs and returns a dependencies object used by the test suite, allowing callers to override parts of the default dependency set. It provides a convenient way to inject mocks or substitutes for the module's collaborators during tests.\n",
+              "returns_summary": "Returns the assembled dependencies object (the merged defaults with any provided overrides)."
+            },
+            "signature": "def deps(over={}):"
+          }
+        ],
+        "language": "javascript",
+        "overview": {
+          "key_responsibilities": [
+            "Provide a req(...) helper to build mock request objects passed to handleOffice in tests.",
+            "Provide a deps(...) helper to assemble dependency objects and stubs required by handleOffice during tests.",
+            "Import and invoke the handleOffice function and its associated error classes (OfficeDenied, OfficeConflict) to verify handler behavior under various conditions.",
+            "Use the Node.js test runner and strict assertions to define and run test cases that validate the handler's responses and error handling."
+          ],
+          "notable_patterns": [
+            "uses Node.js built-in test runner ('node:test') for defining test cases",
+            "uses node:assert/strict for assertions",
+            "separates test scaffolding from assertions via small factory helpers (req and deps)",
+            "imports specific error classes (OfficeDenied, OfficeConflict) alongside the handler for targeted error assertions"
+          ],
+          "summary": "This file contains unit tests for the office request handler exported from './handler.ts'. It uses the Node.js built-in test runner (imported from 'node:test') and the strict assertion library (node:assert/strict) to exercise the handleOffice function and the specific error classes OfficeDenied and OfficeConflict. Two module-level helper functions, req and deps, construct the mock HTTP request and dependency objects used by the test cases so that handleOffice can be invoked with controlled inputs and simulated dependency behavior.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 777,
+        "tokens_output": 748
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-30T04:41:34Z",
+      "model": "gpt-5-mini",
+      "source_sha": "e21dfa6d2ce98d5bbc7d7644ccfa7240cff806d8"
+    },
+    "web-v2/server/office/handler.ts": {
+      "description": {
+        "classes": [
+          {
+            "base_classes": [],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": true,
+            "is_pydantic_model": false,
+            "line_end": 1,
+            "line_start": 1,
+            "name": "Dependencies",
+            "qualified_name": "Dependencies",
+            "response": {
+              "purpose": "Dependencies is an interface that defines the external collaborators and services required by the office request handler in web-v2/server/office/handler.ts. It documents the contract for dependency injection so the handler can operate with testable, replaceable components.\n",
+              "responsibilities": [
+                "Specify the shape of external services, clients, or utilities the handler expects to receive.",
+                "Enable inversion of control so the handler can be constructed with concrete implementations or mocks.",
+                "Document required integrations for the office handler to carry out its processing logic.",
+                "Support testability and decoupling by making required dependencies explicit."
+              ],
+              "role_in_module": "Within the file, this interface serves as the typed contract used when instantiating or wiring the office handler, ensuring the handler receives all required external collaborators in a consistent way."
+            }
+          },
+          {
+            "base_classes": [
+              "Error"
+            ],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": false,
+            "is_pydantic_model": false,
+            "line_end": 42,
+            "line_start": 42,
+            "name": "OfficeDenied",
+            "qualified_name": "OfficeDenied",
+            "response": {
+              "purpose": "OfficeDenied is a specialized Error subclass that represents a denial condition related to office operations. It provides a dedicated error type to signal that an office-related action was not permitted or was rejected.\n",
+              "responsibilities": [
+                "Represent an error condition specific to office-related denial scenarios by extending the built-in Error class.",
+                "Provide a distinct error type that can be thrown and caught to differentiate office-denial cases from other errors.",
+                "Enable clearer error handling and intent communication within the module by using a named, domain-specific error class."
+              ],
+              "role_in_module": "Within the file, OfficeDenied serves as the domain-specific error type used by the module's office handling logic to indicate and propagate denial conditions. It helps consumers of the module identify and handle office-denied situations distinctly from other errors."
+            }
+          },
+          {
+            "base_classes": [
+              "Error"
+            ],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": false,
+            "is_pydantic_model": false,
+            "line_end": 43,
+            "line_start": 43,
+            "name": "OfficeConflict",
+            "qualified_name": "OfficeConflict",
+            "response": {
+              "purpose": "OfficeConflict is a specialized error type that represents conflict conditions related to office operations. It provides a clear, typed way to signal and identify office-specific conflicts within the server-side office handler logic.\n",
+              "responsibilities": [
+                "Represent conflict errors that occur during office-related request handling or state changes.",
+                "Differentiate office-specific conflict conditions from other error types by extending the standard Error class.",
+                "Enable the handler code to catch and respond to conflicts in a consistent and explicit manner.",
+                "Serve as a semantic marker for upstream error handling, logging, and HTTP response construction when a conflict is detected."
+              ],
+              "role_in_module": "Within web-v2/server/office/handler.ts, OfficeConflict functions as the dedicated error class used by the office handler logic to signal conflict situations. It allows the module to produce and handle conflicts in a clear, type-distinguishable way."
+            }
+          }
+        ],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/handler.ts",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": true,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 41,
+            "line_start": 6,
+            "name": "handleOffice",
+            "qualified_name": "handleOffice",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Asynchronously handles an incoming HTTP Request for the web-v2 server's office endpoint, using the provided Dependencies to process the request and produce an appropriate Response. It contains a nested helper function reply to construct and return responses as needed.\n",
+              "returns_summary": null
+            },
+            "signature": "async def handleOffice(request: Request, deps: Dependencies) -> Promise<Response>:"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 8,
+            "line_start": 8,
+            "name": "reply",
+            "qualified_name": "reply",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Constructs and returns a reply representing a response that includes the given numeric status code and the provided body. It packages the status and body together for use as an outgoing response.\n",
+              "returns_summary": "Returns a response value (type not specified in the signature) that represents the composed reply containing the status and body."
+            },
+            "signature": "def reply(status: number, body: unknown):"
+          }
+        ],
+        "language": "typescript",
+        "overview": {
+          "key_responsibilities": [
+            "Declare the Dependencies interface that specifies the external services or resources required by the office handler.",
+            "Provide OfficeDenied and OfficeConflict error classes for signaling permission denial and conflict conditions respectively.",
+            "Export an asynchronous handleOffice function that performs the office handling workflow and uses the declared dependencies and error types."
+          ],
+          "notable_patterns": [
+            "Defines a Dependencies interface to inject external services/resources.",
+            "Implements custom Error subclasses for domain-specific error signaling.",
+            "Exposes an async handler function as the module's runtime entry point."
+          ],
+          "summary": "This file defines the types and runtime error classes used by the office-related request handling logic and exports an asynchronous handler function, handleOffice. It declares a Dependencies interface to capture the external services or resources that the handler requires, and two custom Error subclasses, OfficeDenied and OfficeConflict, to represent specific failure modes that the handler can throw or propagate. The primary runtime entry point is the async handleOffice function, which implements the office handling behavior using the declared dependencies and error types.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 1239,
+        "tokens_output": 1592
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-30T04:41:43Z",
+      "model": "gpt-5-mini",
+      "source_sha": "1827a734db3c39535f133c1f3d9cf5b7e1f4387b"
+    }
+  },
   "schema_version": "1.0.0"
 }
