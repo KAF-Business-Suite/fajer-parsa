@@ -79,6 +79,46 @@ try{
  assert.equal(await denied.locator('#login-view').isVisible(),true)
  assert.equal(await denied.locator('#office-view').isVisible(),false)
  await deniedContext.close()
+
+ // Self-service recovery: no genuine account email or password reset is sent.
+ const recoveryContext=await browser.newContext({viewport:{width:390,height:844}})
+ const recoveryPage=await recoveryContext.newPage()
+ let emailRequests=0,changed=0
+ await recoveryPage.route('**/auth/v1/recover?**',async route=>{
+  const request=route.request(),payload=request.postDataJSON()
+  assert.deepEqual(payload,{email:'qa@example.invalid'})
+  assert.equal(new URL(request.url()).searchParams.get('redirect_to'),base)
+  emailRequests++
+  await route.fulfill({status:200,contentType:'application/json',body:'{}'})
+ })
+ await recoveryPage.goto(base,{waitUntil:'domcontentloaded'})
+ await recoveryPage.locator('#forgot-button').click()
+ await recoveryPage.locator('#recovery-email').fill('qa@example.invalid')
+ await recoveryPage.locator('#send-recovery').click()
+ await recoveryPage.waitForFunction(()=>document.querySelector('#recovery-message')?.textContent?.includes('لینک بازیابی'))
+ assert.equal(emailRequests,1)
+ assert.equal(await recoveryPage.locator('#recovery-request').isVisible(),true)
+ await recoveryPage.goto(base+'#access_token=synthetic-recovery-token&type=recovery')
+ await recoveryPage.locator('#password-reset-view').waitFor({state:'visible'})
+ assert.equal(await recoveryPage.evaluate(()=>location.hash),'','recovery token must be removed from address bar')
+ await recoveryPage.route('**/auth/v1/user',async route=>{
+  const req=route.request()
+  assert.equal(req.method(),'PUT')
+  assert.equal(req.headers().authorization,'Bearer synthetic-recovery-token')
+  assert.equal(req.postDataJSON().password,'synthetic-valid-pass-2026!')
+  changed++
+  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({id:'synthetic-user'})})
+ })
+ await recoveryPage.locator('#new-password').fill('synthetic-valid-pass-2026!')
+ await recoveryPage.locator('#confirm-password').fill('synthetic-valid-pass-2026!')
+ await recoveryPage.locator('#save-password').click()
+ await recoveryPage.waitForFunction(()=>document.querySelector('#login-alert')?.textContent?.includes('رمز تازه ثبت شد'))
+ assert.equal(changed,1)
+ assert.equal(await recoveryPage.locator('#password-reset-view').isVisible(),false)
+ assert.equal(await recoveryPage.locator('#login-view').isVisible(),true)
+ await recoveryContext.close()
+ console.log('PASS: recovery email request and password update with intercepted synthetic tokens, no actual email sent')
+
  console.log('PASS: synthetic full office login -> list -> confirm -> audited API request -> refresh -> logout, and visible access denial')
 
  console.log('PASS: public office loads at 390/1280, browser CORS config works, invalid login intercepted, private workspace stays closed')
