@@ -4,10 +4,10 @@
 
 # 📁 server
 
-> **Purpose:** Contains server-side intake handling implementation and its associated tests, organized under an intake subdirectory to exercise intake logic and behavior.
+> **Purpose:** Contains server-side request handling, adapters, entrypoints, and tests for the web-v2 server, organized into feature subdirectories such as intake and office.
 > 
 
-![Organization: Hierarchical](https://img.shields.io/badge/Organization-Hierarchical-blue)
+![Organization: Feature Based](https://img.shields.io/badge/Organization-Feature_Based-blue)
 
 ## 📑 Table of Contents
 
@@ -20,14 +20,14 @@
 
 ## Overview
 
-This directory is focused on the server-side components responsible for intake handling and the tests that exercise intake logic. There are no files at the root of this directory; all implementation and test artifacts are colocated within the intake subdirectory. The intake subdirectory holds the intake handler implementation and a set of test modules (for example, fp04-scenarios.test.mjs) that import a test harness from node:test, assertions from node:assert/strict, and the intake handler implementation from a local helper.
+The server directory is the home for server-side implementations and their tests for the web-v2 project. At the top level there are no runtime files; instead functionality is organized into focused subdirectories. The intake subdirectory holds server-side intake handling code and its tests, including test modules (for example fp04-scenarios.test.mjs) that use node:test and node:assert/strict along with a local intake handler implementation. The office subdirectory contains Office-related request handling, adapter interfaces and factories (adapters.ts), handler implementations (handler.ts), the Cloudflare Pages entrypoint, tests, and CI database setup for exercising the Office feature surface.
 
-Overall, the server directory acts as the host for server-side intake logic and its verification. The structure keeps implementation and tests together in intake/, enabling focused development and test-driven changes to intake behavior. Within the broader project, this directory plays the role of providing the server-side intake functionality and a test harness that validates scenarios and behavior for that handler, helping ensure correctness before integration with other parts of the system.
+Together these components provide the server-side surface for handling different feature domains. The intake code implements and exercises intake-specific logic and behavior via dedicated tests, while the office code provides adapters, handlers, an entrypoint for Cloudflare Pages, and supporting test/CI database setup. This directory's role in the larger system is to group server-facing feature implementations and their tests so that each feature area (intake, office) can be developed, tested, and deployed with its related artifacts colocated in a predictable structure.
 
 
 ### File Organization
 
-All server-side intake code and tests are placed inside the intake/ subdirectory. The root of server/ contains no files, keeping the surface area small and directing developers immediately to intake/ for implementation and tests.
+Files are organized by feature into subdirectories (e.g., intake, office). The root contains no files; each feature subdirectory contains its implementation artifacts and tests so that feature concerns, entrypoints, adapters, and CI/test setup are grouped together.
 
 ## 📂 Subdirectories
 
@@ -40,17 +40,25 @@ This directory contains the following subdirectories:
 ![Files: 1](https://img.shields.io/badge/Files-1-blue)
 
 ---
+
+### [📁 office](./office/README.md)
+
+**Purpose:** Houses Office-related request handling, adapters, Cloudflare Pages entrypoint, and associated tests and CI database setup for the web-v2 server.
+
+![Files: 7](https://img.shields.io/badge/Files-7-blue)
+
+---
 ## Architecture Notes
 
-- Implementation and tests are colocated within a dedicated intake/ subdirectory to keep server/ root empty and to focus development on intake-related logic and scenario tests.
-- Tests use node:test and node:assert/strict as the harness and assertion library, and they import the intake handler from a local module within intake/.
+- Feature-based organization: each feature (intake, office) contains its implementation, adapters/entrypoints, and tests to keep concerns colocated and easier to test and maintain.
+- Tests in each feature directory use Node's built-in node:test and node:assert/strict as the documented test harness for verifying behavior.
 
 ---
 
 ## Navigation
 
 **↑ Parent Directory:** [Go up](../README.md)
-**🔗 Related:** [intake](./intake/README.md)
+**🔗 Related:** [intake](./intake/README.md) • [office](./office/README.md)
 
 ---
 
