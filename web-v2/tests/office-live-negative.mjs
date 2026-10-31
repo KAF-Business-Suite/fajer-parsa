@@ -19,13 +19,14 @@ test('live staff login shell and script load via HTTPS',async()=>{
  assert.match(js.type,/javascript/)
  assert.match(js.body,/auth\/v1\/token\?grant_type=password/)
 })
-test('live office API denies unauthenticated reads/writes',async()=>{
- const get=await grab('/api/office',{headers:{Origin:origin}})
- assert.equal(get.status,401)
- assert.doesNotMatch(get.body,/contact|service_role|password|auth.users/)
- const post=await grab('/api/office',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:'{}'})
- assert.equal(post.status,401)
- assert.doesNotMatch(post.body,/contact|service_role|password|auth.users/)
+test('direct office API denies unauthenticated reads/writes',async()=>{
+ const api='https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-office/api/office'
+ for(const method of ['GET','POST']){
+  const r=await fetch(api,{method,headers:{Origin:origin,...(method==='POST'?{'Content-Type':'application/json'}:{})},...(method==='POST'?{body:'{}'}:{}),signal:AbortSignal.timeout(16000),redirect:'error'})
+  assert.equal(r.status,401)
+  const body=await r.text()
+  assert.doesNotMatch(body,/contact|service_role|password|auth.users/)
+ }
 })
 
 test('public Supabase office config responds without any secret in logs',async()=>{
