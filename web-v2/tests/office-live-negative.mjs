@@ -35,3 +35,11 @@ test('public Supabase office config responds without any secret in logs',async()
  assert.equal(typeof data.publishableKey,'string')
  assert.ok(data.publishableKey.length>20)
 })
+
+test('live Cloudflare office proxy forwards syntactically valid but invalid JWT to Supabase',async()=>{
+ const r=await grab('/api/office?offset=0',{headers:{Authorization:'Bearer synthetic.invalid.token'}})
+ // No actual user is signed in; a healthy proxy must produce an Auth denial,
+ // not an infrastructure/config failure or a misleading success.
+ assert.equal(r.status,401,'Worker-to-Supabase proxy should reach Auth and reject synthetic JWT; observed HTTP '+r.status+' with '+r.body.slice(0,90))
+ assert.doesNotMatch(r.body,/service_role|contact|password|auth.users/)
+})
