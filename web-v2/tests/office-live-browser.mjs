@@ -19,6 +19,17 @@ try{
    return {status:response.status,keyValid:typeof json.publishableKey==='string'&&json.publishableKey.length>20}
   },config)
   assert.deepEqual(cfg,{status:200,keyValid:true},'CORS/browser config unavailable')
+
+  // Test the ACTUAL remote office API, not a mocked Cloudflare forwarding route.
+  const apiResult=await page.evaluate(async()=>{
+   const response=await fetch('https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-office/api/office?offset=0',{
+    method:'GET',headers:{Authorization:'Bearer synthetic.invalid.token'},cache:'no-store'
+   })
+   return {status:response.status,body:await response.json()}
+  })
+  assert.equal(apiResult.status,401,'real browser CORS/office permission must reject invalid bearer token')
+  assert.equal(apiResult.body.error,'sign_in_required')
+
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'horizontal overflow')
   await page.route('**/auth/v1/token?grant_type=password',route=>route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:'synthetic_invalid_credentials'})}))
   await page.locator('#email').fill('qa@example.invalid')
@@ -37,7 +48,7 @@ try{
  const one='00000000-0000-4000-8000-000000000011'
  let state='received',writes=0,reads=0
  await page.route('**/auth/v1/token?grant_type=password',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({access_token:'synthetic-access-token',refresh_token:'synthetic-refresh-token',token_type:'bearer',expires_in:3600})}))
- await page.route('**/api/office**',async route=>{
+ await page.route('**/functions/v1/fajr-office/api/office**',async route=>{
   const req=route.request()
   if(req.method()==='POST'){
    const data=req.postDataJSON()
@@ -70,7 +81,7 @@ try{
  const deniedContext=await browser.newContext({viewport:{width:390,height:844}})
  const denied=await deniedContext.newPage()
  await denied.route('**/auth/v1/token?grant_type=password',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({access_token:'synthetic-access-token',refresh_token:'synthetic-refresh-token'})}))
- await denied.route('**/api/office**',route=>route.fulfill({status:403,contentType:'application/json',body:JSON.stringify({error:'forbidden'})}))
+ await denied.route('**/functions/v1/fajr-office/api/office**',route=>route.fulfill({status:403,contentType:'application/json',body:JSON.stringify({error:'forbidden'})}))
  await denied.goto(base,{waitUntil:'domcontentloaded'})
  await denied.locator('#email').fill('qa@example.invalid')
  await denied.locator('#password').fill('synthetic-only')
