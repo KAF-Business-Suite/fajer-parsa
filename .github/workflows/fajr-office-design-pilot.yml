@@ -1,8 +1,8 @@
 name: Fajr Office | isolated design preview QA
 on:
-  push:
+  pull_request:
     branches:
-      - design/fajr-office-pilot-20261031
+      - work/fajr-office-main-aligned-20261031
     paths:
       - 'workers/fajr-office-qa/**'
       - 'web-v2/tests/office-design-preview.mjs'
