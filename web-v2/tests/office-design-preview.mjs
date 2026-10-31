@@ -46,8 +46,11 @@ try{
   })
   await page.locator('#email').fill('qa@example.invalid')
   await page.locator('#password').fill('test-not-real')
+  const loginRequest=page.waitForRequest('**/auth/v1/token?grant_type=password')
   await page.locator('#login-button').click()
   await page.locator('#login-button.is-loading').waitFor({state:'visible'})
+  await loginRequest
+  assert.equal(typeof resolveLogin,'function','intercepted auth request must be pending before release')
   assert.equal(await page.locator('#login-button').getAttribute('aria-busy'),'true')
   assert.match(await page.locator('#login-button').textContent(),/در حال بررسی/)
   assert.equal(await page.locator('#login-button').isDisabled(),true)
