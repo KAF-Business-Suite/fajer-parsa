@@ -201,7 +201,16 @@ try {
     await page.setViewportSize({width:393,height:852});await page.getByRole('heading',{name:'خدمات سفر به ایران',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:resolve(output,'iran-country-phone.png')});await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:resolve(output,'iran-country-desktop.png')});
     await page.goto(url+'#/country/xx');await page.getByRole('heading',{name:'این مقصد پیدا نشد',exact:true}).waitFor();await page.getByRole('link',{name:'بازگشت به کشورها',exact:true}).click();await page.locator('.country-card-grid').waitFor();assert.equal(await page.title(),'فجر پارسا | سفر، ویزا و تجارت');
   })
-  await test('No runtime errors or external asset requests',async()=>{assert.deepEqual(failures,[]);assert.deepEqual(external,[])})
+  await test('No runtime errors or unexpected external requests',async()=>{
+    assert.deepEqual(failures,[]);
+    const unexpected=external.filter(address=>{
+      try {
+        const candidate=new URL(address);
+        return !(candidate.origin==='https://public-api.wordpress.com' && /^\/wp\/v2\/sites\/256155663\/posts(?:\/[0-9]+)?$/.test(candidate.pathname));
+      } catch {return true}
+    });
+    assert.deepEqual(unexpected,[]);
+  })
 } finally {
   await writeFile(resolve(output,'results.json'),JSON.stringify({results,failures,external},null,2))
   console.log(JSON.stringify({results,failures,external},null,2))
