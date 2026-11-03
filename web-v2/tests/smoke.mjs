@@ -151,11 +151,30 @@ try {
     await page.getByRole('button',{name:'خدمات مالدیو',exact:true}).click();await page.locator('.country-page-photo').waitFor();assert.match(await page.locator('.country-page-photo').innerText(),/Pexels/);assert.match(await page.locator('.country-page-photo img').getAttribute('src'),/maldives-destination.webp/);await page.getByRole('link',{name:'بررسی کشورهای دیگر',exact:true}).click();await page.locator('.country-card-grid').waitFor();
   })
   await test('Grouped mobile navigation exposes real targets and quick service request',async()=>{
-    await page.setViewportSize({width:393,height:852});await page.getByRole('button',{name:'منوی موبایل',exact:true}).click();const nav=page.locator('#mobile-navigation');assert.equal(await nav.getByRole('link').count(),10);assert.equal(await nav.getByRole('button').count(),6);
-    assert.equal(await nav.getByRole('link',{name:'تکت و بوکینگ سراسری',exact:true}).getAttribute('href'),'#worldwide-booking');assert.equal(await nav.getByRole('link',{name:'پرسش‌های رایج',exact:true}).getAttribute('href'),'#faq');assert.equal(await nav.evaluate(e=>e.clientHeight<=innerHeight-180),true);
+    await page.setViewportSize({width:393,height:852});await page.getByRole('button',{name:'منوی موبایل',exact:true}).click();const nav=page.locator('#mobile-navigation');assert.equal(await nav.getByRole('link').count(),11);assert.equal(await nav.getByRole('button').count(),6);
+    assert.equal(await nav.getByRole('link',{name:'تکت و بوکینگ سراسری',exact:true}).getAttribute('href'),'#worldwide-booking');assert.equal(await nav.getByRole('link',{name:'پرسش‌های رایج',exact:true}).getAttribute('href'),'#faq');assert.equal(await nav.getByRole('link',{name:'مقالات و راهنما',exact:true}).getAttribute('href'),'#/journal');assert.equal(await nav.evaluate(e=>e.clientHeight<=innerHeight-180),true);
     await nav.getByRole('button',{name:'ویزا و اقامت',exact:true}).click();assert.equal(await nav.count(),0);await page.getByRole('dialog').getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).click();assert.equal(await page.getByRole('dialog').getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'ویزا و اقامت');await page.keyboard.press('Escape');
     assert.equal(await page.getByRole('button',{name:'منوی موبایل',exact:true}).evaluate(e=>e===document.activeElement),true);
     await page.getByRole('button',{name:'منوی موبایل',exact:true}).click();await page.screenshot({path:resolve(output,'grouped-mobile-menu.png')});await page.keyboard.press('Escape');
+  })
+  await test('Read-only WordPress newsroom shows published content on the same website',async()=>{
+    const wpPattern='**/wp/v2/sites/256155663/posts**';
+    await page.route(wpPattern,async route=>{
+      const details=/\/posts\/42\?/.test(route.request().url());
+      const article={id:42,slug:'guide-one',status:'publish',date:'2026-11-03T08:00:00',title:{rendered:'راهنمای نمونه سفر'},excerpt:{rendered:'<p>راهنمای عمومی برای آزمون.</p>'}};
+      const data=details?{...article,content:{rendered:'<h2>مراحل آمادگی</h2><p>متن امن مقاله</p><script>window.untrustedExecuted=true</script>'}}:[article];
+      await route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:JSON.stringify(data)});
+    });
+    await page.goto(url+'#/journal');
+    await page.getByRole('heading',{name:'راهنما، اخبار و مقالات سفر',exact:true}).waitFor();
+    await page.getByRole('link',{name:'خواندن راهنمای نمونه سفر',exact:true}).click();
+    await page.getByText('متن امن مقاله',{exact:true}).waitFor();
+    assert.equal(await page.evaluate(()=>window.untrustedExecuted),undefined);
+    assert.equal(await page.getByRole('heading',{name:'مراحل آمادگی',exact:true}).count(),1);
+    await page.getByRole('link',{name:'بازگشت به همه مقالات',exact:true}).click();
+    await page.getByRole('link',{name:'خواندن راهنمای نمونه سفر',exact:true}).waitFor();
+    await page.unroute(wpPattern);
+    await page.goto(url+'#');
   })
   await test('Country deep link survives reload and browser back/forward',async()=>{
     await page.goto(url+'#country-services');await page.getByRole('button',{name:'خدمات ایران',exact:true}).click();await page.getByRole('heading',{name:'خدمات سفر به ایران',exact:true}).waitFor();assert.match(page.url(),/#\/country\/ir$/);assert.equal(await page.title(),'خدمات ایران | فجر پارسا');
