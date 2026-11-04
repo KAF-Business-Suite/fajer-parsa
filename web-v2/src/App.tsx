@@ -74,6 +74,11 @@ function App() {
   useEffect(()=>{
     document.title=isInboundRoute ? 'Afghanistan Inbound Tourism | Fajr Parsa' : selectedCountry ? 'خدمات '+selectedCountry.name+' | فجر پارسا' : isCountryRoute ? 'مقصد پیدا نشد | فجر پارسا' : 'فجر پارسا | سفر، ویزا و تجارت'
     if (!isInboundRoute) { document.documentElement.lang='fa-AF'; document.documentElement.dir='rtl' }
+    if (isInboundRoute) {
+      // A hash route has no matching DOM anchor; entering it from mid-page must start at the top.
+      const frame=requestAnimationFrame(()=>window.scrollTo(0,0))
+      return ()=>cancelAnimationFrame(frame)
+    }
     if(!isCountryRoute && routeHash.length>1) {
       const frame=requestAnimationFrame(()=>document.getElementById(routeHash.slice(1))?.scrollIntoView())
       return ()=>cancelAnimationFrame(frame)
