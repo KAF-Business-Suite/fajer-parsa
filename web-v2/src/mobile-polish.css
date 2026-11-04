@@ -106,7 +106,7 @@ footer .text-slate-400 { color:#b2c0cc; }
 .destination-image-button img { transition:transform .65s cubic-bezier(.2,.65,.3,1); }
 .photo-open-hint { position:absolute;bottom:14px;left:14px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(13,24,31,.82);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:11px;font-weight:650;opacity:0;transform:translateY(6px);transition:opacity .22s,transform .22s;pointer-events:none; }
 .destination-card:focus-within .photo-open-hint { opacity:1;transform:none; }
-.destination-photo .favorite-button { position:absolute;top:12px;left:12px;width:44px;height:44px;min-height:44px;display:grid;place-items:center;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.94);color:#25343b;transition:transform .18s,background .18s; }
+.destination-photo .favorite-button { position:absolute;top:12px;left:12px;width:48px;height:48px;min-height:48px;display:grid;place-items:center;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.94);color:#25343b;transition:transform .18s,background .18s; }
 .favorite-button:active { transform:scale(.92); }
 .destination-photo .favorite-button[aria-pressed="true"] { color:#8a6122;background:#f4e2b3; }
 .favorite-button[aria-pressed="true"] svg { fill:currentColor;animation:fp-favorite .22s ease-out; }
