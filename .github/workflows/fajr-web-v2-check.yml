@@ -42,3 +42,13 @@ jobs:
         run: npm run test:smoke
       - name: Verify optional intake form with intercepted API and synthetic challenge
         run: npm run test:intake-form
+      - name: Save synthetic inbound visual QA for owner review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fajr-pr17-inbound-visual-qa
+          path: |
+            web-v2/test-results/inbound-*.png
+            web-v2/test-results/results.json
+          if-no-files-found: error
+          retention-days: 3
