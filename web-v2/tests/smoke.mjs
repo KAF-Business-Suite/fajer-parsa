@@ -197,8 +197,8 @@ try {
     await page.getByRole('button',{name:'EN',exact:true}).click();
     await page.locator('.inbound-form').getByRole('button',{name:/Continue to WhatsApp/}).click();
     assert.equal(await page.getByRole('alert').isVisible(),true);
-    await page.getByText('Your name',{exact:true}).locator('..').locator('input').fill('Sample Visitor');
-    await page.getByText('Email or contact number',{exact:true}).locator('..').locator('input').fill('visitor@example.invalid');
+    await page.getByRole('textbox',{name:'Your name',exact:true}).fill('Sample Visitor');
+    await page.getByRole('textbox',{name:'Email or contact number',exact:true}).fill('visitor@example.invalid');
     await page.locator('.inbound-form input[type="date"]').fill('2027-01-20');
     await page.locator('.inbound-form input[type="number"]').fill('2');
     await page.locator('.inbound-consent input').check();
