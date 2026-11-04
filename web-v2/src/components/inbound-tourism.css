@@ -5,7 +5,7 @@
 .inbound button{cursor:pointer;}
 .inbound button:focus-visible,.inbound a:focus-visible,.inbound input:focus-visible,.inbound select:focus-visible,.inbound textarea:focus-visible{outline:3px solid #1a9d91;outline-offset:3px;}
 .inbound-hero{background:radial-gradient(circle at 80% 15%,rgba(211,178,113,.17),transparent 36%),linear-gradient(135deg,#0c1829 12%,#142d3a 70%,#102b30);color:#f9f8f3;isolation:isolate;overflow:hidden;}
-.inbound-topbar{padding-block:24px 0;display:flex;align-items:center;justify-content:space-between;gap:20px;}
+.inbound-topbar{padding-block:116px 0;display:flex;align-items:center;justify-content:space-between;gap:20px;}
 .inbound-mark{display:inline-flex;align-items:center;gap:9px;letter-spacing:.09em;font-size:11px;font-weight:750;text-transform:uppercase;color:#e1c991;}
 .inbound-lang{display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.19);border-radius:100px;padding:4px;}
 .inbound-lang button{border:0;color:#dce5e4;padding:8px 12px;border-radius:100px;font-size:12px;min-height:37px;background:transparent;}
@@ -86,7 +86,7 @@
  .inbound-request-intro{max-width:700px;}
 }
 @media (max-width:620px){
- .inbound-topbar{padding-top:18px;}
+ .inbound-topbar{padding-top:110px;}
  .inbound-mark{font-size:9px;letter-spacing:.04em;}
  .inbound-lang button{min-height:36px;padding:7px 9px;}
  .inbound-hero-body{padding-block:55px 72px;}
