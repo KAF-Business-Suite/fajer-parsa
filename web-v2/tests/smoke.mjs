@@ -184,8 +184,11 @@ try {
   })
   await test('Inbound tourism route offers three languages, safe enquiry and mobile layout',async()=>{
     await page.setViewportSize({width:393,height:852});
-    await page.goto(url+'#/inbound',{waitUntil:'networkidle'});
+    await page.goto(url,{waitUntil:'networkidle'});
+    await page.evaluate(()=>{window.scrollTo(0,1800);window.location.hash='/inbound'});
     await page.locator('.inbound h1').waitFor();
+    await page.waitForFunction(()=>window.scrollY < 8);
+    assert.equal(await page.evaluate(()=>window.scrollY < 8),true,'Inbound route should start at top after navigating from mid-home');
     assert.match(await page.locator('.inbound h1').innerText(),/Discover Afghanistan/);
     assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
     assert.equal(await page.title(),'Afghanistan Inbound Tourism | Fajr Parsa');
