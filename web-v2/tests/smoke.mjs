@@ -189,12 +189,18 @@ try {
     assert.match(await page.locator('.inbound h1').innerText(),/Discover Afghanistan/);
     assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
     assert.equal(await page.title(),'Afghanistan Inbound Tourism | Fajr Parsa');
+    await page.screenshot({path:resolve(output,'inbound-en-phone.png'),fullPage:true});
     await page.getByRole('button',{name:'دری',exact:true}).click();
     assert.match(await page.locator('.inbound h1').innerText(),/افغانستان/);
     assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+    await page.screenshot({path:resolve(output,'inbound-fa-phone.png'),fullPage:true});
     await page.getByRole('button',{name:'العربية',exact:true}).click();
     assert.match(await page.locator('.inbound h1').innerText(),/أفغانستان/);
+    await page.screenshot({path:resolve(output,'inbound-ar-phone.png'),fullPage:true});
     await page.getByRole('button',{name:'EN',exact:true}).click();
+    await page.setViewportSize({width:1440,height:1000});
+    await page.screenshot({path:resolve(output,'inbound-en-desktop.png'),fullPage:true});
+    await page.setViewportSize({width:393,height:852});
     await page.locator('.inbound-form').getByRole('button',{name:/Continue to WhatsApp/}).click();
     assert.equal(await page.getByRole('alert').isVisible(),true);
     await page.getByRole('textbox',{name:'Your name',exact:true}).fill('Sample Visitor');
