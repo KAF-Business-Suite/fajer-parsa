@@ -182,6 +182,42 @@ try {
     await page.setViewportSize({width:393,height:852});await page.getByRole('heading',{name:'خدمات سفر به ایران',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:resolve(output,'iran-country-phone.png')});await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:resolve(output,'iran-country-desktop.png')});
     await page.goto(url+'#/country/xx');await page.getByRole('heading',{name:'این مقصد پیدا نشد',exact:true}).waitFor();await page.getByRole('link',{name:'بازگشت به کشورها',exact:true}).click();await page.locator('.country-card-grid').waitFor();assert.equal(await page.title(),'فجر پارسا | سفر، ویزا و تجارت');
   })
+  await test('Inbound tourism route offers three languages, safe enquiry and mobile layout',async()=>{
+    await page.setViewportSize({width:393,height:852});
+    await page.goto(url+'#/inbound',{waitUntil:'networkidle'});
+    await page.locator('.inbound h1').waitFor();
+    assert.match(await page.locator('.inbound h1').innerText(),/Discover Afghanistan/);
+    assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
+    assert.equal(await page.title(),'Afghanistan Inbound Tourism | Fajr Parsa');
+    await page.getByRole('button',{name:'دری',exact:true}).click();
+    assert.match(await page.locator('.inbound h1').innerText(),/افغانستان/);
+    assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+    await page.getByRole('button',{name:'العربية',exact:true}).click();
+    assert.match(await page.locator('.inbound h1').innerText(),/أفغانستان/);
+    await page.getByRole('button',{name:'EN',exact:true}).click();
+    await page.locator('.inbound-form').getByRole('button',{name:/Continue to WhatsApp/}).click();
+    assert.equal(await page.getByRole('alert').isVisible(),true);
+    await page.getByText('Your name',{exact:true}).locator('..').locator('input').fill('Sample Visitor');
+    await page.getByText('Email or contact number',{exact:true}).locator('..').locator('input').fill('visitor@example.invalid');
+    await page.locator('.inbound-form input[type="date"]').fill('2027-01-20');
+    await page.locator('.inbound-form input[type="number"]').fill('2');
+    await page.locator('.inbound-consent input').check();
+    await page.evaluate(()=>{window.open=(target)=>{window.__inboundUrl=target;return null}});
+    await page.locator('.inbound-form').getByRole('button',{name:/Continue to WhatsApp/}).click();
+    const outbound=await page.evaluate(()=>window.__inboundUrl);
+    const link=new URL(outbound);
+    assert.equal(link.hostname,'wa.me');assert.equal(link.pathname,'/93777377774');
+    assert.match(link.searchParams.get('text'),/Sample Visitor/);
+    assert.match(link.searchParams.get('text'),/2027-01-20/);
+    assert.match(link.searchParams.get('text'),/2/);
+    for(const width of [320,360,393,768,1440]) {
+      await page.setViewportSize({width,height:852});
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Inbound overflow '+width);
+    }
+    await page.goto(url,{waitUntil:'networkidle'});
+    assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+    assert.equal(await page.locator('.hero-scene img').getAttribute('src'),'/media/hero-dubai.webp');
+  })
   await test('No runtime errors or external asset requests',async()=>{assert.deepEqual(failures,[]);assert.deepEqual(external,[])})
 } finally {
   await writeFile(resolve(output,'results.json'),JSON.stringify({results,failures,external},null,2))
