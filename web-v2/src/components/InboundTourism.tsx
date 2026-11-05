@@ -6,6 +6,21 @@ type Language = 'en' | 'fa' | 'ar'
 type Localized = Record<Language, string>
 type TravelService = 'arrival' | 'transport' | 'stay' | 'guide' | 'journey'
 const contactNumber = '93777377774'
+
+// Evaluate arrival in Afghanistan, not at an overseas visitor's local midnight.
+function todayInKabul(): string {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kabul', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(new Date())
+  const values = Object.fromEntries(parts.map(part => [part.type, part.value]))
+  return values.year + '-' + values.month + '-' + values.day
+}
+
+function isReachableContact(value: string): boolean {
+  const trimmed = value.trim()
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(trimmed)) return true
+  return /^\+?[\d\s().-]+$/.test(trimmed) && /^\d{7,15}$/.test(trimmed.replace(/[^\d]/g, ''))
+}
 const translations: Record<Language, {
   eyebrow:string; title:string; accent:string; subtitle:string; ask:string; explore:string;
   local:string; quote:string; process:string; stepOne:string; stepTwo:string; stepThree:string;
@@ -86,18 +101,23 @@ export function InboundTourism({onLanguageChange}: {onLanguageChange?: (language
     document.documentElement.dir=rtl?'rtl':'ltr'
     return ()=>{document.documentElement.lang='fa-AF';document.documentElement.dir='rtl'}
   },[lang,rtl])
-  const formReady=name.trim().length>1 && contact.trim().length>=7 && Boolean(arrival) && Number(people)>0 && Number(people)<101 && Boolean(region.trim()) && consent
+  const today = todayInKabul()
+  const arrivalValid = /^\d{4}-\d{2}-\d{2}$/.test(arrival) && arrival >= today
+  const travellers = Number(people)
+  const formReady = name.trim().length > 1 && isReachableContact(contact) && arrivalValid
+    && Number.isInteger(travellers) && travellers >= 1 && travellers <= 100
+    && Boolean(region.trim()) && consent
   function sendEnquiry(){
     setTried(true)
-    if(!formReady)return
+    if(!formReady || arrival < todayInKabul())return
     const chosen=serviceCards.find(item=>item.id===service)
     const message=[
       'FAJR PARSA | Afghanistan Inbound Travel Enquiry',
-      'Name: '+name.trim(),
+      'Name: '+name.trim().replace(/\s+/g, ' '),
       'Contact: '+contact.trim(),
       'Arrival: '+arrival,
       'Travellers: '+people,
-      'Afghanistan destination: '+region.trim(),
+      'Afghanistan destination: '+region.trim().replace(/\s+/g, ' '),
       'Service: '+(chosen?.title.en||service),
       'Notes: '+(notes.trim()||'None'),
       'Please confirm availability, quotation, requirements and cancellation terms before any booking.'
@@ -155,9 +175,9 @@ export function InboundTourism({onLanguageChange}: {onLanguageChange?: (language
       <form className="inbound-form" onSubmit={e=>{e.preventDefault();sendEnquiry()}} noValidate>
         <div className="inbound-form-grid">
           <label>{t.name}<input required maxLength={100} autoComplete="name" value={name} onChange={e=>setName(e.target.value)}/></label>
-          <label>{t.email}<input required maxLength={120} autoComplete="email" dir="auto" value={contact} onChange={e=>setContact(e.target.value)}/></label>
-          <label>{t.date}<span className="inbound-icon-input"><CalendarDays size={17}/><input required aria-label={t.date} type="date" value={arrival} onChange={e=>setArrival(e.target.value)}/></span></label>
-          <label>{t.people}<span className="inbound-icon-input"><Users size={17}/><input required aria-label={t.people} type="number" min="1" max="100" value={people} onChange={e=>setPeople(e.target.value)}/></span></label>
+          <label>{t.email}<input required maxLength={120} autoComplete="off" dir="auto" aria-invalid={tried && !isReachableContact(contact)} value={contact} onChange={e=>setContact(e.target.value)}/></label>
+          <label>{t.date}<span className="inbound-icon-input"><CalendarDays size={17}/><input required aria-label={t.date} type="date" min={today} aria-invalid={tried && !arrivalValid} value={arrival} onChange={e=>setArrival(e.target.value)}/></span></label>
+          <label>{t.people}<span className="inbound-icon-input"><Users size={17}/><input required aria-label={t.people} type="number" min="1" max="100" step="1" aria-invalid={tried && !(Number.isInteger(travellers) && travellers >= 1 && travellers <= 100)} value={people} onChange={e=>setPeople(e.target.value)}/></span></label>
           <label>{t.region}<input required maxLength={80} value={region} onChange={e=>setRegion(e.target.value)}/></label>
           <label>{t.choice}<select value={service} onChange={e=>setService(e.target.value as TravelService)}>{serviceCards.map(s=><option key={s.id} value={s.id}>{s.title[lang]}</option>)}</select></label>
         </div>
