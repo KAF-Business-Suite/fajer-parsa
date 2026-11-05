@@ -12,6 +12,8 @@ import { MagicCard } from './components/magicui/magic-card'
 import { Reveal } from './components/Reveal'
 import type { Selection, RequestContext } from './components/DetailsDialog'
 const CountryPage = lazy(() => import('./components/CountryPage').then(module => ({default:module.CountryPage})))
+import { InboundTourism } from './components/InboundTourism'
+import { inboundSeo, isInboundPath, normalizeLegacyInbound, updateInboundMetadata } from './inbound-route'
 const DetailsDialog = lazy(() => import('./components/DetailsDialog').then(m => ({default:m.DetailsDialog})))
 import {
   ArrowLeft,
@@ -45,10 +47,21 @@ const trustItems = [
   ['درخواست کوتاه', 'جزئیات سفر را یک‌جا آماده کنید'],
   ['پیگیری از دفتر', 'اطلاعات رسید را همراه داشته باشید'],
 ]
-function App() {
+type InboundLanguage = 'en' | 'fa' | 'ar'
+const inboundHeaderText = {
+  en: {nav:'Visitor navigation',services:'Services',how:'How it works',enquire:'Enquire',home:'Main website',contact:'Contact',menu:'Mobile menu',themeLight:'Switch to light mode',themeDark:'Switch to dark mode',skip:'Skip to main content',visit:'VISIT AFGHANISTAN',header:'Fajr Parsa header',logo:'Fajr Parsa logo'},
+  fa: {nav:'ناوبری گردشگران',services:'خدمات',how:'روش کار',enquire:'درخواست سفر',home:'سایت اصلی',contact:'تماس',menu:'منوی موبایل',themeLight:'فعال کردن حالت روشن',themeDark:'فعال کردن حالت تاریک',skip:'رفتن به محتوای اصلی',visit:'سفر به افغانستان',header:'سربرگ فجر پارسا',logo:'لوگوی فجر پارسا'},
+  ar: {nav:'التنقل للزوار',services:'الخدمات',how:'طريقة العمل',enquire:'استفسار',home:'الموقع الرئيسي',contact:'اتصل بنا',menu:'قائمة الهاتف',themeLight:'التبديل إلى الوضع الفاتح',themeDark:'التبديل إلى الوضع الداكن',skip:'الانتقال إلى المحتوى الرئيسي',visit:'زيارة أفغانستان',header:'ترويسة فجر بارسا',logo:'شعار فجر بارسا'},
+}
+
+function App({initialPath}: {initialPath?: string} = {}) {
   const headerRef = useRef<HTMLElement>(null)
-  const [routeHash,setRouteHash] = useState(window.location.hash)
-  const isCountryRoute = routeHash.startsWith('#/country/')
+  const [routeHash,setRouteHash] = useState(typeof window === 'undefined' ? '' : window.location.hash)
+  const [routePath,setRoutePath] = useState(initialPath ?? (typeof window === 'undefined' ? '/' : window.location.pathname))
+  const [inboundLanguage,setInboundLanguage] = useState<InboundLanguage>('en')
+  const inboundNav=inboundHeaderText[inboundLanguage]
+  const isCountryRoute = routePath === '/' && routeHash.startsWith('#/country/')
+  const isInboundRoute = isInboundPath(routePath)
   const routeCode = isCountryRoute ? routeHash.slice('#/country/'.length).toUpperCase() : null
   const selectedCountry = countryServices.find(country=>countryPresentation[country.name]?.code===routeCode)
   const openCountry = (name:string) => { const code=countryPresentation[name]?.code; if(code) window.location.hash='/country/'+code.toLowerCase() }
@@ -65,17 +78,29 @@ function App() {
   const finderReady = useMemo(() => Boolean(finder.destination && finder.purpose), [finder])
 
   useEffect(()=>{
-    const sync=()=>{setRouteHash(window.location.hash);setMegaOpen(false);setMobileOpen(false);setSelection(null)}
+    const sync=()=>{normalizeLegacyInbound();setRouteHash(window.location.hash);setRoutePath(window.location.pathname);setMegaOpen(false);setMobileOpen(false);setSelection(null)}
     window.addEventListener('hashchange',sync)
-    return ()=>window.removeEventListener('hashchange',sync)
+    window.addEventListener('popstate',sync)
+    return ()=>{window.removeEventListener('hashchange',sync);window.removeEventListener('popstate',sync)}
   },[])
   useEffect(()=>{
-    document.title=selectedCountry ? 'خدمات '+selectedCountry.name+' | فجر پارسا' : isCountryRoute ? 'مقصد پیدا نشد | فجر پارسا' : 'فجر پارسا | سفر، ویزا و تجارت'
+    updateInboundMetadata(inboundLanguage,isInboundRoute)
+    document.title=isInboundRoute ? inboundSeo[inboundLanguage].title : selectedCountry ? 'خدمات '+selectedCountry.name+' | فجر پارسا' : isCountryRoute ? 'مقصد پیدا نشد | فجر پارسا' : 'فجر پارسا | سفر، ویزا و تجارت'
+    if (!isInboundRoute) { document.documentElement.lang='fa-AF'; document.documentElement.dir='rtl' }
+    if (isInboundRoute) {
+      // Keep section anchors useful; only a fresh route entry resets to the top.
+      const frame=requestAnimationFrame(()=>{
+        const target=routeHash.length>1 ? document.getElementById(routeHash.slice(1)) : null
+        if(target)target.scrollIntoView();else window.scrollTo(0,0)
+      })
+      return ()=>cancelAnimationFrame(frame)
+    }
     if(!isCountryRoute && routeHash.length>1) {
       const frame=requestAnimationFrame(()=>document.getElementById(routeHash.slice(1))?.scrollIntoView())
       return ()=>cancelAnimationFrame(frame)
     }
-  },[routeHash,selectedCountry,isCountryRoute])
+  },[routeHash,selectedCountry,isCountryRoute,isInboundRoute])
+  useEffect(()=>{if(isInboundRoute){document.title=inboundSeo[inboundLanguage].title;updateInboundMetadata(inboundLanguage,true)}},[inboundLanguage,isInboundRoute])
   const visibleServices = useMemo(() => serviceGroups.filter(s => (s.title + ' ' + s.desc).includes(query.trim())), [query])
   useEffect(() => {
     const sync = () => setHeaderScrolled(window.scrollY > 24)
@@ -101,38 +126,43 @@ function App() {
   return (
     <div className="min-h-screen overflow-x-clip fp-app bg-[var(--fp-ivory)] text-[var(--fp-ink)]">
       <ScrollProgress className="fp-scroll-progress" aria-hidden="true" />
-      <header ref={headerRef} data-scrolled={headerScrolled} className="floating-header" aria-label="سربرگ فجر پارسا">
+      <header ref={headerRef} data-scrolled={headerScrolled} className="floating-header" aria-label={isInboundRoute ? inboundNav.header : "سربرگ فجر پارسا"}>
         <div className="shell flex h-[74px] items-center justify-between gap-4">
-          <a href="#" className="flex items-center gap-3">
+          <a href={isInboundRoute ? "/" : "#"} className="flex items-center gap-3">
             <div className="relative">
-              <img src="/media/logo.png" alt="لوگوی فجر پارسا" className="h-12 w-12 rounded-[15px] border border-[var(--fp-line)] bg-[var(--fp-surface)] object-contain p-1 shadow-sm" />
+              <img src="/media/logo.png" alt={isInboundRoute ? inboundNav.logo : "لوگوی فجر پارسا"} className="h-12 w-12 rounded-[15px] border border-[var(--fp-line)] bg-[var(--fp-surface)] object-contain p-1 shadow-sm" />
 
             </div>
             <div>
-              <div className="text-[17px] font-black tracking-[-.02em]">فجر پارسا</div>
-              <div className="font-latin text-[9px] font-bold tracking-[.16em] text-slate-400">سفر • ویزا • تجارت</div>
+              <div className="text-[17px] font-black tracking-[-.02em]">{isInboundRoute ? "FAJR PARSA" : "فجر پارسا"}</div>
+              <div className="font-latin text-[9px] font-bold tracking-[.16em] text-slate-400">{isInboundRoute ? "AFGHANISTAN TRAVEL" : "سفر • ویزا • تجارت"}</div>
             </div>
           </a>
 
-          <nav className="hidden items-center gap-1 text-[13px] font-extrabold lg:flex">
+          {isInboundRoute ? <nav className="hidden items-center gap-2 text-[13px] font-extrabold lg:flex" aria-label={inboundNav.nav}>
+            <button className="rounded-xl px-3 py-2.5" onClick={()=>document.getElementById('inbound-services')?.scrollIntoView({behavior:'smooth'})}>{inboundNav.services}</button>
+            <button className="rounded-xl px-3 py-2.5" onClick={()=>document.getElementById('inbound-process')?.scrollIntoView({behavior:'smooth'})}>{inboundNav.how}</button>
+            <button className="rounded-xl px-3 py-2.5" onClick={()=>document.getElementById('inbound-request')?.scrollIntoView({behavior:'smooth'})}>{inboundNav.enquire}</button>
+            <a className="rounded-xl px-3 py-2.5" href="/">{inboundNav.home}</a>
+          </nav> : <nav className="hidden items-center gap-1 text-[13px] font-extrabold lg:flex">
             <button aria-expanded={megaOpen} aria-controls="services-mega" onClick={() => setMegaOpen(!megaOpen)} className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5">
               خدمات <ChevronDown size={15} className={megaOpen ? 'rotate-180 transition' : 'transition'} />
             </button>
+            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="/inbound">Afghanistan Tourism</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#country-services">کشورها</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#journey">درخواست سفر</a>
-            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#deals">بسته‌های خدمات</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#track">پیگیری</a>
-          </nav>
+          </nav>}
 
           <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <button onClick={() => inform('ارتباط با فجر پارسا', 'واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴. کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵. برای پیگیری، اطلاعات درج‌شده در رسید را آماده کنید.', {}, true)} className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> تماس</button>
-            <button onClick={request} className="shine rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10">شروع درخواست</button>
-            <MenuToggle open={mobileOpen} onToggle={() => setMobileOpen(!mobileOpen)} />
+            <ThemeToggle labels={isInboundRoute ? {light:inboundNav.themeLight,dark:inboundNav.themeDark} : undefined} />
+            {isInboundRoute ? <a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer" className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> {inboundNav.contact}</a> : <button onClick={() => inform('ارتباط با فجر پارسا', 'واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴. کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵. برای پیگیری، اطلاعات درج‌شده در رسید را آماده کنید.', {}, true)} className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> تماس</button>}
+            <button onClick={isInboundRoute ? ()=>document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"}) : request} className="shine rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10">{isInboundRoute ? inboundNav.enquire : "شروع درخواست"}</button>
+            <MenuToggle open={mobileOpen} onToggle={() => setMobileOpen(!mobileOpen)} label={isInboundRoute ? inboundNav.menu : undefined} />
           </div>
         </div>
 
-        {megaOpen && (
+        {!isInboundRoute && megaOpen && (
           <div id="services-mega" className="absolute inset-x-0 top-full hidden border-t border-[var(--fp-line)] bg-[var(--fp-cream)] shadow-2xl lg:block">
             <div className="shell grid grid-cols-[1.25fr_2.75fr] gap-6 py-7">
               <div className="rounded-3xl bg-[#09111f] p-6 text-white">
@@ -155,7 +185,8 @@ function App() {
         )}
 
         {mobileOpen && (
-          <nav id="mobile-navigation" aria-label="ناوبری گوشی" className="mobile-navigation-panel lg:hidden">
+          <nav id="mobile-navigation" aria-label={isInboundRoute ? inboundNav.nav : "ناوبری گوشی"} className="mobile-navigation-panel lg:hidden">
+            {isInboundRoute ? <div className="mobile-nav-group"><p>{inboundNav.visit}</p><div className="mobile-nav-links">{[[inboundNav.services,"inbound-services"],[inboundNav.how,"inbound-process"],[inboundNav.enquire,"inbound-request"]].map(([label,id])=><a href={'#'+id} key={id} onClick={e=>{e.preventDefault();setMobileOpen(false);document.getElementById(id)?.scrollIntoView({behavior:"smooth"})}}>{label}<ArrowLeft size={15}/></a>)}<a href="/" onClick={()=>setMobileOpen(false)}>{inboundNav.home} <ArrowLeft size={15}/></a></div></div> : <>
             <div className="mobile-nav-group"><p>سفر خود را برنامه‌ریزی کنید</p><div className="mobile-nav-links">
               {[['کشورها','country-services'],['خدمات','services'],['تکت و بوکینگ سراسری','worldwide-booking'],['بسته‌های خدمات','deals']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
             </div></div>
@@ -163,13 +194,14 @@ function App() {
             <div className="mobile-nav-group"><p>راهنما و ارتباط</p><div className="mobile-nav-links">
               {[['راهنمای انتخاب خدمت','finder'],['درخواست سفر','journey'],['الهام سفر','destinations'],['پرسش‌های رایج','faq'],['پیگیری پرونده','track'],['معرفی و تماس دفتر','contact']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
             </div></div>
+            </>}
           </nav>
         )}
       </header>
 
-      <a className="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
+      <a className="skip-link" href="#main-content">{isInboundRoute ? inboundNav.skip : "رفتن به محتوای اصلی"}</a>
       <main id="main-content">
-        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : <>
+        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : isInboundRoute ? <InboundTourism language={inboundLanguage} onLanguageChange={setInboundLanguage}/> : <>
         <section className="hero scenic-hero">
           <picture className="hero-scene"><source media="(max-width: 767px)" srcSet="/media/hero-dubai-mobile.webp"/><img src="/media/hero-dubai.webp" alt="چشم‌انداز روشن دبی و برج خلیفه" width="1800" height="1350" fetchPriority="high" decoding="async"/></picture>
           <div className="shell hero-layout">
@@ -177,7 +209,7 @@ function App() {
               <p className="eyebrow">فجر پارسا؛ همراه برنامه‌ریزی سفر شما</p>
               <h1>سفر بعدی شما،<br/>از همین‌جا آغاز می‌شود.</h1>
               <p className="hero-description">ویزا، تکت، هتل و خدمات سفر؛ گزینه‌ها را بررسی کنید و با اطلاعات روشن، قدم بعد را با مشاور فجر پارسا بردارید.</p>
-              <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">شروع درخواست <ArrowLeft size={17}/></button><a href="#destinations" className="secondary-action">دیدن مقصدها <Globe2 size={17}/></a></div>
+              <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">شروع درخواست <ArrowLeft size={17}/></button><a href="/inbound" className="secondary-action" lang="en">Visit Afghanistan <Globe2 size={17}/></a></div>
               <div className="hero-services"><span>ویزا و اقامت</span><span>پرواز و هتل</span><span>سفرهای گروهی</span></div>
             </div>
             <div className="hero-caption"><span>مقصدی برای ایده گرفتن</span><strong>دبی، امارات متحده عربی</strong><a href="#destinations">کشف مقصدها <ArrowLeft size={14}/></a></div>
@@ -340,7 +372,7 @@ function App() {
       </main>
 
       {selection && <Suspense fallback={<div role="status" className="dialog-loading">در حال آماده‌سازی فرم…</div>}><DetailsDialog selection={selection} onClose={() => setSelection(null)} onRequest={openRequest} /></Suspense>}
-      <footer id="contact" className="bg-[#070d17] py-14 text-slate-300">
+      {!isInboundRoute && <footer id="contact" className="bg-[#070d17] py-14 text-slate-300">
         <div className="shell grid gap-9 md:grid-cols-4">
           <div>
             <div className="flex items-center gap-3">
@@ -354,14 +386,14 @@ function App() {
           <div><div className="text-xs font-black text-white">پشتیبانی</div><p className="footer-links"><a href="#faq">پرسش‌های رایج</a><a href="#finder">راهنمای درخواست</a><a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer">تماس با دفتر</a></p></div>
         </div>
         <div className="shell mt-10 border-t border-white/10 pt-5 text-[10px] text-[var(--fp-muted)]">فجر پارسا — خدمات سفر، ویزا و تجارت</div>
-      </footer>
+      </footer>}
 
 
 
-      <div className="mobile-action-bar fixed inset-x-3 bottom-3 z-30 flex items-center gap-2 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-glass)] p-2 shadow-2xl backdrop-blur md:hidden">
+      {!isInboundRoute && <div className="mobile-action-bar fixed inset-x-3 bottom-3 z-30 flex items-center gap-2 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-glass)] p-2 shadow-2xl backdrop-blur md:hidden">
         <button onClick={request} className="flex-1 rounded-xl bg-[#09111f] px-3 py-3 text-xs font-black text-white">شروع درخواست</button>
         <a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 rounded-xl border border-[var(--fp-line)] px-4 py-3 text-xs font-black"><MessageCircle size={15} /> واتساپ</a>
-      </div>
+      </div>}
     </div>
   )
 }
