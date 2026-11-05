@@ -13,7 +13,10 @@ const server = createServer(async (req,res) => {
   if (!path.startsWith(root + sep)) { res.writeHead(403); res.end(); return }
   if (req.url === '/favicon.ico') { res.writeHead(204); res.end(); return }
   try { const bytes = await readFile(path); res.writeHead(200, { 'content-type': mime[extname(path)] || 'application/octet-stream' }); res.end(bytes) }
-  catch { res.writeHead(404);res.end('Not found') }
+  catch {
+    try { const bytes=await readFile(path+'.html');res.writeHead(200,{'content-type':mime['.html']});res.end(bytes) }
+    catch {res.writeHead(404);res.end('Not found')}
+  }
 })
 await new Promise(r => server.listen(0, '127.0.0.1', r))
 const url = `http://127.0.0.1:${server.address().port}/`

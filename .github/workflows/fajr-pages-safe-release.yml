@@ -60,6 +60,11 @@ jobs:
       - name: Verify production UI with local Chromium
         working-directory: web-v2
         run: npm run test:smoke
+      - name: Verify crawlable inbound HTML and local Pages routing (no deploy)
+        working-directory: web-v2
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: npm run test:seo
       - name: Verify optional synthetic intake without live submission
         working-directory: web-v2
         run: npm run test:intake-form

@@ -40,6 +40,10 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Verify website UX with local browser and synthetic data
         run: npm run test:smoke
+      - name: Verify crawlable inbound HTML and local Pages routing (no deploy)
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: npm run test:seo
       - name: Verify optional intake form with intercepted API and synthetic challenge
         run: npm run test:intake-form
       - name: Save synthetic inbound visual QA for owner review
@@ -50,5 +54,8 @@ jobs:
           path: |
             web-v2/test-results/inbound-*.png
             web-v2/test-results/results.json
+            web-v2/test-results/inbound-seo-results.json
+            web-v2/test-results/inbound-response.html
+            web-v2/test-results/inbound-pages.log
           if-no-files-found: error
           retention-days: 3

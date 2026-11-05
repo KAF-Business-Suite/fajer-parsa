@@ -12,7 +12,8 @@ import { MagicCard } from './components/magicui/magic-card'
 import { Reveal } from './components/Reveal'
 import type { Selection, RequestContext } from './components/DetailsDialog'
 const CountryPage = lazy(() => import('./components/CountryPage').then(module => ({default:module.CountryPage})))
-const InboundTourism = lazy(() => import('./components/InboundTourism').then(module => ({default:module.InboundTourism})))
+import { InboundTourism } from './components/InboundTourism'
+import { inboundSeo, isInboundPath, normalizeLegacyInbound, updateInboundMetadata } from './inbound-route'
 const DetailsDialog = lazy(() => import('./components/DetailsDialog').then(m => ({default:m.DetailsDialog})))
 import {
   ArrowLeft,
@@ -53,13 +54,14 @@ const inboundHeaderText = {
   ar: {nav:'التنقل للزوار',services:'الخدمات',how:'طريقة العمل',enquire:'استفسار',home:'الموقع الرئيسي',contact:'اتصل بنا',menu:'قائمة الهاتف',themeLight:'التبديل إلى الوضع الفاتح',themeDark:'التبديل إلى الوضع الداكن',skip:'الانتقال إلى المحتوى الرئيسي',visit:'زيارة أفغانستان',header:'ترويسة فجر بارسا',logo:'شعار فجر بارسا'},
 }
 
-function App() {
+function App({initialPath}: {initialPath?: string} = {}) {
   const headerRef = useRef<HTMLElement>(null)
-  const [routeHash,setRouteHash] = useState(window.location.hash)
+  const [routeHash,setRouteHash] = useState(typeof window === 'undefined' ? '' : window.location.hash)
+  const [routePath,setRoutePath] = useState(initialPath ?? (typeof window === 'undefined' ? '/' : window.location.pathname))
   const [inboundLanguage,setInboundLanguage] = useState<InboundLanguage>('en')
   const inboundNav=inboundHeaderText[inboundLanguage]
-  const isCountryRoute = routeHash.startsWith('#/country/')
-  const isInboundRoute = routeHash.startsWith('#/inbound')
+  const isCountryRoute = routePath === '/' && routeHash.startsWith('#/country/')
+  const isInboundRoute = isInboundPath(routePath)
   const routeCode = isCountryRoute ? routeHash.slice('#/country/'.length).toUpperCase() : null
   const selectedCountry = countryServices.find(country=>countryPresentation[country.name]?.code===routeCode)
   const openCountry = (name:string) => { const code=countryPresentation[name]?.code; if(code) window.location.hash='/country/'+code.toLowerCase() }
@@ -76,16 +78,21 @@ function App() {
   const finderReady = useMemo(() => Boolean(finder.destination && finder.purpose), [finder])
 
   useEffect(()=>{
-    const sync=()=>{setRouteHash(window.location.hash);if(window.location.hash.startsWith('#/inbound'))setInboundLanguage('en');setMegaOpen(false);setMobileOpen(false);setSelection(null)}
+    const sync=()=>{normalizeLegacyInbound();setRouteHash(window.location.hash);setRoutePath(window.location.pathname);setMegaOpen(false);setMobileOpen(false);setSelection(null)}
     window.addEventListener('hashchange',sync)
-    return ()=>window.removeEventListener('hashchange',sync)
+    window.addEventListener('popstate',sync)
+    return ()=>{window.removeEventListener('hashchange',sync);window.removeEventListener('popstate',sync)}
   },[])
   useEffect(()=>{
-    document.title=isInboundRoute ? 'Afghanistan Inbound Tourism | Fajr Parsa' : selectedCountry ? 'خدمات '+selectedCountry.name+' | فجر پارسا' : isCountryRoute ? 'مقصد پیدا نشد | فجر پارسا' : 'فجر پارسا | سفر، ویزا و تجارت'
+    updateInboundMetadata(inboundLanguage,isInboundRoute)
+    document.title=isInboundRoute ? inboundSeo[inboundLanguage].title : selectedCountry ? 'خدمات '+selectedCountry.name+' | فجر پارسا' : isCountryRoute ? 'مقصد پیدا نشد | فجر پارسا' : 'فجر پارسا | سفر، ویزا و تجارت'
     if (!isInboundRoute) { document.documentElement.lang='fa-AF'; document.documentElement.dir='rtl' }
     if (isInboundRoute) {
-      // A hash route has no matching DOM anchor; entering it from mid-page must start at the top.
-      const frame=requestAnimationFrame(()=>window.scrollTo(0,0))
+      // Keep section anchors useful; only a fresh route entry resets to the top.
+      const frame=requestAnimationFrame(()=>{
+        const target=routeHash.length>1 ? document.getElementById(routeHash.slice(1)) : null
+        if(target)target.scrollIntoView();else window.scrollTo(0,0)
+      })
       return ()=>cancelAnimationFrame(frame)
     }
     if(!isCountryRoute && routeHash.length>1) {
@@ -93,6 +100,7 @@ function App() {
       return ()=>cancelAnimationFrame(frame)
     }
   },[routeHash,selectedCountry,isCountryRoute,isInboundRoute])
+  useEffect(()=>{if(isInboundRoute){document.title=inboundSeo[inboundLanguage].title;updateInboundMetadata(inboundLanguage,true)}},[inboundLanguage,isInboundRoute])
   const visibleServices = useMemo(() => serviceGroups.filter(s => (s.title + ' ' + s.desc).includes(query.trim())), [query])
   useEffect(() => {
     const sync = () => setHeaderScrolled(window.scrollY > 24)
@@ -120,7 +128,7 @@ function App() {
       <ScrollProgress className="fp-scroll-progress" aria-hidden="true" />
       <header ref={headerRef} data-scrolled={headerScrolled} className="floating-header" aria-label={isInboundRoute ? inboundNav.header : "سربرگ فجر پارسا"}>
         <div className="shell flex h-[74px] items-center justify-between gap-4">
-          <a href="#" className="flex items-center gap-3">
+          <a href={isInboundRoute ? "/" : "#"} className="flex items-center gap-3">
             <div className="relative">
               <img src="/media/logo.png" alt={isInboundRoute ? inboundNav.logo : "لوگوی فجر پارسا"} className="h-12 w-12 rounded-[15px] border border-[var(--fp-line)] bg-[var(--fp-surface)] object-contain p-1 shadow-sm" />
 
@@ -135,12 +143,12 @@ function App() {
             <button className="rounded-xl px-3 py-2.5" onClick={()=>document.getElementById('inbound-services')?.scrollIntoView({behavior:'smooth'})}>{inboundNav.services}</button>
             <button className="rounded-xl px-3 py-2.5" onClick={()=>document.getElementById('inbound-process')?.scrollIntoView({behavior:'smooth'})}>{inboundNav.how}</button>
             <button className="rounded-xl px-3 py-2.5" onClick={()=>document.getElementById('inbound-request')?.scrollIntoView({behavior:'smooth'})}>{inboundNav.enquire}</button>
-            <a className="rounded-xl px-3 py-2.5" href="#">{inboundNav.home}</a>
+            <a className="rounded-xl px-3 py-2.5" href="/">{inboundNav.home}</a>
           </nav> : <nav className="hidden items-center gap-1 text-[13px] font-extrabold lg:flex">
             <button aria-expanded={megaOpen} aria-controls="services-mega" onClick={() => setMegaOpen(!megaOpen)} className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5">
               خدمات <ChevronDown size={15} className={megaOpen ? 'rotate-180 transition' : 'transition'} />
             </button>
-            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#/inbound">Afghanistan Tourism</a>
+            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="/inbound">Afghanistan Tourism</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#country-services">کشورها</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#journey">درخواست سفر</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#track">پیگیری</a>
@@ -178,7 +186,7 @@ function App() {
 
         {mobileOpen && (
           <nav id="mobile-navigation" aria-label={isInboundRoute ? inboundNav.nav : "ناوبری گوشی"} className="mobile-navigation-panel lg:hidden">
-            {isInboundRoute ? <div className="mobile-nav-group"><p>{inboundNav.visit}</p><div className="mobile-nav-links">{[[inboundNav.services,"inbound-services"],[inboundNav.how,"inbound-process"],[inboundNav.enquire,"inbound-request"]].map(([label,id])=><a href="#/inbound" key={id} onClick={e=>{e.preventDefault();setMobileOpen(false);document.getElementById(id)?.scrollIntoView({behavior:"smooth"})}}>{label}<ArrowLeft size={15}/></a>)}<a href="#" onClick={()=>setMobileOpen(false)}>{inboundNav.home} <ArrowLeft size={15}/></a></div></div> : <>
+            {isInboundRoute ? <div className="mobile-nav-group"><p>{inboundNav.visit}</p><div className="mobile-nav-links">{[[inboundNav.services,"inbound-services"],[inboundNav.how,"inbound-process"],[inboundNav.enquire,"inbound-request"]].map(([label,id])=><a href={'#'+id} key={id} onClick={e=>{e.preventDefault();setMobileOpen(false);document.getElementById(id)?.scrollIntoView({behavior:"smooth"})}}>{label}<ArrowLeft size={15}/></a>)}<a href="/" onClick={()=>setMobileOpen(false)}>{inboundNav.home} <ArrowLeft size={15}/></a></div></div> : <>
             <div className="mobile-nav-group"><p>سفر خود را برنامه‌ریزی کنید</p><div className="mobile-nav-links">
               {[['کشورها','country-services'],['خدمات','services'],['تکت و بوکینگ سراسری','worldwide-booking'],['بسته‌های خدمات','deals']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
             </div></div>
@@ -193,7 +201,7 @@ function App() {
 
       <a className="skip-link" href="#main-content">{isInboundRoute ? inboundNav.skip : "رفتن به محتوای اصلی"}</a>
       <main id="main-content">
-        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : isInboundRoute ? <Suspense fallback={<div className="shell country-page" role="status">Preparing Afghanistan travel…</div>}><InboundTourism onLanguageChange={setInboundLanguage}/></Suspense> : <>
+        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : isInboundRoute ? <InboundTourism language={inboundLanguage} onLanguageChange={setInboundLanguage}/> : <>
         <section className="hero scenic-hero">
           <picture className="hero-scene"><source media="(max-width: 767px)" srcSet="/media/hero-dubai-mobile.webp"/><img src="/media/hero-dubai.webp" alt="چشم‌انداز روشن دبی و برج خلیفه" width="1800" height="1350" fetchPriority="high" decoding="async"/></picture>
           <div className="shell hero-layout">
@@ -201,7 +209,7 @@ function App() {
               <p className="eyebrow">فجر پارسا؛ همراه برنامه‌ریزی سفر شما</p>
               <h1>سفر بعدی شما،<br/>از همین‌جا آغاز می‌شود.</h1>
               <p className="hero-description">ویزا، تکت، هتل و خدمات سفر؛ گزینه‌ها را بررسی کنید و با اطلاعات روشن، قدم بعد را با مشاور فجر پارسا بردارید.</p>
-              <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">شروع درخواست <ArrowLeft size={17}/></button><a href="#/inbound" className="secondary-action" lang="en">Visit Afghanistan <Globe2 size={17}/></a></div>
+              <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">شروع درخواست <ArrowLeft size={17}/></button><a href="/inbound" className="secondary-action" lang="en">Visit Afghanistan <Globe2 size={17}/></a></div>
               <div className="hero-services"><span>ویزا و اقامت</span><span>پرواز و هتل</span><span>سفرهای گروهی</span></div>
             </div>
             <div className="hero-caption"><span>مقصدی برای ایده گرفتن</span><strong>دبی، امارات متحده عربی</strong><a href="#destinations">کشف مقصدها <ArrowLeft size={14}/></a></div>

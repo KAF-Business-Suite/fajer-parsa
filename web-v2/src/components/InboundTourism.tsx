@@ -82,8 +82,10 @@ const serviceCards: Array<{id:TravelService;icon:typeof PlaneLanding;title:Local
   {id:'guide',icon:Languages,title:{en:'Interpreter & guide coordination',fa:'ترجمان و رهنمای گردشگری',ar:'تنسيق المترجمين والمرشدين'},description:{en:'Language support and local guides subject to applicable requirements.',fa:'خدمات ترجمانی و رهنمای محلی مطابق شرایط مربوط.',ar:'الترجمة والمرشدون المحليون وفق المتطلبات المعمول بها.'}},
   {id:'journey',icon:Compass,title:{en:'Tailored journeys',fa:'برنامه سفر اختصاصی',ar:'برامج رحلات مخصصة'},description:{en:'A thoughtful itinerary matched to your dates and interests.',fa:'طرح سفر بر اساس زمان و علاقه‌مندی‌های شما.',ar:'برنامج يناسب مواعيدك واهتماماتك.'}}
 ]
-export function InboundTourism({onLanguageChange}: {onLanguageChange?: (language:Language)=>void}) {
-  const [lang,setLang]=useState<Language>('en')
+export function InboundTourism({language='en',onLanguageChange}: {language?:Language;onLanguageChange?: (language:Language)=>void}) {
+  const [interactive,setInteractive]=useState(false)
+  useEffect(()=>setInteractive(true),[])
+  const lang=language
   const [name,setName]=useState('')
   const [contact,setContact]=useState('')
   const [arrival,setArrival]=useState('')
@@ -129,7 +131,7 @@ export function InboundTourism({onLanguageChange}: {onLanguageChange?: (language
       <div className="shell inbound-topbar">
         <span className="inbound-mark"><Globe2 size={16}/> Afghanistan Travel</span>
         <div className="inbound-lang" role="group" aria-label="Choose language">
-          {(['en','fa','ar'] as Language[]).map(code=><button type="button" key={code} lang={code==='fa'?'fa-AF':code} aria-pressed={lang===code} onClick={()=>{setLang(code);onLanguageChange?.(code)}}>{code==='en'?'EN':code==='fa'?'دری':'العربية'}</button>)}
+          {(['en','fa','ar'] as Language[]).map(code=><button type="button" key={code} lang={code==='fa'?'fa-AF':code} aria-pressed={lang===code} onClick={()=>onLanguageChange?.(code)}>{code==='en'?'EN':code==='fa'?'دری':'العربية'}</button>)}
         </div>
       </div>
       <div className="shell inbound-hero-body">
@@ -166,13 +168,14 @@ export function InboundTourism({onLanguageChange}: {onLanguageChange?: (language
       </div>
     </section>
 
+    <noscript><p className="shell">Enable JavaScript to choose a language and prepare an enquiry. No information is sent from this page without your action.</p></noscript>
     <section id="inbound-request" className="shell inbound-section inbound-request-section">
       <div className="inbound-request-intro">
         <span className="inbound-kicker">03 / YOUR ENQUIRY</span><h2>{t.formTitle}</h2><p>{t.formNote}</p>
         <div className="inbound-trust-note"><ShieldCheck size={22}/><div><strong>{t.trustTitle}</strong><p>{t.trustBody}</p></div></div>
         <p className="inbound-caution">{t.noPromise}</p>
       </div>
-      <form className="inbound-form" onSubmit={e=>{e.preventDefault();sendEnquiry()}} noValidate>
+      <form inert={!interactive} className="inbound-form" onSubmit={e=>{e.preventDefault();sendEnquiry()}} noValidate>
         <div className="inbound-form-grid">
           <label>{t.name}<input required maxLength={100} autoComplete="name" value={name} onChange={e=>setName(e.target.value)}/></label>
           <label>{t.email}<input required maxLength={120} autoComplete="off" dir="auto" aria-invalid={tried && !isReachableContact(contact)} value={contact} onChange={e=>setContact(e.target.value)}/></label>
@@ -184,10 +187,10 @@ export function InboundTourism({onLanguageChange}: {onLanguageChange?: (language
         <label>{t.notes}<textarea rows={3} maxLength={700} value={notes} onChange={e=>setNotes(e.target.value)}/></label>
         <label className="inbound-consent"><input type="checkbox" checked={consent} onChange={e=>setConsent(e.target.checked)}/><span>{t.consent}</span></label>
         {tried&&!formReady&&<p className="inbound-error" role="alert">{t.invalid}</p>}
-        <button type="submit" className="inbound-form-submit"><MessageCircle size={19}/>{t.send}<Send size={15}/></button>
+        <button type="submit" disabled={!interactive} className="inbound-form-submit"><MessageCircle size={19}/>{t.send}<Send size={15}/></button>
         <p className="inbound-footnote">{t.notSubmitted}</p>
       </form>
     </section>
-    <div className="inbound-bottom"><div className="shell"><span>{t.footer}</span><a href="#">{t.back}</a><a href={'https://wa.me/'+contactNumber} target="_blank" rel="noreferrer noopener">{t.contact}</a></div></div>
+    <div className="inbound-bottom"><div className="shell"><span>{t.footer}</span><a href="/">{t.back}</a><a href={'https://wa.me/'+contactNumber} target="_blank" rel="noreferrer noopener">{t.contact}</a></div></div>
   </div>
 }
