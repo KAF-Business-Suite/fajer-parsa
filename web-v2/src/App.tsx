@@ -13,6 +13,7 @@ import { Reveal } from './components/Reveal'
 import type { Selection, RequestContext } from './components/DetailsDialog'
 const CountryPage = lazy(() => import('./components/CountryPage').then(module => ({default:module.CountryPage})))
 const DetailsDialog = lazy(() => import('./components/DetailsDialog').then(m => ({default:m.DetailsDialog})))
+const Newsroom = lazy(() => import('./components/Newsroom').then(m => ({default:m.Newsroom})))
 import {
   ArrowLeft,
   BadgeCheck,
@@ -49,6 +50,7 @@ function App() {
   const headerRef = useRef<HTMLElement>(null)
   const [routeHash,setRouteHash] = useState(window.location.hash)
   const isCountryRoute = routeHash.startsWith('#/country/')
+  const isNewsRoute = routeHash === '#/journal' || routeHash.startsWith('#/journal/')
   const routeCode = isCountryRoute ? routeHash.slice('#/country/'.length).toUpperCase() : null
   const selectedCountry = countryServices.find(country=>countryPresentation[country.name]?.code===routeCode)
   const openCountry = (name:string) => { const code=countryPresentation[name]?.code; if(code) window.location.hash='/country/'+code.toLowerCase() }
@@ -70,12 +72,13 @@ function App() {
     return ()=>window.removeEventListener('hashchange',sync)
   },[])
   useEffect(()=>{
-    document.title=selectedCountry ? 'خدمات '+selectedCountry.name+' | فجر پارسا' : isCountryRoute ? 'مقصد پیدا نشد | فجر پارسا' : 'فجر پارسا | سفر، ویزا و تجارت'
+    document.title=isNewsRoute ? 'راهنما و مقالات | فجر پارسا' : selectedCountry ? 'خدمات '+selectedCountry.name+' | فجر پارسا' : isCountryRoute ? 'مقصد پیدا نشد | فجر پارسا' : 'فجر پارسا | سفر، ویزا و تجارت'
+    if (isNewsRoute) { window.scrollTo({ top: 0, behavior: 'auto' }); return }
     if(!isCountryRoute && routeHash.length>1) {
       const frame=requestAnimationFrame(()=>document.getElementById(routeHash.slice(1))?.scrollIntoView())
       return ()=>cancelAnimationFrame(frame)
     }
-  },[routeHash,selectedCountry,isCountryRoute])
+  },[routeHash,selectedCountry,isCountryRoute,isNewsRoute])
   const visibleServices = useMemo(() => serviceGroups.filter(s => (s.title + ' ' + s.desc).includes(query.trim())), [query])
   useEffect(() => {
     const sync = () => setHeaderScrolled(window.scrollY > 24)
@@ -122,6 +125,7 @@ function App() {
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#journey">درخواست سفر</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#deals">بسته‌های خدمات</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#track">پیگیری</a>
+            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#/journal">مقالات</a>
           </nav>
 
           <div className="flex items-center gap-2">
@@ -161,7 +165,7 @@ function App() {
             </div></div>
             <div className="mobile-nav-group"><p>انتخاب سریع خدمت</p><div className="mobile-service-links">{serviceGroups.map(({title,icon:Icon,desc})=><button type="button" key={title} onClick={()=>{setMobileOpen(false);inform(title,desc+' شرایط و هزینه با دفتر بررسی می‌شود.',{service:title})}}><Icon size={18}/><span>{title}</span></button>)}</div></div>
             <div className="mobile-nav-group"><p>راهنما و ارتباط</p><div className="mobile-nav-links">
-              {[['راهنمای انتخاب خدمت','finder'],['درخواست سفر','journey'],['الهام سفر','destinations'],['پرسش‌های رایج','faq'],['پیگیری پرونده','track'],['معرفی و تماس دفتر','contact']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
+              {[['راهنمای انتخاب خدمت','finder'],['درخواست سفر','journey'],['الهام سفر','destinations'],['پرسش‌های رایج','faq'],['مقالات و راهنما','/journal'],['پیگیری پرونده','track'],['معرفی و تماس دفتر','contact']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
             </div></div>
           </nav>
         )}
@@ -169,7 +173,7 @@ function App() {
 
       <a className="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
       <main id="main-content">
-        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : <>
+        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : isNewsRoute ? <Suspense fallback={<div className="shell py-20" role="status">در حال آماده‌سازی مقالات…</div>}><Newsroom routeHash={routeHash}/></Suspense> : <>
         <section className="hero scenic-hero">
           <picture className="hero-scene"><source media="(max-width: 767px)" srcSet="/media/hero-dubai-mobile.webp"/><img src="/media/hero-dubai.webp" alt="چشم‌انداز روشن دبی و برج خلیفه" width="1800" height="1350" fetchPriority="high" decoding="async"/></picture>
           <div className="shell hero-layout">
@@ -351,7 +355,7 @@ function App() {
           </div>
           <div><div className="text-xs font-black text-white">خدمات</div><p className="mt-4 text-xs leading-7 text-slate-400">ویزا • اقامت • دعوتنامه • پرواز • هتل • زیارت • اسناد • بیمه</p></div>
           <div><div className="text-xs font-black text-white">راه‌های ارتباط</div><p className="mt-4 text-xs leading-7 text-slate-400"><a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer">واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴</a><br/>کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵.</p></div>
-          <div><div className="text-xs font-black text-white">پشتیبانی</div><p className="footer-links"><a href="#faq">پرسش‌های رایج</a><a href="#finder">راهنمای درخواست</a><a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer">تماس با دفتر</a></p></div>
+          <div><div className="text-xs font-black text-white">پشتیبانی</div><p className="footer-links"><a href="#faq">پرسش‌های رایج</a><a href="#/journal">مقالات و راهنما</a><a href="#finder">راهنمای درخواست</a><a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer">تماس با دفتر</a></p></div>
         </div>
         <div className="shell mt-10 border-t border-white/10 pt-5 text-[10px] text-[var(--fp-muted)]">فجر پارسا — خدمات سفر، ویزا و تجارت</div>
       </footer>
