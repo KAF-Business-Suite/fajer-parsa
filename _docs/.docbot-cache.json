@@ -1,54 +1,390 @@
 {
   "entries": {
-    "services/fastapi/src/app/main.py": {
+    "web-v2/server/office/adapters.test.mjs": {
+      "description": {
+        "classes": [],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/adapters.test.mjs",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 9,
+            "line_start": 9,
+            "name": "request",
+            "qualified_name": "request",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Send an HTTP request using the given HTTP method and optional request body, intended for use in the test suite. It wraps creating and dispatching a request to the test server or adapter and handles the supplied method and payload.\n",
+              "returns_summary": "Returns a promise that resolves with the HTTP response from the server/adapter (the test response object)."
+            },
+            "signature": "def request(method='GET', body):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 10,
+            "line_start": 10,
+            "name": "auth",
+            "qualified_name": "auth",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Defines an authentication helper used in the adapters test suite (web-v2/server/office/adapters.test.mjs). It encapsulates authentication-related setup or behavior for use by the tests.\n",
+              "returns_summary": null
+            },
+            "signature": "def auth():"
+          }
+        ],
+        "language": "javascript",
+        "overview": {
+          "key_responsibilities": [
+            "Provide a request helper function used by tests to build or simulate requests against the office handler.",
+            "Provide an auth helper function used by tests to supply authentication context or credentials for handler invocation.",
+            "Import the officeDependencies to allow tests to inject or reference the real adapter dependencies.",
+            "Import the handleOffice function so tests can invoke the actual office request handler implementation."
+          ],
+          "notable_patterns": [
+            "Uses the Node.js built-in test runner (node:test) for defining tests.",
+            "Uses strict assertions via node:assert/strict for verifying test outcomes.",
+            "References dependency objects and the handler directly to support dependency-injected testing of handler behavior."
+          ],
+          "summary": "This file is a test module that sets up helpers and utilities used by tests for the office-related adapter and handler code. It imports the Node.js test harness and assertion library, pulls in the officeDependencies object from the adapters module, and pulls in the handleOffice function from the handler module. Within the module scope it defines two functions, request and auth, which are used by test cases to construct requests and provide authentication context for exercising the handler logic.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 751,
+        "tokens_output": 927
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-31T02:49:10Z",
+      "model": "gpt-5-mini",
+      "source_sha": "59e0b0f654c8ede6ed5cbc4c0718f89bc0eb61c8"
+    },
+    "web-v2/server/office/adapters.ts": {
       "description": {
         "classes": [
           {
+            "base_classes": [],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": true,
+            "is_pydantic_model": false,
+            "line_end": 7,
+            "line_start": 7,
+            "name": "Config",
+            "qualified_name": "Config",
+            "response": {
+              "purpose": "Config is an interface that defines the shape of configuration data used by the office adapter layer. It provides a typed contract that other parts of the module rely on when reading or supplying configuration values.\n",
+              "responsibilities": [
+                "Declare the expected structure of configuration objects consumed by the adapter code.",
+                "Ensure type safety for configuration values passed through the office adapter boundaries.",
+                "Serve as documentation for what configuration the adapter expects, enabling consistent usage across the module."
+              ],
+              "role_in_module": "Within web-v2/server/office/adapters.ts, Config acts as the central type contract for adapter configuration; other functions and classes in the file refer to it to guarantee they receive configuration in the expected form."
+            }
+          },
+          {
+            "base_classes": [],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": true,
+            "is_pydantic_model": false,
+            "line_end": 8,
+            "line_start": 8,
+            "name": "Row",
+            "qualified_name": "Row",
+            "response": {
+              "purpose": "Row is a TypeScript interface that defines the shape and contract for a single row representation used by the office adapter layer. It provides a typed abstraction so code in this module can work with row data in a consistent, predictable way.\n",
+              "responsibilities": [
+                "Declare the expected structure (properties and types) for a row used by the adapters in this module.",
+                "Serve as a compile-time contract to ensure consumers produce and consume row objects consistently.",
+                "Support type safety across functions and components in the office adapter code that manipulate row data.",
+                "Act as the canonical row type for integrations and other parts of the module that need to work with row entities."
+              ],
+              "role_in_module": "Within web-v2/server/office/adapters.ts, Row provides the typed interface that other adapters and utilities rely on to exchange and manipulate row-level data. It anchors the module's row-related APIs by defining the expected shape of row objects used throughout the file."
+            }
+          }
+        ],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/adapters.ts",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 12,
+            "line_start": 10,
+            "name": "object",
+            "qualified_name": "object",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "A type guard function that checks whether the given value is an object with string keys and unknown values, i.e., a Record<string, unknown>. It narrows the input type at runtime so callers can safely treat the value as a plain object when the function returns true.\n",
+              "returns_summary": null
+            },
+            "signature": "def object(value: unknown) -> value is Record<string, unknown>:"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 23,
+            "line_start": 13,
+            "name": "row",
+            "qualified_name": "row",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Converts or wraps an arbitrary input into the module's Row representation. It accepts any value and normalizes or adapts it into a Row object used by the office adapter layer.\n",
+              "returns_summary": null
+            },
+            "signature": "def row(value: unknown) -> Row:"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 77,
+            "line_start": 27,
+            "name": "officeDependencies",
+            "qualified_name": "officeDependencies",
+            "response": {
+              "parameters_summary": "takeSlot is an optional async callback (user => Promise<boolean>) used to attempt to reserve or claim a slot for a given user; fetcher lets callers substitute a different fetch implementation (useful for testing or environments without the global fetch).",
+              "purpose": "Creates and returns a set of office-related dependency functions using the provided configuration. It optionally accepts a takeSlot callback to attempt claiming a user slot and a fetcher override for making HTTP requests, and exposes nested helpers named call and rpc for performing those operations.\n",
+              "returns_summary": "Returns an object of office dependencies (including the nested call and rpc helper functions) configured according to the supplied config and optional callbacks."
+            },
+            "signature": "def officeDependencies(config: Config, takeSlot: ((user: string) => Promise<boolean>) | undefined = undefined, fetcher: typeof fetch = fetch):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": true,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 34,
+            "line_start": 31,
+            "name": "call",
+            "qualified_name": "call",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Performs an asynchronous HTTP call to the given path using the provided RequestInit options. It is an async helper that issues a request to the specified endpoint and awaits the outcome.\n",
+              "returns_summary": "Returns a Promise that resolves with the result of the asynchronous request."
+            },
+            "signature": "async def call(path: string, init: RequestInit):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": true,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 47,
+            "line_start": 35,
+            "name": "rpc",
+            "qualified_name": "rpc",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Performs an asynchronous remote procedure call identified by the given name, sending the provided payload to the target and awaiting a response. It encapsulates making and awaiting the RPC operation using the specified procedure name and associated data.\n",
+              "returns_summary": null
+            },
+            "signature": "async def rpc(name: string, payload: object):"
+          }
+        ],
+        "language": "typescript",
+        "overview": {
+          "key_responsibilities": [
+            "Declare the Config interface to describe configuration shape used by the office adapters.",
+            "Declare the Row interface to represent row-shaped data structures manipulated by the adapters.",
+            "Provide the object() function as a module-level factory or transformer for building/normalizing object-shaped data.",
+            "Provide the row() function as a module-level factory or transformer for building/normalizing Row instances.",
+            "Provide the officeDependencies() function to construct or return office-related dependencies, and to surface OfficeDenied or OfficeConflict where relevant."
+          ],
+          "notable_patterns": [
+            "Defines TypeScript interfaces to model data shapes (Config, Row).",
+            "Exposes module-level factory/helper functions rather than class methods.",
+            "Imports and references application-specific error classes (OfficeDenied, OfficeConflict) from a handler module."
+          ],
+          "summary": "This TypeScript module declares two interfaces and three module-level factory/helper functions which together act as adapters for office-related data and dependency construction. The file exports interfaces named Config and Row to shape configuration and row-like data structures, and it exposes functions object, row, and officeDependencies. The module also imports two specific error classes, OfficeDenied and OfficeConflict, from a handler module, indicating it interacts with or signals those application-level error conditions when constructing or validating office-related artifacts.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 1734,
+        "tokens_output": 1944
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-31T02:49:19Z",
+      "model": "gpt-5-mini",
+      "source_sha": "97676dfc118b16c6eb6555bc82c32afac18ac1f8"
+    },
+    "web-v2/server/office/handler.test.mjs": {
+      "description": {
+        "classes": [],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/handler.test.mjs",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 5,
+            "line_start": 5,
+            "name": "req",
+            "qualified_name": "req",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Constructs or configures a request for tests using the provided HTTP method, optional request body, and any additional options. The function defaults to the 'GET' method and an empty object for extra options if they are not supplied.\n",
+              "returns_summary": null
+            },
+            "signature": "def req(method='GET', body, extra={}):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 6,
+            "line_start": 6,
+            "name": "deps",
+            "qualified_name": "deps",
+            "response": {
+              "parameters_summary": "over is an optional object of overrides that will be merged into the default dependency configuration to customize or replace specific dependencies for a test.",
+              "purpose": "Creates a set of test dependencies for the office handler tests, supplying sensible defaults that can be adjusted for each test. It builds and returns a dependency object used by tests, with the ability to override parts of that object when needed.\n",
+              "returns_summary": "Returns the resulting dependency object (defaults merged with any provided overrides) to be used by test code."
+            },
+            "signature": "def deps(over={}):"
+          }
+        ],
+        "language": "javascript",
+        "overview": {
+          "key_responsibilities": [
+            "Provide the req helper to build request-like objects used by the tests.",
+            "Provide the deps helper to construct dependency stubs or mocks consumed by handleOffice during testing.",
+            "Import and run tests using Node's built-in test() runner and perform assertions with node:assert/strict.",
+            "Exercise the handleOffice function and assert its behavior, including raising OfficeDenied and OfficeConflict where appropriate."
+          ],
+          "notable_patterns": [
+            "Uses Node's built-in test runner (node:test) for organizing tests.",
+            "Imports specific error classes (OfficeDenied, OfficeConflict) alongside the handler under test.",
+            "Exposes small factory/helper functions (req, deps) at module scope to simplify test setup."
+          ],
+          "summary": "This file contains tests and test helpers for the office request handler. It imports Node's built-in test runner and assertion library, and it imports the handler under test (handleOffice) along with two specific error types (OfficeDenied and OfficeConflict) from the handler module. At module level it exposes two functions, req and deps, which are used by the test code to construct request-like objects and dependency stubs for exercising handleOffice and for asserting behavior related to the OfficeDenied and OfficeConflict error conditions.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 777,
+        "tokens_output": 727
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-31T02:49:09Z",
+      "model": "gpt-5-mini",
+      "source_sha": "e21dfa6d2ce98d5bbc7d7644ccfa7240cff806d8"
+    },
+    "web-v2/server/office/handler.ts": {
+      "description": {
+        "classes": [
+          {
+            "base_classes": [],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": true,
+            "is_pydantic_model": false,
+            "line_end": 1,
+            "line_start": 1,
+            "name": "Dependencies",
+            "qualified_name": "Dependencies",
+            "response": {
+              "purpose": "An interface describing the set of external services and resources that the office request handler requires. It defines the shape of the dependency object passed into the handler so the handler can access required collaborators in a typed way.\n",
+              "responsibilities": [
+                "Declare the collection of services, clients, and utilities the handler needs to operate",
+                "Provide a single typed contract used for dependency injection into the handler",
+                "Enable the handler implementation to remain decoupled from concrete implementations for easier testing and substitution",
+                "Document what external collaborators the handler expects to receive"
+              ],
+              "role_in_module": "Dependencies serves as the typed dependency bag used by the office handler in this file; it centralizes and formalizes the external collaborators the handler consumes so the module can be composed and tested more easily."
+            }
+          },
+          {
             "base_classes": [
-              "logging.Filter"
+              "Error"
             ],
             "is_abstract": false,
             "is_dataclass": false,
             "is_enum": false,
             "is_protocol": false,
             "is_pydantic_model": false,
-            "line_end": 26,
-            "line_start": 18,
-            "name": "RedactConsumerAuthQuery",
-            "qualified_name": "main.RedactConsumerAuthQuery",
+            "line_end": 44,
+            "line_start": 44,
+            "name": "OfficeDenied",
+            "qualified_name": "OfficeDenied",
             "response": {
-              "purpose": "RedactConsumerAuthQuery is a logging.Filter subclass intended to process log records and apply redaction logic for consumer authentication query data. It exists to ensure sensitive information in authentication-related log entries is filtered before emission.\n",
+              "purpose": "OfficeDenied is a specialized Error subclass used to represent an access-denied condition related to office operations. It provides a distinct error type so callers can identify and handle office denial cases specifically.\n",
               "responsibilities": [
-                "Implement the filter(record) method to examine logging.LogRecord objects.",
-                "Mutate or block log records that contain consumer authentication query details to prevent sensitive data from being logged.",
-                "Integrate with the module's logging configuration so filtered records are passed to handlers in redacted form."
+                "Represent an office access denial as an Error instance",
+                "Provide a distinct error type that can be thrown by code in this module",
+                "Allow calling code to catch and differentiate office-denied conditions from other errors",
+                "Carry the standard Error message information via the Error base class"
               ],
-              "role_in_module": "This class provides a pluggable logging filter within the module to centralize redaction of consumer authentication query information. It is used by the module's logging setup to ensure authentication-related log entries do not expose sensitive data."
+              "role_in_module": "Within the handler.ts file, OfficeDenied serves as the canonical error type that the module's logic can throw to indicate an office-related denial; it enables clearer error handling and flow control for office access scenarios."
+            }
+          },
+          {
+            "base_classes": [
+              "Error"
+            ],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": false,
+            "is_pydantic_model": false,
+            "line_end": 45,
+            "line_start": 45,
+            "name": "OfficeConflict",
+            "qualified_name": "OfficeConflict",
+            "response": {
+              "purpose": "OfficeConflict is a specialized Error subclass used to represent conflict conditions that occur within office-related operations. It provides a distinct error type so callers and handlers can identify and respond to office-specific conflicts.\n",
+              "responsibilities": [
+                "Represent a conflict error specific to office operations by extending the standard Error type.",
+                "Provide a distinct error type that can be thrown when an office-related conflict is detected.",
+                "Allow error-handling code in the module to identify and handle office conflict conditions separately from other errors."
+              ],
+              "role_in_module": "Within web-v2/server/office/handler.ts, OfficeConflict serves as the module's canonical error type for signaling office-specific conflicts, enabling the handler code to throw and catch these conditions in a clear and consistent way."
             }
           }
         ],
-        "extraction_quality": "full_ast",
-        "file_path": "services/fastapi/src/app/main.py",
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/handler.ts",
         "functions": [
-          {
-            "class_name": "RedactConsumerAuthQuery",
-            "is_abstract": false,
-            "is_async": false,
-            "is_classmethod": false,
-            "is_method": true,
-            "is_property": false,
-            "is_staticmethod": false,
-            "line_end": 26,
-            "line_start": 19,
-            "name": "filter",
-            "qualified_name": "main.RedactConsumerAuthQuery.filter",
-            "response": {
-              "parameters_summary": null,
-              "purpose": "Evaluate a logging.LogRecord and decide whether it should pass this filter. The method returns True if the record is allowed through the filter and False if it should be excluded.\n",
-              "returns_summary": null
-            },
-            "signature": "def filter(self, record: logging.LogRecord) -> bool:"
-          },
           {
             "class_name": null,
             "is_abstract": false,
@@ -57,67 +393,371 @@
             "is_method": false,
             "is_property": false,
             "is_staticmethod": false,
-            "line_end": 48,
-            "line_start": 47,
-            "name": "root",
-            "qualified_name": "main.root",
+            "line_end": 43,
+            "line_start": 6,
+            "name": "handleOffice",
+            "qualified_name": "handleOffice",
             "response": {
               "parameters_summary": null,
-              "purpose": "Asynchronous FastAPI route function registered with app.get to handle GET requests to the application's root endpoint. It serves as the handler invoked when clients make HTTP GET requests to the root path.\n",
+              "purpose": "Asynchronously handles an incoming HTTP Request for office-related routes within the server, using the provided Dependencies to perform whatever processing is required and producing an appropriate HTTP Response. It contains an inner helper function reply to build or send replies as part of that handling.\n",
               "returns_summary": null
             },
-            "signature": "async def root():"
+            "signature": "async def handleOffice(request: Request, deps: Dependencies) -> Promise<Response>:"
           },
           {
             "class_name": null,
             "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 8,
+            "line_start": 8,
+            "name": "reply",
+            "qualified_name": "reply",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Constructs an HTTP-style reply using the given numeric status code and arbitrary body payload; intended for sending a response from the server handler.\n",
+              "returns_summary": "Returns a reply value (typically an object or structure representing the HTTP response containing the provided status and body) suitable for being sent back to the client."
+            },
+            "signature": "def reply(status: number, body: unknown):"
+          }
+        ],
+        "language": "typescript",
+        "overview": {
+          "key_responsibilities": [
+            "Describe the external dependencies required by the office handler via the Dependencies interface.",
+            "Represent access-denied situations with the OfficeDenied Error subclass.",
+            "Represent conflict situations with the OfficeConflict Error subclass.",
+            "Implement the asynchronous entry point for office request handling in the handleOffice function."
+          ],
+          "notable_patterns": [
+            "Defines custom Error subclasses for domain-specific error signaling",
+            "Declares an interface to type external dependencies",
+            "Implements an async handler function for request processing"
+          ],
+          "summary": "This file defines the error types, dependency interface, and the primary request handler for office-related operations in the web-v2 server. It declares an interface named Dependencies to describe external collaborators required by the handler, two custom Error subclasses OfficeDenied and OfficeConflict to represent specific failure conditions, and an async function handleOffice that implements the request handling logic for office endpoints. The contents are focused on typing the handler's runtime dependencies and providing explicit error types the handler can throw or propagate.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 1239,
+        "tokens_output": 1354
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-31T02:49:15Z",
+      "model": "gpt-5-mini",
+      "source_sha": "1164ca13ac44d9fc473170d51a60c2790c131878"
+    },
+    "web-v2/server/office/pages-entry.test.mjs": {
+      "description": {
+        "classes": [],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/pages-entry.test.mjs",
+        "functions": [],
+        "language": "javascript",
+        "overview": {
+          "key_responsibilities": [
+            "Import the onRequest handler from ./pages-entry.ts so it can be exercised by tests.",
+            "Use the node:test test function to declare and run test cases targeting onRequest.",
+            "Use node:assert/strict to assert expected outcomes and invariants in those tests.",
+            "Provide a focused test module that validates the request-handling behavior of pages-entry.ts."
+          ],
+          "notable_patterns": [
+            "uses the built-in node:test test runner",
+            "uses node:assert/strict for assertions",
+            "imports the module under test directly from a relative path"
+          ],
+          "summary": "This file is a Node.js test module that sets up runtime tests for the onRequest export from the local pages-entry.ts module. It uses the built-in node:test test runner and the strict assertion utilities from node:assert to exercise and validate the behavior of the onRequest handler provided by pages-entry.ts. The file imports the test helper and assertion library and brings in the onRequest implementation under test, and then defines test cases around that implementation.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 363,
+        "tokens_output": 363
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-31T02:49:05Z",
+      "model": "gpt-5-mini",
+      "source_sha": "539ce2eea445dabd1d0f7dff995357f0d61ffda1"
+    },
+    "web-v2/server/office/pages-entry.ts": {
+      "description": {
+        "classes": [
+          {
+            "base_classes": [],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": true,
+            "is_pydantic_model": false,
+            "line_end": 8,
+            "line_start": 8,
+            "name": "Env",
+            "qualified_name": "Env",
+            "response": {
+              "purpose": "An interface representing a future Cloudflare Pages Functions entrypoint for the project. It documents that this entry is not currently mounted under /functions and is disabled until a reviewed Preview binding, schema, and release gate are available.\n",
+              "responsibilities": [
+                "Declare the shape of the environment binding for a planned Cloudflare Pages Functions entry.",
+                "Signal that the entrypoint is experimental/disabled and gated behind review and release controls.",
+                "Provide a clear contract for future implementation once the Preview binding and schema are approved.",
+                "Act as a placeholder in the codebase to indicate where Pages Functions integration will be added."
+              ],
+              "role_in_module": "This interface serves as a placeholder and documentation artifact in the module, marking the intended Cloudflare Pages Functions entry and its current off state. It communicates deployment and gating expectations until the feature is enabled."
+            }
+          }
+        ],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/pages-entry.ts",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
             "is_async": true,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 23,
+            "line_start": 9,
+            "name": "onRequest",
+            "qualified_name": "onRequest",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Asynchronous request handler that serves as the entry point for incoming HTTP requests to the office pages subsystem. It receives an execution context containing the Request and runtime Env and produces an HTTP Response to be returned to the client.\n",
+              "returns_summary": null
+            },
+            "signature": "async def onRequest(context: {request:Request;env:Env}) -> Promise<Response>:"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 11,
+            "line_start": 11,
+            "name": "unavailable",
+            "qualified_name": "unavailable",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Defines an entry point function named unavailable in the office pages entry module. The function represents the 'unavailable' page entry for the web-v2 server office pages.\n",
+              "returns_summary": null
+            },
+            "signature": "def unavailable():"
+          }
+        ],
+        "language": "typescript",
+        "overview": {
+          "key_responsibilities": [
+            "Declare the Env interface that represents the environment bindings available to the Pages function.",
+            "Export an async onRequest function that serves as the Cloudflare Pages Functions entrypoint for Office requests.",
+            "Wire the Pages runtime invocation into the application handler by calling handleOffice with dependencies from officeDependencies."
+          ],
+          "notable_patterns": [
+            "Defines an async request handler (onRequest) compatible with Cloudflare Pages Functions.",
+            "Separates concerns by delegating request handling to an imported handleOffice function.",
+            "Uses an adapters module (officeDependencies) to provide dependency wiring for the handler."
+          ],
+          "summary": "This file defines the Cloudflare Pages Functions entrypoint for the Office-related route surface. It exports an async onRequest function which acts as the handler invoked by the Pages runtime, and it relies on an imported handleOffice function to perform the actual request handling. The file also declares an Env interface representing the environment bindings available to the function, and it pulls in officeDependencies from a separate adapters module to supply concrete dependencies to the handler implementation.\n\nThe arrangement separates the Pages-specific invocation (onRequest) from the core request logic (handleOffice) and from dependency construction (officeDependencies). The onRequest function wires the runtime inputs and environment into handleOffice using the adapter-provided dependencies so that the function can be mounted by Cloudflare Pages without embedding application logic directly in the entry file.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 969,
+        "tokens_output": 950
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-31T02:49:11Z",
+      "model": "gpt-5-mini",
+      "source_sha": "7aec788b18946d549f3a9c13d53f797245ce6f95"
+    },
+    "web-v2/server/office/quota.postgres.test.mjs": {
+      "description": {
+        "classes": [],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/server/office/quota.postgres.test.mjs",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
             "is_classmethod": false,
             "is_method": false,
             "is_property": false,
             "is_staticmethod": false,
             "line_end": 53,
-            "line_start": 52,
-            "name": "dev_order",
-            "qualified_name": "main.dev_order",
+            "line_start": 53,
+            "name": "list",
+            "qualified_name": "list",
             "response": {
               "parameters_summary": null,
-              "purpose": "Asynchronous FastAPI route handler named dev_order exposed via app.get; it serves GET requests for the development order endpoint and performs the endpoint's request handling logic.\n",
+              "purpose": "Retrieve a paginated list of quota records associated with the given user, starting from the provided offset. Intended for use in tests that exercise the office quota Postgres codepaths.\n",
+              "returns_summary": "Returns an array (or iterable) of quota entries for the specified user beginning at the given offset, suitable for assertions in tests."
+            },
+            "signature": "def list(user, offset=0):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 54,
+            "line_start": 54,
+            "name": "change",
+            "qualified_name": "change",
+            "response": {
+              "parameters_summary": "user supplies the actor or credentials used for the request, expected is the value or shape the test asserts against, status is the expected HTTP/status result for the operation, and id is an optional request identifier that defaults to requestId.",
+              "purpose": "A test helper that performs a change operation in the quota tests using the given user context, checks the result against the expected value, and verifies the HTTP/status outcome. The request identifier defaults to a shared requestId when not provided.\n",
               "returns_summary": null
             },
-            "signature": "async def dev_order():"
+            "signature": "def change(user, expected, status, id=requestId):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 55,
+            "line_start": 55,
+            "name": "current",
+            "qualified_name": "current",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "A zero-argument helper function defined in the office quota Postgres test module. It is intended to provide the test suite with the current test-related value or state used by tests in web-v2/server/office/quota.postgres.test.mjs.\n",
+              "returns_summary": "Returns the current test value or state needed by the quota tests (the exact shape is not specified in the extracted data)."
+            },
+            "signature": "def current():"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 56,
+            "line_start": 56,
+            "name": "audits",
+            "qualified_name": "audits",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Defines and runs the test cases related to audit behavior for the office quota PostgreSQL code in the web-v2 server test file. It groups and executes audit-specific tests used to validate quota auditing functionality in that test suite.\n",
+              "returns_summary": null
+            },
+            "signature": "def audits():"
           }
         ],
-        "language": "Python",
+        "language": "javascript",
         "overview": {
           "key_responsibilities": [
-            "Instantiate the FastAPI application object (app) with a title and version.",
-            "Provide two asynchronous HTTP handlers: root and dev_order, which serve requests at application endpoints.",
-            "Declare RedactConsumerAuthQuery, a logging.Filter subclass used to alter or redact logging related to consumer authentication queries.",
-            "Import and expose multiple router modules and an adapter router to compose the API surface (billing, carriers, concierge, consumer, health, orders, shipments, shopify)."
+            "Provide test coverage for listing available quotas via the list function.",
+            "Validate quota modification behavior using the change function.",
+            "Verify retrieval of the current quota state with the current function.",
+            "Test audit-related functionality for quotas through the audits function.",
+            "Run external commands as part of tests using a promisified execFile and assert outcomes with node:assert."
           ],
           "notable_patterns": [
-            "Creates a FastAPI application instance",
-            "Defines asynchronous request handlers (async functions)",
-            "Implements a custom logging.Filter subclass for log message handling",
-            "Organizes application routes by importing multiple router modules and an adapter router"
+            "Uses the built-in node:test framework and before hook for organizing tests.",
+            "Uses node:child_process.execFile together with util.promisify to run external processes asynchronously.",
+            "Uses node:assert/strict for test assertions.",
+            "Organizes test logic into module-level functions that map to specific quota operations (list, change, current, audits)."
           ],
-          "summary": "This module defines the FastAPI application entry point for the Agentic Delivery Gateway. It creates a FastAPI instance named app with a title and version, imports a set of routers and an adapter router for composing the API, and exposes at least two asynchronous endpoint handlers: root and dev_order. The file also declares a logging filter class, RedactConsumerAuthQuery, as a specialized logging.Filter implementation intended for use within the application's logging configuration.\n\nThe module organizes application-level pieces: the FastAPI application object, routing adapters and routers, an authentication-redaction logging filter class, and two async endpoints that serve as part of the HTTP surface. The components present indicate integration points for billing, carriers, concierge, consumer, health, orders, shipments and shopify functionality via imported router modules and an adapter router from a Shopify adapter package.\n"
+          "summary": "This file contains a set of tests for the office quota functionality against a Postgres-backed environment. It uses the node:test testing primitives together with node:assert for assertions and node:child_process.execFile (promisified) to run external commands or test fixtures. The module exposes four top-level test helper functions \u2014 list, change, current and audits \u2014 each corresponding to an aspect of the quota API or CLI behavior that the test suite exercises. A before hook is imported to establish any required pre-test setup, and individual tests use the promisified execFile to invoke processes and assert expected outputs or side effects.\n"
         },
         "schema_version": "2.0.0",
-        "tokens_input": 1444,
-        "tokens_output": 1166
+        "tokens_input": 1149,
+        "tokens_output": 1336
       },
-      "extraction_quality": "full_ast",
-      "generated_at": "2026-10-30T17:44:41Z",
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-31T02:49:16Z",
       "model": "gpt-5-mini",
-      "source_sha": "96c29bc451513543590ac9eafb52300d121f7017"
+      "source_sha": "c1c280968c91d7d6fc0641d74b98129642dac480"
     },
-    "web-v2/server/intake/fp04-scenarios.test.mjs": {
+    "web-v2/server/office/sql-test/setup.sql": {
       "description": {
         "classes": [],
+        "extraction_quality": "raw_source",
+        "file_path": "web-v2/server/office/sql-test/setup.sql",
+        "functions": [],
+        "language": "SQL",
+        "overview": {
+          "key_responsibilities": [
+            "Create CI-oriented roles representing anon, authenticated, and service_role identities.",
+            "Define minimal auth and public tables needed for tests: auth.users and public.fajr_web_requests.",
+            "Enable row level security on the public.fajr_web_requests table and revoke default access from public and the created roles.",
+            "Source an external SQL proposal file and insert seed rows for users and office_members to populate test data."
+          ],
+          "notable_patterns": [
+            "Uses psql meta-command \\set and \\ir to control execution and include external SQL.",
+            "Applies DDL statements to create roles, schema, and tables.",
+            "Enables row level security and explicitly revokes privileges for tightened access control.",
+            "Provides deterministic seed data inserts for CI/testing."
+          ],
+          "summary": "This SQL setup script provisions a disposable CI database environment for the web-v2 office service. It creates three roles (anon, authenticated, service_role), an auth schema with a minimal users table, and a public table fajr_web_requests that stores incoming web request metadata (including service, destination, variant, contact, status, private_extra, and created_at). The script enables row level security on the fajr_web_requests table and revokes all privileges on it from public and the defined roles. It also sources an external SQL proposal file and inserts seed user and office member rows into the auth.users and fajr_private.office_members tables respectively to provide initial test identities and membership state.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 708,
+        "tokens_output": 383
+      },
+      "extraction_quality": "raw_source",
+      "generated_at": "2026-10-31T02:49:05Z",
+      "model": "gpt-5-mini",
+      "source_sha": "00e2d578fb5bc1e2675232f57c88f1f22f43cc4f"
+    },
+    "web-v2/src/office/OfficeWorkspace.tsx": {
+      "description": {
+        "classes": [
+          {
+            "base_classes": [],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": true,
+            "is_pydantic_model": false,
+            "line_end": 4,
+            "line_start": 4,
+            "name": "OfficeCase",
+            "qualified_name": "OfficeCase",
+            "response": {
+              "purpose": "Defines a TypeScript interface used by internal staff workflows. It represents a prepared staff-related case type that is intentionally excluded from the public build and runtime mounting.\n",
+              "responsibilities": [
+                "Provide a compile-time contract describing the shape of an internal staff case used by the workspace.",
+                "Restrict usage to internal development and testing by marking the interface as not mounted or reachable in public builds.",
+                "Enable other internal modules or components in the codebase to reference a consistent type for staff cases."
+              ],
+              "role_in_module": "Acts as an internal-only type declaration within the OfficeWorkspace module, supporting staff-focused code paths without being exposed or instantiated in the public application build."
+            }
+          },
+          {
+            "base_classes": [],
+            "is_abstract": false,
+            "is_dataclass": false,
+            "is_enum": false,
+            "is_protocol": true,
+            "is_pydantic_model": false,
+            "line_end": 5,
+            "line_start": 5,
+            "name": "OfficeGateway",
+            "qualified_name": "OfficeGateway",
+            "response": {
+              "purpose": "OfficeGateway provides an abstraction layer that mediates interactions between the OfficeWorkspace UI and external services or underlying application logic. It centralizes coordination needed for the workspace to send and receive data, enabling the rest of the component to remain focused on presentation and composition.\n",
+              "responsibilities": [
+                "Serve as the single integration point used by the OfficeWorkspace to communicate with backend APIs or other application subsystems.",
+                "Translate and forward workspace-related requests and responses so the UI components do not need to know low-level details of external interfaces.",
+                "Encapsulate protocol, formatting, and routing concerns for office-related actions to keep the workspace component simpler and more testable.",
+                "Provide a stable surface for workspace state updates and events so other parts of the module can subscribe or react without coupling to implementation details."
+              ],
+              "role_in_module": "Within OfficeWorkspace.tsx, OfficeGateway functions as the connector between the workspace presentation layer and external services or application logic, allowing the file's components to remain decoupled from integration specifics. It enables the file to organize UI composition separately from communication and coordination responsibilities."
+            }
+          }
+        ],
         "extraction_quality": "structural",
-        "file_path": "web-v2/server/intake/fp04-scenarios.test.mjs",
+        "file_path": "web-v2/src/office/OfficeWorkspace.tsx",
         "functions": [
           {
             "class_name": null,
@@ -127,42 +767,176 @@
             "is_method": false,
             "is_property": false,
             "is_staticmethod": false,
-            "line_end": 14,
+            "line_end": 12,
             "line_start": 12,
-            "name": "request",
-            "qualified_name": "request",
+            "name": "valid",
+            "qualified_name": "valid",
             "response": {
-              "parameters_summary": "body is the request payload to send (typically an object or JSON string representing the request body used by the test).",
-              "purpose": "Make a test HTTP request using the supplied payload. This helper function wraps sending the provided body to the system under test so test code can assert on the response.\n",
-              "returns_summary": "Returns the result of the request (usually a promise resolving to the HTTP response or response-like object) to allow test assertions."
+              "parameters_summary": null,
+              "purpose": "Determines whether a given OfficeCase record is considered valid according to the component's validation logic. It returns true when the provided row meets the criteria for a valid OfficeCase and false otherwise.\n",
+              "returns_summary": null
             },
-            "signature": "def request(body):"
+            "signature": "def valid(row: OfficeCase) -> boolean:"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 79,
+            "line_start": 13,
+            "name": "OfficeWorkspace",
+            "qualified_name": "OfficeWorkspace",
+            "response": {
+              "parameters_summary": "gateway is an OfficeGateway used to perform API or backend operations related to the office workspace; onSignOut is a no-argument callback invoked to sign the user out of the workspace.",
+              "purpose": "OfficeWorkspace is a React component that renders and manages the office workspace UI using the provided OfficeGateway for backend interactions. It also exposes a nested load function to perform any necessary data loading when the component is used, and provides a sign-out flow via the onSignOut callback.\n",
+              "returns_summary": "Returns the component's rendered UI (a React element) representing the office workspace."
+            },
+            "signature": "def OfficeWorkspace({gateway,onSignOut}: {gateway:OfficeGateway;onSignOut:()=>void}):"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": true,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 29,
+            "line_start": 21,
+            "name": "load",
+            "qualified_name": "load",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Asynchronously performs a load operation for a given page number, with a default of 0. It initiates whatever data-fetching or refresh logic is implemented for the workspace when called.\n",
+              "returns_summary": null
+            },
+            "signature": "async def load(page=0):"
           }
         ],
+        "language": "typescript",
+        "overview": {
+          "key_responsibilities": [
+            "Declare the OfficeCase interface to represent prepared staff case data used by the workspace.",
+            "Declare the OfficeGateway interface to represent gateway interactions or external integrations for the workspace.",
+            "Provide a small validation helper function valid to evaluate or normalize input related to the workspace.",
+            "Implement the OfficeWorkspace function which uses React hooks (useState and useCallback) to manage component state and memoized callbacks."
+          ],
+          "notable_patterns": [
+            "Uses React hooks (useState and useCallback) for state management and memoized callbacks",
+            "Defines TypeScript interfaces for domain types (OfficeCase, OfficeGateway)",
+            "Exports a module-level functional component or function (OfficeWorkspace) alongside a utility (valid)"
+          ],
+          "summary": "This TypeScript file defines types and functional behavior for an office-related workspace in a React application. It declares two interfaces, OfficeCase and OfficeGateway, which describe the shape of data used by the workspace and any gateway interactions. The module exports a validation helper named valid and a top-level function OfficeWorkspace that uses React hooks (useState and useCallback) to implement its behavior, indicating that OfficeWorkspace is written as a functional component or hook-style module-level routine.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 1337,
+        "tokens_output": 1572
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-31T02:49:20Z",
+      "model": "gpt-5-mini",
+      "source_sha": "5d9a9823d5e0674905df223a33406841288f5509"
+    },
+    "web-v2/src/office/office-gateway.test.mjs": {
+      "description": {
+        "classes": [],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/src/office/office-gateway.test.mjs",
+        "functions": [],
         "language": "javascript",
         "overview": {
           "key_responsibilities": [
-            "Import the node:test test function and node:assert/strict for defining and asserting test cases.",
-            "Import the handleIntake implementation from the local './handler.ts' module to exercise production logic.",
-            "Provide a module-level helper function request that builds and dispatches requests against handleIntake for use in test scenarios.",
-            "Wrap calls to handleIntake with assertions using assert.strict to validate the handler's responses within test cases."
+            "Load the Node.js test runner and strict assertion utilities to define and run unit tests.",
+            "Import the createOfficeGateway factory from the local office-gateway implementation for testing.",
+            "Define test cases (via node:test) that verify the behavior and contract of createOfficeGateway using assertions."
           ],
           "notable_patterns": [
-            "uses the node:test testing API",
+            "uses the built-in node:test test runner",
             "uses node:assert/strict for assertions",
-            "imports the handler implementation from a TypeScript module ('./handler.ts')",
-            "centralizes request construction through a single helper function for reuse in tests"
+            "imports the unit-under-test (createOfficeGateway) from a local TypeScript module"
           ],
-          "summary": "This file contains a Node.js test module that exercises the intake handling logic by importing the test harness from 'node:test', the strict assertion library from 'node:assert/strict', and the intake handler implementation from './handler.ts'. It defines a single module-level helper function named request which is used inside the tests to construct and send requests to the handleIntake function, and to capture or assert responses. The test module is organized around the standard node:test API and makes assertions using assert.strict to verify expected behavior of the intake handler.\n"
+          "summary": "This module is a test file for the office gateway implementation. It imports the built-in Node.js test runner and strict assertion utilities from 'node:test' and 'node:assert/strict' respectively, and it brings in the createOfficeGateway factory from the local './office-gateway.ts' module. The file is organized to define tests that exercise the behavior of createOfficeGateway using the node:test API and assert to validate expected outcomes.\n"
         },
         "schema_version": "2.0.0",
-        "tokens_input": 565,
-        "tokens_output": 522
+        "tokens_input": 367,
+        "tokens_output": 287
       },
       "extraction_quality": "structural",
-      "generated_at": "2026-10-30T17:53:26Z",
+      "generated_at": "2026-10-31T02:49:12Z",
       "model": "gpt-5-mini",
-      "source_sha": "018b2769c0ba7b36dffbf8f61aedf42e69e63cb4"
+      "source_sha": "3377fb8edc700128a0c309391cc0acc0a78b5ba6"
+    },
+    "web-v2/src/office/office-gateway.ts": {
+      "description": {
+        "classes": [],
+        "extraction_quality": "structural",
+        "file_path": "web-v2/src/office/office-gateway.ts",
+        "functions": [
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": false,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 30,
+            "line_start": 6,
+            "name": "createOfficeGateway",
+            "qualified_name": "createOfficeGateway",
+            "response": {
+              "parameters_summary": "getAccessToken is a TokenProvider used to retrieve access tokens for authenticated requests; fetcher is an optional fetch implementation (defaults to the global fetch) that the gateway will use to make HTTP calls.",
+              "purpose": "Constructs and returns an OfficeGateway object that performs authenticated HTTP calls to the office API. The created gateway uses the provided TokenProvider to obtain access tokens and the supplied fetch implementation to perform network requests, with a nested helper function call used for making those requests.\n",
+              "returns_summary": "An OfficeGateway instance that exposes methods for interacting with the office API using authenticated fetch calls."
+            },
+            "signature": "def createOfficeGateway(getAccessToken: TokenProvider, fetcher: typeof fetch = fetch) -> OfficeGateway:"
+          },
+          {
+            "class_name": null,
+            "is_abstract": false,
+            "is_async": true,
+            "is_classmethod": false,
+            "is_method": false,
+            "is_property": false,
+            "is_staticmethod": false,
+            "line_end": 17,
+            "line_start": 7,
+            "name": "call",
+            "qualified_name": "call",
+            "response": {
+              "parameters_summary": null,
+              "purpose": "Performs an asynchronous operation identified by an HTTP-like method and a resource path, optionally including a payload. It returns the eventual result of that operation as a promise.\n",
+              "returns_summary": null
+            },
+            "signature": "async def call(method: 'GET'|'POST', path: string, payload: unknown = undefined) -> Promise<unknown>:"
+          }
+        ],
+        "language": "typescript",
+        "overview": {
+          "key_responsibilities": [
+            "Provide a factory function named createOfficeGateway to obtain an OfficeGateway instance.",
+            "Reference the OfficeCase and OfficeGateway types from the OfficeWorkspace module to ensure correct typing.",
+            "Encapsulate the creation or provisioning logic for an OfficeGateway so callers need only invoke the factory."
+          ],
+          "notable_patterns": [
+            "Imports TypeScript types (import type) rather than runtime values",
+            "Module exposes a single top-level factory function",
+            "No classes or methods are declared in this file"
+          ],
+          "summary": "This TypeScript module provides a single exported factory function, createOfficeGateway, for producing an OfficeGateway instance to work with office-related cases. The file imports the OfficeCase and OfficeGateway types from the OfficeWorkspace module and centralizes the construction or provisioning of an OfficeGateway that will be used elsewhere in the codebase to interact with office cases and workspace concerns.\n\nThe module is focused and narrowly scoped: it does not declare classes or additional helper functions, but instead exposes the factory function as the module's primary public API. The implementation encapsulates whatever wiring is required to produce an OfficeGateway that is typed according to the OfficeWorkspace definitions.\n"
+        },
+        "schema_version": "2.0.0",
+        "tokens_input": 840,
+        "tokens_output": 654
+      },
+      "extraction_quality": "structural",
+      "generated_at": "2026-10-31T02:49:12Z",
+      "model": "gpt-5-mini",
+      "source_sha": "62505363ebec1d52467a31a8f4afcdc214d34b33"
     }
   },
   "schema_version": "1.0.0"

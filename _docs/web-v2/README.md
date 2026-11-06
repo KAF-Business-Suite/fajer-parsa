@@ -4,53 +4,72 @@
 
 # 📁 web-v2
 
-> **Purpose:** Holds the web application's version 2 frontend assets, configuration, and a server subdirectory focused on intake handling and its tests.
+> **Purpose:** Top-level web-v2 project directory that groups frontend source (src/), server implementations (server/), and project-level configuration and deployment files to support building and running the web-v2 application.
 > 
 
-![Organization: Hierarchical](https://img.shields.io/badge/Organization-Hierarchical-blue)
+![Organization: Feature Based](https://img.shields.io/badge/Organization-Feature_Based-blue)
 
 ## 📑 Table of Contents
 
 
 - [Overview](#overview)
 - [Subdirectories](#subdirectories)
+- [Dependencies](#dependencies)
 - [Architecture Notes](#architecture-notes)
 
 ---
 
 ## Overview
 
-This directory contains the web-v2 application surface: root-level configuration and build files plus a dedicated server subdirectory for intake handling. The documented server/ subdirectory contains the server-side intake handling implementation and its associated tests; specifically, implementation and test artifacts are colocated under an intake subdirectory to exercise intake logic and behavior. Root-level entries (such as .gitignore, package.json, tsconfig.json, vite.config.ts, index.html, design-preview.html, and others) are present but their specific purposes were not provided in the input context.
+The web-v2 directory is the repository root for the web-v2 application. At the top level it contains project and build configuration files (for example: .gitignore, .nvmrc, design-preview.html, index.html, package-lock.json, package.json, tsconfig.json, vercel.json, vite.config.ts) and several top-level subdirectories. The listed root files are present but have no additional purpose information provided here. Those files typically hold project configuration, package manifests, and build/runtime configuration, and live alongside dedicated subdirectories that contain the actual application source and server code.
 
-Together, the root files provide the project-level configuration, package metadata, and web entry points needed to build and run the frontend, while the server/ subdirectory encapsulates backend intake logic and test coverage. The server intake subdirectory is the focal point for intake behavior verification. Other sibling subdirectories (public, scripts, src, tests, vendor) exist at this level but were not described in detail in the provided context.
+This directory is organized into two main documented subtrees: server/ and src/. The server/ subdirectory contains server-side request handling, adapters, entrypoints, and tests, organized into feature subdirectories such as intake and office — it is the home for server-side implementations and their tests for the web-v2 project. The src/ subdirectory contains the frontend source for the web-v2 application: root-level app entry files, global styles, and feature subdirectories such as the office workspace and related modules. Together, the src/ frontend and server/ backend implementations form the runnable application: configuration and build files at the root coordinate building, bundling, and deployment of those two main code trees.
+
+Note: There are additional top-level directories present (public, scripts, tests, vendor) listed in the repository root but not documented here; no purpose details for those entries are provided in the available context.
 
 
 ### File Organization
 
-Top-level contains project configuration and web entry files (specific purposes not provided). A dedicated server/ subdirectory groups server-side intake implementation and tests; within server/, an intake subdirectory colocates implementation and test artifacts to make intake logic and behavior easy to exercise.
+The directory separates concerns by feature and role: server-side code and tests live under server/, frontend source and global entry files live under src/. Root-level configuration and build files live at the repository root. Within server/ functionality is further organized into focused feature subdirectories (for example intake and office) as described in the server overview.
 
 ## 📂 Subdirectories
 
 This directory contains the following subdirectories:
 
-### [📁 server/](./server//README.md)
+### [📁 server](./server/README.md)
 
-**Purpose:** Contains server-side intake handling implementation and its associated tests, organized under an intake subdirectory to exercise intake logic and behavior.
+**Purpose:** Contains server-side request handling, adapters, entrypoints, and tests for the web-v2 server, organized into feature subdirectories such as intake and office.
 
 ![Files: 0](https://img.shields.io/badge/Files-0-blue)
 
 ---
+
+### [📁 src](./src/README.md)
+
+**Purpose:** Contains the source code for the web-v2 frontend, grouping root-level app entry files, global styles, and feature subdirectories such as office workspace and related modules.
+
+![Files: 0](https://img.shields.io/badge/Files-0-blue)
+
+---
+## Dependencies
+
+### Internal Dependencies
+
+| Dependency | Usage |
+| --- | --- |
+| `src -> server` | Frontend (src/) and server/ are complementary parts of the application; configuration files at the root coordinate how they are built and deployed. |
+
 ## Architecture Notes
 
-- Server-side intake implementation and corresponding tests are colocated under server/intake to simplify exercising intake logic and behavior.
-- Root-level configuration and web entry files are present at the project root; their specific roles were not detailed in the provided context.
+- Clear separation of frontend (src/) and server-side code (server/) to keep UI and backend implementations decoupled.
+- Server/ is organized into feature subdirectories (intake, office) so backend responsibilities are grouped by feature area and can be tested alongside implementation.
 
 ---
 
 ## Navigation
 
 **↑ Parent Directory:** [Go up](../README.md)
-**🔗 Related:** [server/](./server//README.md)
+**🔗 Related:** [server](./server/README.md) • [src](./src/README.md)
 
 ---
 
