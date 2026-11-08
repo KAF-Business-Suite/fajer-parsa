@@ -45,6 +45,25 @@ jobs:
           node-version-file: web-v2/.nvmrc
           cache: npm
           cache-dependency-path: web-v2/package-lock.json
+      - name: R1 credential presence check (never prints values)
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        env:
+          ACCOUNT_ID_PRESENT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+          API_TOKEN_PRESENT: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          for secret in ACCOUNT_ID API_TOKEN; do
+            name=ACCOUNT_ID_PRESENT
+            if [[ "$secret" == API_TOKEN ]]; then name=API_TOKEN_PRESENT; fi
+            if [[ "${!name}" == true ]]; then
+              echo "FAJR_R1_${secret}=PRESENT"
+            else
+              echo "FAJR_R1_${secret}=MISSING_OR_UNAVAILABLE"
+              echo "::warning::R1 ${secret} unavailable in this PR context; no deployment attempted."
+            fi
+          done
+          echo "FAJR_R1_NO_DEPLOY=ENFORCED"
       - name: Install exactly the locked dependencies
         working-directory: web-v2
         run: npm ci --no-audit --no-fund
