@@ -131,9 +131,7 @@ jobs:
           echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
           echo "Selected release: $deploy"
       - name: Check credentials and block stale production sources
-        # FP-08 temporary auth-only check for owner-authored PR #17.
-        # pull_request policy has deploy=none, so Deploy step always stays SKIPPED.
-        if: steps.policy.outputs.deploy != 'none' || (github.event_name == 'pull_request' && github.event.pull_request.number == 17 && github.event.pull_request.user.login == 'khwajaprn' && github.event.pull_request.head.repo.full_name == github.repository)
+        if: steps.policy.outputs.deploy != 'none'
         id: guard
         shell: bash
         env:
