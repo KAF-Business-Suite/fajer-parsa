@@ -107,6 +107,23 @@ function SiteLanguageMenu({language,inbound,onSelect}: {
   </div>
 }
 
+// FP-UX-03: offline follow-up via an opt-in office WhatsApp draft.
+// The website does NOT claim access to case status or transmit any customer identifier.
+const followUpContent: Record<SiteLanguage,{description:string;message:string}> = {
+  fa:{
+    description:'پیگیری آنلاین هنوز به پرونده‌های دفتر متصل نیست. برای بررسی وضعیت، از واتساپ دفتر پیام آماده کنید. هیچ سند یا شمارهٔ شخصی در این صفحه درخواست یا ارسال نمی‌شود و ارسال نهایی به انتخاب شماست.',
+    message:'سلام فجر پارسا، می‌خواهم یک درخواست قبلی را از دفتر پیگیری کنم. لطفاً راهنمایی کنید برای بررسی وضعیت و ارائهٔ شمارهٔ رسید از چه راه مصونی استفاده کنم.'
+  },
+  en:{
+    description:'Online case status is not connected yet. You can prepare a message to our office on WhatsApp. This page requests no personal documents or case identifiers; you decide whether to send the message.',
+    message:'Hello Fajr Parsa, I would like to follow up on an existing enquiry. Please advise how I can securely provide my receipt reference and check its status.'
+  },
+  ar:{
+    description:'تتبّع حالة الطلب عبر الموقع غير متصل حالياً بسجلات المكتب. يمكنك تجهيز رسالة إلى المكتب عبر واتساب. لا تطلب هذه الصفحة وثائق أو أرقاماً شخصية، ولن تُرسل الرسالة إلا باختيارك.',
+    message:'مرحباً فجر بارسا، أود متابعة طلب سابق. يرجى إرشادي إلى طريقة آمنة لتقديم رقم الإيصال والتحقق من حالة الطلب.'
+  }
+}
+
 function App({initialPath}: {initialPath?: string} = {}) {
   const headerRef = useRef<HTMLElement>(null)
   const [routeHash,setRouteHash] = useState(typeof window === 'undefined' ? '' : window.location.hash)
@@ -407,7 +424,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
               <div className="font-latin mt-6 text-[9px] font-black uppercase tracking-[.16em] text-[#d9bc75]">{t("پشتیبانی فجر پارسا")}</div>
               <h2 className="mt-2 text-3xl font-black">{t("برای ادامهٔ مسیر، همراه شما")}</h2>
               <p className="mt-4 max-w-xl text-sm leading-8 text-slate-300">{t("برای پروندهٔ موجود، شمارهٔ ثبت‌شده در رسید و مدارک مورد نیاز را هنگام تماس با دفتر آماده داشته باشید.")}</p>
-              <button onClick={() => inform('پیگیری پرونده', 'پیگیری آنلاین در این نسخه هنوز به اطلاعات پرونده متصل نیست. برای پیگیری پروندهٔ موجود، با دفتر و شمارهٔ ثبت‌شده در رسیدتان تماس بگیرید.', {}, true)} className="mt-7 flex items-center gap-2 rounded-2xl bg-[var(--fp-surface)] px-5 py-3 text-xs font-black text-[var(--fp-ink)]">{t("پیگیری پرونده")}<ArrowLeft size={15} /></button>
+              <button onClick={() => setSelection({title:t('پیگیری پرونده'),description:followUpContent[language].description,contactOnly:true,contactMessage:followUpContent[language].message})} className="mt-7 flex items-center gap-2 rounded-2xl bg-[var(--fp-surface)] px-5 py-3 text-xs font-black text-[var(--fp-ink)]">{t("پیگیری پرونده")}<ArrowLeft size={15} /></button>
             </article></Reveal>
 
             <Reveal><article className="soft-card relative overflow-hidden rounded-[32px] p-8 md:p-10">
