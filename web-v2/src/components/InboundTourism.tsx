@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Globe2, Hotel, Languages, MapPin, MessageCircle, PlaneLanding, Send, ShieldCheck, Users, CarFront, Compass, BadgeCheck } from 'lucide-react'
 import './inbound-tourism.css'
 
-type Language = 'en' | 'fa' | 'ar'
+type Language = 'en' | 'fa' | 'ps' | 'ar'
 type Localized = Record<Language, string>
 type TravelService = 'arrival' | 'transport' | 'stay' | 'guide' | 'journey'
 const contactNumber = '93777377774'
@@ -60,6 +60,23 @@ const translations: Record<Language, {
     noPromise:'شرایط سفر در افغانستان ممکن است تغییر کند. صدور ویزه، امنیت مطلق، موافقت دولتی یا ورود به ساحات محدود تضمین نمی‌شود.',
     footer:'فجر پارسا · کابل، افغانستان · درخواست خدمات گردشگری ورودی',back:'سایت اصلی'
   },
+  ps: {
+    eyebrow:'افغانستان · د سفر د خدمتونو همغږي',
+    title:'افغانستان وپېژنئ.',accent:'له پلان سره سفر وکړئ.',
+    subtitle:'په کابل کې د فجر پارسا ټیم د هوايي ډګر د لېږد، استوګنې، ژباړې او د سفر د پلان په همغږۍ کې مرسته کوي. هر خدمت له رزرو مخکې جلا ارزول او تاییدېږي.',
+    ask:'خپل سفر پلان کړئ',explore:'خدمتونه وګورئ',local:'سیمه‌ییزه همغږي او انساني ملاتړ',
+    quote:'له تایید مخکې روښانه وړاندیز',process:'موږ څنګه کار کوو',
+    stepOne:'د سفر منزل او وخت مو راته ووایاست.',
+    stepTwo:'شته امکانات، اړتیاوې او اوسني شرایط ارزوو.',
+    stepThree:'له رزرو مخکې لیکلی وړاندیز وګورئ.',
+    services:'سفري خدمتونه',servicesNote:'د مېلمنو، کورنیو، سوداګریزو مسافرو او سفري شریکانو لپاره انعطاف منونکی ملاتړ.',
+    formTitle:'د خپل سفر معلومات راکړئ',formNote:'اړین معلومات بشپړ کړئ. ستاسو لپاره د واتساپ پیغام چمتو کوو چې پخپله یې وګورئ او ولېږئ. دا وېبپاڼه فورم په خپله نه زېرمه کوي او نه یې لېږي.',
+    name:'ستاسو نوم',email:'برېښنالیک یا د اړیکې شمېره',date:'د راتګ نېټه',people:'د مسافرو شمېر',region:'په افغانستان کې منزل',choice:'اړین خدمت',notes:'ځانګړې غوښتنې (اختیاري)',consent:'زه موافق یم چې زما د سفر معلومات په واتساپ کې پرانیستل شي؛ له لېږلو مخکې به پیغام وګورم.',
+    send:'واتساپ ته دوام ورکړئ',notSubmitted:'هیڅ رزرو نه دی شوی او معلومات په خپله نه دي لېږل شوي.',invalid:'مهرباني وکړئ اړینې برخې بشپړې او خپله موافقه څرګنده کړئ.',
+    contact:'له ټیم سره اړیکه',trustTitle:'روښانه او مسؤولانه همغږي',trustBody:'د غوښتنې پر بنسټ د خدمت معلومات او لیکلې بیې وړاندې کوو. د هر سفر شتون، د لاسرسي اجازه، لغوه کول او لګښتونه باید جلا تایید شي.',
+    noPromise:'په افغانستان کې د سفر شرایط بدلېدای شي. موږ د ویزې، مطلق امنیت، حکومتي اجازې یا محدودو سیمو ته د لاسرسي تضمین نه کوو.',
+    footer:'فجر پارسا · کابل، افغانستان · د بهرنیو سیلانیانو غوښتنې',back:'اصلي وېبپاڼه'
+  },
   ar: {
     eyebrow:'أفغانستان · تنسيق خدمات السفر الخاصة',title:'اكتشف أفغانستان.',accent:'وسافر بخطة واضحة.',
     subtitle:'فريق فجر بارسا في كابول يساعد في تنسيق النقل من المطار والإقامة والترجمة وترتيبات الرحلات. تخضع جميع الخدمات للتحقق والتأكيد قبل أي حجز.',
@@ -76,11 +93,11 @@ const translations: Record<Language, {
   }
 }
 const serviceCards: Array<{id:TravelService;icon:typeof PlaneLanding;title:Localized;description:Localized}> = [
-  {id:'arrival',icon:PlaneLanding,title:{en:'Airport pickup',fa:'استقبال از میدان هوایی',ar:'الاستقبال من المطار'},description:{en:'Arrival transfer arrangements, pickup point and driver confirmation.',fa:'هماهنگی انتقال، محل ملاقات و تأیید راننده.',ar:'تنسيق الاستقبال وتأكيد نقطة اللقاء والسائق.'}},
-  {id:'transport',icon:CarFront,title:{en:'Private transportation',fa:'ترانسپورت اختصاصی',ar:'النقل الخاص'},description:{en:'City transfers and vehicle requests with a clear itinerary.',fa:'انتقال شهری و درخواست موتر مطابق برنامه مشخص.',ar:'النقل داخل المدينة وترتيبات المركبات حسب البرنامج.'}},
-  {id:'stay',icon:Hotel,title:{en:'Hotel reservations',fa:'رزرو هوتل',ar:'حجوزات الفنادق'},description:{en:'Accommodation enquiries, options and written confirmation.',fa:'استعلام اقامت، گزینه‌ها و تأیید مکتوب رزرو.',ar:'الاستفسار عن الإقامة والخيارات والتأكيد الكتابي.'}},
-  {id:'guide',icon:Languages,title:{en:'Interpreter & guide coordination',fa:'ترجمان و رهنمای گردشگری',ar:'تنسيق المترجمين والمرشدين'},description:{en:'Language support and local guides subject to applicable requirements.',fa:'خدمات ترجمانی و رهنمای محلی مطابق شرایط مربوط.',ar:'الترجمة والمرشدون المحليون وفق المتطلبات المعمول بها.'}},
-  {id:'journey',icon:Compass,title:{en:'Tailored journeys',fa:'برنامه سفر اختصاصی',ar:'برامج رحلات مخصصة'},description:{en:'A thoughtful itinerary matched to your dates and interests.',fa:'طرح سفر بر اساس زمان و علاقه‌مندی‌های شما.',ar:'برنامج يناسب مواعيدك واهتماماتك.'}}
+  {id:'arrival',icon:PlaneLanding,title:{en:'Airport pickup',fa:'استقبال از میدان هوایی',ps:'له هوايي ډګر څخه هرکلی',ar:'الاستقبال من المطار'},description:{en:'Arrival transfer arrangements, pickup point and driver confirmation.',fa:'هماهنگی انتقال، محل ملاقات و تأیید راننده.',ps:'د لېږد، د لیدنې ځای او د موټرچلوونکي تایید همغږي.',ar:'تنسيق الاستقبال وتأكيد نقطة اللقاء والسائق.'}},
+  {id:'transport',icon:CarFront,title:{en:'Private transportation',fa:'ترانسپورت اختصاصی',ps:'ځانګړی ټرانسپورټ',ar:'النقل الخاص'},description:{en:'City transfers and vehicle requests with a clear itinerary.',fa:'انتقال شهری و درخواست موتر مطابق برنامه مشخص.',ps:'د ښار دننه لېږد او د روښانه پلان له مخې د موټر غوښتنه.',ar:'النقل داخل المدينة وترتيبات المركبات حسب البرنامج.'}},
+  {id:'stay',icon:Hotel,title:{en:'Hotel reservations',fa:'رزرو هوتل',ps:'د هوټلونو رزرو',ar:'حجوزات الفنادق'},description:{en:'Accommodation enquiries, options and written confirmation.',fa:'استعلام اقامت، گزینه‌ها و تأیید مکتوب رزرو.',ps:'د استوګنې پوښتنې، انتخابونه او د رزرو لیکلی تایید.',ar:'الاستفسار عن الإقامة والخيارات والتأكيد الكتابي.'}},
+  {id:'guide',icon:Languages,title:{en:'Interpreter & guide coordination',fa:'ترجمان و رهنمای گردشگری',ps:'د ژباړونکي او لارښود همغږي',ar:'تنسيق المترجمين والمرشدين'},description:{en:'Language support and local guides subject to applicable requirements.',fa:'خدمات ترجمانی و رهنمای محلی مطابق شرایط مربوط.',ps:'د اړوندو شرایطو له مخې د ژباړې او سیمه‌ییز لارښود خدمتونه.',ar:'الترجمة والمرشدون المحليون وفق المتطلبات المعمول بها.'}},
+  {id:'journey',icon:Compass,title:{en:'Tailored journeys',fa:'برنامه سفر اختصاصی',ps:'ځانګړی سفري پلان',ar:'برامج رحلات مخصصة'},description:{en:'A thoughtful itinerary matched to your dates and interests.',fa:'طرح سفر بر اساس زمان و علاقه‌مندی‌های شما.',ps:'ستاسو د وخت او خوښیو له مخې جوړ شوی سفري پلان.',ar:'برنامج يناسب مواعيدك واهتماماتك.'}}
 ]
 export function InboundTourism({language='en'}: {language?:Language}) {
   const [interactive,setInteractive]=useState(false)
@@ -99,7 +116,7 @@ export function InboundTourism({language='en'}: {language?:Language}) {
   const rtl=lang!=='en'
   const focus=(id:string)=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'})
   useEffect(()=>{
-    document.documentElement.lang=lang==='fa'?'fa-AF':lang
+    document.documentElement.lang=lang==='fa'?'fa-AF':lang==='ps'?'ps-AF':lang
     document.documentElement.dir=rtl?'rtl':'ltr'
     return ()=>{document.documentElement.lang='fa-AF';document.documentElement.dir='rtl'}
   },[lang,rtl])
@@ -113,23 +130,29 @@ export function InboundTourism({language='en'}: {language?:Language}) {
     setTried(true)
     if(!formReady || arrival < todayInKabul())return
     const chosen=serviceCards.find(item=>item.id===service)
+    const labels={
+      en:['FAJR PARSA | Afghanistan Inbound Travel Enquiry','Name','Contact','Arrival','Travellers','Afghanistan destination','Service','Notes','None','Please confirm availability, quotation, requirements and cancellation terms before any booking.'],
+      fa:['فجر پارسا | درخواست سفر به افغانستان','نام','تماس','تاریخ ورود','تعداد مسافران','مقصد در افغانستان','خدمت','یادداشت','ندارد','لطفاً ظرفیت، قیمت، شرایط و لغو را پیش از رزرو تأیید کنید.'],
+      ps:['فجر پارسا | افغانستان ته د سفر غوښتنه','نوم','اړیکه','د راتګ نېټه','د مسافرو شمېر','په افغانستان کې منزل','خدمت','یادښت','نشته','مهرباني وکړئ له رزرو مخکې د خدمت شتون، بیه، شرایط او د لغوه کولو تګلاره تایید کړئ.'],
+      ar:['فجر بارسا | طلب سفر إلى أفغانستان','الاسم','التواصل','تاريخ الوصول','عدد المسافرين','الوجهة في أفغانستان','الخدمة','ملاحظات','لا يوجد','يرجى تأكيد التوفر والسعر والشروط والإلغاء قبل أي حجز.'],
+    }[lang]
     const message=[
-      'FAJR PARSA | Afghanistan Inbound Travel Enquiry',
-      'Name: '+name.trim().replace(/\s+/g, ' '),
-      'Contact: '+contact.trim(),
-      'Arrival: '+arrival,
-      'Travellers: '+people,
-      'Afghanistan destination: '+region.trim().replace(/\s+/g, ' '),
-      'Service: '+(chosen?.title.en||service),
-      'Notes: '+(notes.trim()||'None'),
-      'Please confirm availability, quotation, requirements and cancellation terms before any booking.'
+      labels[0],
+      labels[1]+': '+name.trim().replace(/\s+/g, ' '),
+      labels[2]+': '+contact.trim(),
+      labels[3]+': '+arrival,
+      labels[4]+': '+people,
+      labels[5]+': '+region.trim().replace(/\s+/g, ' '),
+      labels[6]+': '+(chosen?.title[lang]||service),
+      labels[7]+': '+(notes.trim()||labels[8]),
+      labels[9]
     ].join('\n')
     window.open('https://wa.me/'+contactNumber+'?text='+encodeURIComponent(message),'_blank','noopener,noreferrer')
   }
-  return <div className="inbound" dir={rtl?'rtl':'ltr'} lang={lang==='fa'?'fa-AF':lang}>
+  return <div className="inbound" dir={rtl?'rtl':'ltr'} lang={lang==='fa'?'fa-AF':lang==='ps'?'ps-AF':lang}>
     <div className="inbound-hero">
       <div className="shell inbound-topbar">
-        <span className="inbound-mark"><Globe2 size={16}/>{lang==='fa'?'سفر به افغانستان':lang==='ar'?'السفر إلى أفغانستان':'Afghanistan Travel'}</span>
+        <span className="inbound-mark"><Globe2 size={16}/>{lang==='fa'?'سفر به افغانستان':lang==='ps'?'افغانستان ته سفر':lang==='ar'?'السفر إلى أفغانستان':'Afghanistan Travel'}</span>
       </div>
       <div className="shell inbound-hero-body">
         <div className="inbound-copy">
@@ -142,25 +165,25 @@ export function InboundTourism({language='en'}: {language?:Language}) {
           </div>
           <div className="inbound-proof"><span><CheckCircle2 size={17}/>{t.local}</span><span><BadgeCheck size={17}/>{t.quote}</span></div>
         </div>
-        <div className="inbound-hero-art" aria-label="Afghanistan travel planning visual" role="img">
+        <div className="inbound-hero-art" aria-label={lang==='ps'?'د افغانستان د سفر د پلان انځور':'Afghanistan travel planning visual'} role="img">
           <div className="inbound-art-ring"/>
           <div className="inbound-art-plate">
             <span>FAJR PARSA</span>
-            <strong>AFGHANISTAN</strong>
-            <small>KABUL · LOCAL COORDINATION</small>
+            <strong>{lang==='ps'?'افغانستان':'AFGHANISTAN'}</strong>
+            <small>{lang==='ps'?'کابل · سیمه‌ییزه همغږي':'KABUL · LOCAL COORDINATION'}</small>
           </div>
-          <div className="inbound-art-route"><MapPin size={19}/><span>YOUR JOURNEY, THOUGHTFULLY ARRANGED</span></div>
+          <div className="inbound-art-route"><MapPin size={19}/><span>{lang==='ps'?'ستاسو سفر، په پام سره تنظیم شوی':'YOUR JOURNEY, THOUGHTFULLY ARRANGED'}</span></div>
         </div>
       </div>
     </div>
 
     <section id="inbound-services" className="shell inbound-section">
-      <div className="inbound-section-head"><span className="inbound-kicker">01 / SERVICES</span><h2>{t.services}</h2><p>{t.servicesNote}</p></div>
+      <div className="inbound-section-head"><span className="inbound-kicker">{lang==='ps'?'۰۱ / خدمتونه':'01 / SERVICES'}</span><h2>{t.services}</h2><p>{t.servicesNote}</p></div>
       <div className="inbound-service-grid">{serviceCards.map(item=>{const Icon=item.icon;return <article className="inbound-service" key={item.id}><span className="inbound-service-icon"><Icon size={23}/></span><h3>{item.title[lang]}</h3><p>{item.description[lang]}</p><button type="button" onClick={()=>{setService(item.id);focus('inbound-request')}}>{t.ask}{rtl?<ArrowLeft size={15}/>:<ArrowRight size={15}/>}</button></article>})}</div>
     </section>
 
     <section id="inbound-process" className="inbound-process">
-      <div className="shell inbound-process-inner"><div className="inbound-section-head"><span className="inbound-kicker">02 / OUR APPROACH</span><h2>{t.process}</h2></div>
+      <div className="shell inbound-process-inner"><div className="inbound-section-head"><span className="inbound-kicker">{lang==='ps'?'۰۲ / زموږ تګلاره':'02 / OUR APPROACH'}</span><h2>{t.process}</h2></div>
         <div className="inbound-steps">{[t.stepOne,t.stepTwo,t.stepThree].map((step,index)=><div key={index}><span>0{index+1}</span><p>{step}</p></div>)}</div>
       </div>
     </section>
@@ -168,7 +191,7 @@ export function InboundTourism({language='en'}: {language?:Language}) {
     <noscript><p className="shell">Enable JavaScript to choose a language and prepare an enquiry. No information is sent from this page without your action.</p></noscript>
     <section id="inbound-request" className="shell inbound-section inbound-request-section">
       <div className="inbound-request-intro">
-        <span className="inbound-kicker">03 / YOUR ENQUIRY</span><h2>{t.formTitle}</h2><p>{t.formNote}</p>
+        <span className="inbound-kicker">{lang==='ps'?'۰۳ / ستاسو غوښتنه':'03 / YOUR ENQUIRY'}</span><h2>{t.formTitle}</h2><p>{t.formNote}</p>
         <div className="inbound-trust-note"><ShieldCheck size={22}/><div><strong>{t.trustTitle}</strong><p>{t.trustBody}</p></div></div>
         <p className="inbound-caution">{t.noPromise}</p>
       </div>
@@ -188,6 +211,6 @@ export function InboundTourism({language='en'}: {language?:Language}) {
         <p className="inbound-footnote">{t.notSubmitted}</p>
       </form>
     </section>
-    <div className="inbound-bottom"><div className="shell"><span>{t.footer}</span><a href="/">{t.back}</a><a href={'https://wa.me/'+contactNumber} target="_blank" rel="noreferrer noopener">{t.contact}</a></div></div>
+    <div className="inbound-bottom"><div className="shell"><span>{t.footer}</span><a href={"/?lang="+lang}>{t.back}</a><a href={'https://wa.me/'+contactNumber} target="_blank" rel="noreferrer noopener">{t.contact}</a></div></div>
   </div>
 }

@@ -1,6 +1,7 @@
-// FP-UX-02 — one source of truth for customer-facing Dari/English/Arabic labels.
+// FP-UX-02 / FP-PS-01 — shared customer-facing translations: Dari, Pashto, English, Arabic.
 // Localized text is for presentation only. Existing Dari service codes and request data remain stable.
-export type SiteLanguage = 'fa' | 'en' | 'ar'
+import { pashtoTextMap } from './site-ps'
+export type SiteLanguage = 'fa' | 'ps' | 'en' | 'ar'
 const textMap: Record<string, {en:string;ar:string}> = {
   "فجر پارسا": {
     "en": "Fajr Parsa",
@@ -1154,6 +1155,7 @@ const textMap: Record<string, {en:string;ar:string}> = {
 }
 export function siteText(input:string, language:SiteLanguage):string {
   if (language==='fa') return input
+  if (language==='ps') return pashtoTextMap[input] || input
   return textMap[input]?.[language] || input
 }
 export function knownSiteText(input:string):boolean{return Boolean(textMap[input])}
