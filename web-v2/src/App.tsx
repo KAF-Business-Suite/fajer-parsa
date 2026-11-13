@@ -282,7 +282,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
         )}
       </header>
 
-      <a className="skip-link" href="#main-content">{isInboundRoute ? inboundNav.skip : "رفتن به محتوای اصلی"}</a>
+      <a className="skip-link" href="#main-content">{isInboundRoute ? inboundNav.skip : t("رفتن به محتوای اصلی")}</a>
       <main id="main-content">
         {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">{t("در حال آماده‌سازی صفحهٔ کشور…")}</div>}><CountryPage country={selectedCountry} language={language} onRequest={openRequest}/></Suspense> : isInboundRoute ? <InboundTourism language={inboundLanguage}/> : <>
         <section className="hero scenic-hero">
@@ -356,7 +356,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
             <label className="catalog-search"><Search size={18}/><input type="search" aria-label={t("جستجوی خدمات")} placeholder={t("جستجو در خدمات")} value={query} onChange={e => setQuery(e.target.value)}/></label>
           </div></Reveal>
 
-          <p className="sr-only" role="status">{visibleServices.length} خدمت پیدا شد</p>
+          <p className="sr-only" role="status">{visibleServices.length} {language==='en'?'services found':language==='ar'?'خدمة متاحة':'خدمت پیدا شد'}</p>
           {visibleServices.length === 0 && <p className="py-8 text-center">{t("خدمتی با این عبارت پیدا نشد. عبارت کوتاه‌تری بنویسید.")}</p>}
           <div className="service-grid grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {visibleServices.map(({ title, icon: Icon, desc, label }, index) => (
