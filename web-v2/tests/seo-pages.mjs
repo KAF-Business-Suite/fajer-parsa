@@ -82,7 +82,7 @@ try {
   await test('Direct entry, reload, languages and metadata agree',async()=>{
     await page.goto(origin+'/inbound',{waitUntil:'networkidle'})
     await page.locator('.inbound-form:not([inert])').waitFor()
-    for(const [label,lang,dir,title] of [['دری','fa-AF','rtl','گردشگری ورودی افغانستان'],['العربية','ar','rtl','السياحة الوافدة'],['English','en','ltr','Afghanistan Inbound Tourism']]) {
+    for(const [label,lang,dir,title] of [['دری','fa-AF','rtl','گردشگری ورودی افغانستان'],['پښتو','ps-AF','rtl','افغانستان ته د راتلونکو سیلانیانو سفر'],['العربية','ar','rtl','السياحة الوافدة'],['English','en','ltr','Afghanistan Inbound Tourism']]) {
       await page.locator('.fp-lang-trigger').click()
       await page.locator('.fp-lang-panel').getByRole('button',{name:label,exact:true}).click()
       await page.waitForFunction(({lang,dir})=>document.documentElement.lang===lang&&document.documentElement.dir===dir,{lang,dir})
@@ -121,11 +121,11 @@ try {
   })
   await test('Multilingual navigation and WhatsApp draft preserve selected locale',async()=>{
     await page.setViewportSize({width:393,height:852})
-    for(const [code,htmlLang,expected] of [['en','en','Nationality:'],['ar','ar','الجنسية:']]){
+    for(const [code,htmlLang,expected] of [['en','en','Nationality:'],['ar','ar','الجنسية:'],['ps','ps-AF','د تابعیت هېواد:']]){
       await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
       await page.waitForFunction(lang=>document.documentElement.lang===lang,htmlLang)
       // The desktop header can be visually hidden at 393px; the fixed mobile CTA must be visible.
-      const expectedCta=code==='en'?'Start enquiry':'ابدأ الطلب'
+      const expectedCta=code==='en'?'Start enquiry':code==='ar'?'ابدأ الطلب':'غوښتنه پیل کړئ'
       await page.waitForFunction(label=>document.querySelector('.mobile-action-bar button.fp-bottom-primary')?.textContent?.includes(label),expectedCta)
       assert.equal(await page.locator('.mobile-action-bar button.fp-bottom-primary').isVisible(),true)
       assert.ok((await page.locator('.floating-header').textContent()).includes(expectedCta))
@@ -147,14 +147,14 @@ try {
   })
   await test('Offline case follow-up has localized opt-in WhatsApp draft and no case data',async()=>{
     await page.setViewportSize({width:393,height:852})
-    for(const [code,lang,phrase] of [['en','en','follow up'],['ar','ar','متابعة'],['fa','fa-AF','پیگیری']]){
+    for(const [code,lang,phrase] of [['en','en','follow up'],['ar','ar','متابعة'],['fa','fa-AF','پیگیری'],['ps','ps-AF','تعقیب']]){
       await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
       await page.waitForFunction(expected=>document.documentElement.lang===expected,lang)
       await page.locator('#track button').click()
       const dialog=page.getByRole('dialog')
       await dialog.waitFor()
       const visible=await dialog.innerText()
-      assert.ok(visible.includes(code==='en'?'not connected':code==='ar'?'غير متصل':'متصل نیست'))
+      assert.ok(visible.includes(code==='en'?'not connected':code==='ar'?'غير متصل':code==='ps'?'نه دی نښلول شوی':'متصل نیست'))
       const link=await dialog.locator('a[href*="wa.me/"]').getAttribute('href')
       const url=new URL(link)
       assert.equal(url.hostname,'wa.me')
@@ -168,7 +168,7 @@ try {
   })
   await test('Localized favorites and accessible destination controls in both foreign languages',async()=>{
     await page.setViewportSize({width:393,height:852})
-    for (const [code,label,addWord] of [['en','My favorites','Add '],['ar','المفضلة','إضافة ']]) {
+    for (const [code,label,addWord] of [['en','My favorites','Add '],['ar','المفضلة','إضافة '],['ps','زما خوښونه','خوښونو ته ورزیات کړئ: ']]) {
       await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
       await page.waitForFunction(l=>document.documentElement.lang===l,code)
       const gallery=page.locator('#destinations')
@@ -185,6 +185,7 @@ try {
   await test('FP-NAV-01 branded controls, mobile destinations and verified contact channel',async()=>{
     for(const [code,htmlLang,expected,themeLabel] of [
       ['fa','fa-AF','شروع درخواست','فعال کردن حالت'],
+      ['ps','ps-AF','غوښتنه پیل کړئ','روښانه بڼه'],
       ['en','en','Start enquiry','Switch to'],
       ['ar','ar','ابدأ الطلب','التبديل إلى'],
     ]){
