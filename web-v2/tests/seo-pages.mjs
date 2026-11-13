@@ -354,7 +354,7 @@ try {
     assert.equal(await page.locator('html').getAttribute('dir'),'rtl')
     assert.equal(await page.locator('link[rel="canonical"]').count(),0)
     assert.equal(await page.locator('meta[property="og:title"]').count(),0)
-    await page.getByRole('link',{name:'Visit Afghanistan',exact:true}).click()
+    await page.locator('.hero-actions a[href^="/inbound?lang="]').click()
     await page.locator('.inbound-form:not([inert])').waitFor()
     assert.equal(new URL(page.url()).pathname,'/inbound')
     await page.goBack();await page.locator('.hero-scene').waitFor()
