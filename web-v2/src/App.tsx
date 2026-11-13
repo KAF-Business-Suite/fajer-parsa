@@ -48,6 +48,14 @@ const trustItems = [
   ['پیگیری از دفتر', 'اطلاعات رسید را همراه داشته باشید'],
 ]
 type InboundLanguage = 'en' | 'fa' | 'ar'
+
+// The Dari homepage is not yet translated. These links intentionally open
+// the already-localized Afghanistan inbound page; never relabel untranslated UI.
+function inboundLanguageFromUrl(): InboundLanguage {
+  if (typeof window === 'undefined') return 'en'
+  const code = new URLSearchParams(window.location.search).get('lang')
+  return code === 'fa' || code === 'ar' ? code : 'en'
+}
 const inboundHeaderText = {
   en: {nav:'Visitor navigation',services:'Services',how:'How it works',enquire:'Enquire',home:'Main website',contact:'Contact',menu:'Mobile menu',themeLight:'Switch to light mode',themeDark:'Switch to dark mode',skip:'Skip to main content',visit:'VISIT AFGHANISTAN',header:'Fajr Parsa header',logo:'Fajr Parsa logo'},
   fa: {nav:'ناوبری گردشگران',services:'خدمات',how:'روش کار',enquire:'درخواست سفر',home:'سایت اصلی',contact:'تماس',menu:'منوی موبایل',themeLight:'فعال کردن حالت روشن',themeDark:'فعال کردن حالت تاریک',skip:'رفتن به محتوای اصلی',visit:'سفر به افغانستان',header:'سربرگ فجر پارسا',logo:'لوگوی فجر پارسا'},
@@ -58,10 +66,19 @@ function App({initialPath}: {initialPath?: string} = {}) {
   const headerRef = useRef<HTMLElement>(null)
   const [routeHash,setRouteHash] = useState(typeof window === 'undefined' ? '' : window.location.hash)
   const [routePath,setRoutePath] = useState(initialPath ?? (typeof window === 'undefined' ? '/' : window.location.pathname))
-  const [inboundLanguage,setInboundLanguage] = useState<InboundLanguage>('en')
+  const [inboundLanguage,setInboundLanguage] = useState<InboundLanguage>(inboundLanguageFromUrl)
   const inboundNav=inboundHeaderText[inboundLanguage]
   const isCountryRoute = routePath === '/' && routeHash.startsWith('#/country/')
   const isInboundRoute = isInboundPath(routePath)
+  const changeInboundLanguage = (code: InboundLanguage) => {
+    setInboundLanguage(code)
+    if (typeof window !== 'undefined' && isInboundPath(window.location.pathname)) {
+      const url = new URL(window.location.href)
+      url.searchParams.set('lang', code)
+      // This is a display preference, not a new booking or navigation event.
+      window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
+    }
+  }
   const routeCode = isCountryRoute ? routeHash.slice('#/country/'.length).toUpperCase() : null
   const selectedCountry = countryServices.find(country=>countryPresentation[country.name]?.code===routeCode)
   const openCountry = (name:string) => { const code=countryPresentation[name]?.code; if(code) window.location.hash='/country/'+code.toLowerCase() }
@@ -78,7 +95,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
   const finderReady = useMemo(() => Boolean(finder.destination && finder.purpose), [finder])
 
   useEffect(()=>{
-    const sync=()=>{normalizeLegacyInbound();setRouteHash(window.location.hash);setRoutePath(window.location.pathname);setMegaOpen(false);setMobileOpen(false);setSelection(null)}
+    const sync=()=>{normalizeLegacyInbound();setInboundLanguage(inboundLanguageFromUrl());setRouteHash(window.location.hash);setRoutePath(window.location.pathname);setMegaOpen(false);setMobileOpen(false);setSelection(null)}
     window.addEventListener('hashchange',sync)
     window.addEventListener('popstate',sync)
     return ()=>{window.removeEventListener('hashchange',sync);window.removeEventListener('popstate',sync)}
@@ -201,7 +218,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
 
       <a className="skip-link" href="#main-content">{isInboundRoute ? inboundNav.skip : "رفتن به محتوای اصلی"}</a>
       <main id="main-content">
-        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : isInboundRoute ? <InboundTourism language={inboundLanguage} onLanguageChange={setInboundLanguage}/> : <>
+        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : isInboundRoute ? <InboundTourism language={inboundLanguage} onLanguageChange={changeInboundLanguage}/> : <>
         <section className="hero scenic-hero">
           <picture className="hero-scene"><source media="(max-width: 767px)" srcSet="/media/hero-dubai-mobile.webp"/><img src="/media/hero-dubai.webp" alt="چشم‌انداز روشن دبی و برج خلیفه" width="1800" height="1350" fetchPriority="high" decoding="async"/></picture>
           <div className="shell hero-layout">
@@ -209,7 +226,13 @@ function App({initialPath}: {initialPath?: string} = {}) {
               <p className="eyebrow">فجر پارسا؛ همراه برنامه‌ریزی سفر شما</p>
               <h1>سفر بعدی شما،<br/>از همین‌جا آغاز می‌شود.</h1>
               <p className="hero-description">ویزا، تکت، هتل و خدمات سفر؛ گزینه‌ها را بررسی کنید و با اطلاعات روشن، قدم بعد را با مشاور فجر پارسا بردارید.</p>
-              <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">شروع درخواست <ArrowLeft size={17}/></button><a href="/inbound" className="secondary-action" lang="en">Visit Afghanistan <Globe2 size={17}/></a></div>
+              <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">شروع درخواست <ArrowLeft size={17}/></button><a href="/inbound?lang=en" className="secondary-action" lang="en">Visit Afghanistan <Globe2 size={17}/></a></div>
+              <nav aria-label="انتخاب زبان گردشگری افغانستان" className="mt-5 flex max-w-full flex-wrap items-center gap-1.5 rounded-2xl border border-white/40 bg-white/90 p-2 shadow-md backdrop-blur-sm">
+                <span className="px-2 text-xs font-extrabold text-[#1b2b34]">گردشگری افغانستان به زبان:</span>
+                <a href="/inbound?lang=fa" lang="fa-AF" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#d5d9d7] bg-white px-3 text-xs font-bold text-[#1b2b34]">دری</a>
+                <a href="/inbound?lang=en" lang="en" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#d5d9d7] bg-white px-3 text-xs font-bold text-[#1b2b34]">English</a>
+                <a href="/inbound?lang=ar" lang="ar" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#d5d9d7] bg-white px-3 text-xs font-bold text-[#1b2b34]">العربية</a>
+              </nav>
               <div className="hero-services"><span>ویزا و اقامت</span><span>پرواز و هتل</span><span>سفرهای گروهی</span></div>
             </div>
             <div className="hero-caption"><span>مقصدی برای ایده گرفتن</span><strong>دبی، امارات متحده عربی</strong><a href="#destinations">کشف مقصدها <ArrowLeft size={14}/></a></div>
