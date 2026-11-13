@@ -6,6 +6,7 @@ import { siteText, type SiteLanguage } from './content/site-i18n'
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { MenuToggle } from './components/ui/menu-toggle'
 import { ThemeToggle } from './components/ThemeToggle'
+import { ContactChannels } from './components/ContactChannels'
 import { ScrollProgress } from './components/magicui/scroll-progress'
 import { DestinationGallery } from './components/DestinationGallery'
 import { FaqSection } from './components/FaqSection'
@@ -18,6 +19,9 @@ import { inboundSeo, isInboundPath, normalizeLegacyInbound, updateInboundMetadat
 const DetailsDialog = lazy(() => import('./components/DetailsDialog').then(m => ({default:m.DetailsDialog})))
 import {
   ArrowLeft,
+  House,
+  LayoutGrid,
+  ClipboardList,
   BadgeCheck,
   CheckCircle2,
   ChevronDown,
@@ -93,8 +97,8 @@ function SiteLanguageMenu({language,inbound,onSelect}: {
   const active=language
   const activeText=active==='fa'?'دری':active==='ar'?'العربية':'EN'
   return <div ref={host} className="fp-lang-menu">
-    <button ref={trigger} type="button" className="fp-lang-trigger" aria-label={t("انتخاب زبان / Choose language / اختيار اللغة")} aria-expanded={open} aria-controls="fp-language-options" onClick={()=>setOpen(value=>!value)}>
-      <Languages size={18} aria-hidden="true"/>
+    <button ref={trigger} type="button" className="fp-lang-trigger fp-control" aria-label={t("انتخاب زبان / Choose language / اختيار اللغة")} aria-expanded={open} aria-controls="fp-language-options" onClick={()=>setOpen(value=>!value)}>
+      <Languages size={17} aria-hidden="true"/>
       <span className="fp-lang-current">{activeText}</span>
       <ChevronDown size={14} aria-hidden="true" className={open?'rotate-180 transition':'transition'}/>
     </button>
@@ -150,16 +154,21 @@ function App({initialPath}: {initialPath?: string} = {}) {
   const [selection, setSelection] = useState<Selection | null>(null)
   const [query, setQuery] = useState('')
   const [headerScrolled, setHeaderScrolled] = useState(false)
+  const [navSection, setNavSection] = useState<'home'|'services'|'request'>('home')
   const openRequest = ({destination=selectedCountry?.name || finder.destination,purpose=selectedCountry ? undefined : finder.purpose,passport=finder.passport,service,bundle,variant}: RequestContext = {}) => setSelection({ destination,purpose,passport,service,bundle,variant, title: t('آماده‌سازی درخواست'), description: language==='en'?'Prepare your trip details. You choose when to send the final WhatsApp message.':language==='ar'?'جهز تفاصيل رحلتك. أنت من يقرر إرسال الرسالة النهائية عبر واتساب.':'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true })
-  const request = () => openRequest()
+  const request = () => {setContactOpen(false);openRequest()}
   const inform = (title: string, description: string, context: RequestContext = {}, contactOnly = false) => setSelection({ ...finder, ...context, title:t(title), description:t(description), contactOnly })
   const [megaOpen, setMegaOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [contactOpen, setContactOpen] = useState(false)
   const [finder, setFinder] = useState<FinderState>({ passport: 'افغانستان', destination: '', purpose: '' })
   const finderReady = useMemo(() => Boolean(finder.destination && finder.purpose), [finder])
+  const navActive = contactOpen ? 'contact' : selection?.request ? 'request' : isCountryRoute ? 'services' : navSection
+  const finderTitle = (language==='en' ? 'Travel services in ' : language==='ar' ? 'خدمات السفر إلى ' : 'خدمات سفر به ') + t(finder.destination)
+  const finderDescription = `${t('هدف سفر')}: ${t(finder.purpose)} — ${t('تابعیت')}: ${t(finder.passport)}. ${t('برای راهنمایی اولیه است؛ امکان ارائه، شرایط و مدارک هر خدمت باید با دفتر بررسی شود.')}`
 
   useEffect(()=>{
-    const sync=()=>{normalizeLegacyInbound();setInboundLanguage(inboundLanguageFromUrl());setRouteHash(window.location.hash);setRoutePath(window.location.pathname);setMegaOpen(false);setMobileOpen(false);setSelection(null)}
+    const sync=()=>{normalizeLegacyInbound();setInboundLanguage(inboundLanguageFromUrl());setRouteHash(window.location.hash);setRoutePath(window.location.pathname);setMegaOpen(false);setMobileOpen(false);setContactOpen(false);setSelection(null)}
     window.addEventListener('hashchange',sync)
     window.addEventListener('popstate',sync)
     return ()=>{window.removeEventListener('hashchange',sync);window.removeEventListener('popstate',sync)}
@@ -183,6 +192,26 @@ function App({initialPath}: {initialPath?: string} = {}) {
     }
   },[routeHash,selectedCountry,isCountryRoute,isInboundRoute,language])
   useEffect(()=>{if(isInboundRoute){document.title=inboundSeo[inboundLanguage].title;updateInboundMetadata(inboundLanguage,true)}},[inboundLanguage,isInboundRoute])
+  useEffect(() => {
+    // Only one tab is active: update for tapping links and ordinary page scrolling.
+    const update = () => {
+      if (isCountryRoute) {setNavSection('services');return}
+      const marker=Math.min(155,window.innerHeight*0.28)
+      const inside=(id:string) => {
+        const el=document.getElementById(id)
+        if(!el)return false
+        const r=el.getBoundingClientRect()
+        return r.top<=marker && r.bottom>marker
+      }
+      if(isInboundRoute && inside('inbound-request')) {setNavSection('request');return}
+      const services=isInboundRoute?['inbound-services']:['services','country-services','worldwide-booking']
+      setNavSection(services.some(inside)?'services':'home')
+    }
+    update()
+    window.addEventListener('scroll',update,{passive:true})
+    window.addEventListener('resize',update)
+    return ()=>{window.removeEventListener('scroll',update);window.removeEventListener('resize',update)}
+  },[isInboundRoute,isCountryRoute,routeHash])
   const visibleServices = useMemo(() => serviceGroups.filter(s => (t(s.title)+' '+t(s.desc)+' '+s.title).toLocaleLowerCase().includes(query.trim().toLocaleLowerCase())), [query,language])
   useEffect(() => {
     const sync = () => setHeaderScrolled(window.scrollY > 24)
@@ -190,7 +219,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
     return () => window.removeEventListener('scroll', sync)
   }, [])
   useEffect(() => {
-    const escape = (e: KeyboardEvent) => { if (e.key === 'Escape') { headerRef.current?.querySelector<HTMLElement>('[aria-expanded="true"]')?.focus(); setMegaOpen(false); setMobileOpen(false) } }
+    const escape = (e: KeyboardEvent) => { if (e.key === 'Escape') { headerRef.current?.querySelector<HTMLElement>('[aria-expanded="true"]')?.focus(); setMegaOpen(false); setMobileOpen(false); setContactOpen(false) } }
     window.addEventListener('keydown', escape)
     return () => window.removeEventListener('keydown', escape)
   }, [])
@@ -209,8 +238,8 @@ function App({initialPath}: {initialPath?: string} = {}) {
     <div lang={language==='fa'?'fa-AF':language} dir={language==='en'?'ltr':'rtl'} className="min-h-screen overflow-x-clip fp-app bg-[var(--fp-ivory)] text-[var(--fp-ink)]">
       <ScrollProgress className="fp-scroll-progress" aria-hidden="true" />
       <header ref={headerRef} data-scrolled={headerScrolled} className="floating-header" aria-label={isInboundRoute ? inboundNav.header : "سربرگ فجر پارسا"}>
-        <div className="shell flex h-[74px] items-center justify-between gap-4">
-          <a href={isInboundRoute ? '/?lang='+language : "#"} className="flex items-center gap-3">
+        <div className="shell fp-header-inner flex h-[74px] items-center justify-between gap-2 lg:gap-4">
+          <a href={isInboundRoute ? '/?lang='+language : "#"} className="fp-brand flex min-w-0 items-center gap-3">
             <div className="relative">
               <img src="/media/logo.png" alt={isInboundRoute ? inboundNav.logo : "لوگوی فجر پارسا"} className="h-12 w-12 rounded-[15px] border border-[var(--fp-line)] bg-[var(--fp-surface)] object-contain p-1 shadow-sm" />
 
@@ -236,12 +265,12 @@ function App({initialPath}: {initialPath?: string} = {}) {
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#track">{t("پیگیری")}</a>
           </nav>}
 
-          <div className="flex items-center gap-2">
+          <div className="fp-header-actions flex items-center gap-2">
             <SiteLanguageMenu language={inboundLanguage} inbound={isInboundRoute} onSelect={changeInboundLanguage}/>
-            <ThemeToggle labels={isInboundRoute ? {light:inboundNav.themeLight,dark:inboundNav.themeDark} : undefined} />
-            {isInboundRoute ? <a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer" className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> {inboundNav.contact}</a> : <button onClick={() => inform('ارتباط با فجر پارسا', 'واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴. کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵. برای پیگیری، اطلاعات درج‌شده در رسید را آماده کنید.', {}, true)} className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} />{t("تماس")}</button>}
-            <button onClick={isInboundRoute ? ()=>document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"}) : request} className="shine rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10">{isInboundRoute ? inboundNav.enquire : t("شروع درخواست")}</button>
-            <MenuToggle open={mobileOpen} onToggle={() => setMobileOpen(!mobileOpen)} label={isInboundRoute ? inboundNav.menu : language==='en'?'Mobile menu':language==='ar'?'قائمة الهاتف':'منوی موبایل'} />
+            <ThemeToggle labels={{light:inboundNav.themeLight,dark:inboundNav.themeDark}} />
+            <button type="button" onClick={()=>{setMobileOpen(false);setContactOpen(true)}} className="fp-header-contact hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold xl:inline-flex"><Headphones size={17} aria-hidden="true"/>{isInboundRoute?inboundNav.contact:t("تماس")}</button>
+            <button type="button" onClick={isInboundRoute ? ()=>document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"}) : request} className="shine fp-header-request hidden items-center rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10 lg:inline-flex">{isInboundRoute ? inboundNav.enquire : t("شروع درخواست")}</button>
+            <MenuToggle open={mobileOpen} onToggle={() => {setContactOpen(false);setMobileOpen(!mobileOpen)}} label={isInboundRoute ? inboundNav.menu : language==='en'?'Mobile menu':language==='ar'?'قائمة الهاتف':'منوی موبایل'} />
           </div>
         </div>
 
@@ -292,7 +321,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
               <p className="eyebrow">{t("فجر پارسا؛ همراه برنامه‌ریزی سفر شما")}</p>
               <h1>{t("سفر بعدی شما،")}<br/>{t("از همین‌جا آغاز می‌شود.")}</h1>
               <p className="hero-description">{t("ویزا، تکت، هتل و خدمات سفر؛ گزینه‌ها را بررسی کنید و با اطلاعات روشن، قدم بعد را با مشاور فجر پارسا بردارید.")}</p>
-              <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">{t("شروع درخواست")}<ArrowLeft size={17}/></button><a href="/inbound?lang=en" className="secondary-action" lang="en">Visit Afghanistan <Globe2 size={17}/></a></div>
+              <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">{t("شروع درخواست")}<ArrowLeft size={17}/></button><a href={'/inbound?lang='+language} className="secondary-action" lang={language}>{t('سفر به افغانستان')} <Globe2 size={17}/></a></div>
               <div className="hero-services"><span>{t("ویزا و اقامت")}</span><span>{t("پرواز و هتل")}</span><span>{t("سفرهای گروهی")}</span></div>
             </div>
             <div className="hero-caption"><span>{t("مقصدی برای ایده گرفتن")}</span><strong>{t("دبی، امارات متحده عربی")}</strong><a href="#destinations">{t("کشف مقصدها")}<ArrowLeft size={14}/></a></div>
@@ -322,7 +351,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
                   <select id="purpose" value={finder.purpose} onChange={(e) => setFinder({ ...finder, purpose: e.target.value })} className="w-full rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-surface)] p-3.5 text-sm outline-none transition focus:border-[#c79a42]">
                     <option value="">{t('انتخاب هدف')}</option>{['سیاحت','تجارت','اقامت','زیارت','تحصیل','کار'].map(value=><option key={value} value={value}>{t(value)}</option>)}
                   </select>
-                  <button onClick={() => setSelection({...finder,title: `خدمات سفر به ${finder.destination}`, description: `هدف سفر: ${finder.purpose} — تابعیت: ${finder.passport}. این فهرست برای راهنمایی اولیه است؛ امکان ارائه، شرایط و مدارک هر خدمت باید با دفتر بررسی شود.`, options: serviceGroups.filter((_, index) => ({'سیاحت':[0,2,5], 'تجارت':[0,1,2,4], 'اقامت':[0,4], 'زیارت':[2,3,5], 'تحصیل':[0,4], 'کار':[0,1,4]}[finder.purpose] || []).includes(index)).map(s => ({title:s.title, description:s.desc}))})} disabled={!finderReady} className="shine mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#09111f] px-4 py-3.5 text-sm font-black text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-40">{t("نمایش خدمات مرتبط")}<ArrowLeft size={17} /></button>
+                  <button onClick={() => setSelection({...finder,title:finderTitle,description:finderDescription,options: serviceGroups.filter((_, index) => ({'سیاحت':[0,2,5], 'تجارت':[0,1,2,4], 'اقامت':[0,4], 'زیارت':[2,3,5], 'تحصیل':[0,4], 'کار':[0,1,4]}[finder.purpose] || []).includes(index)).map(s => ({title:s.title, description:s.desc}))})} disabled={!finderReady} className="shine mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#09111f] px-4 py-3.5 text-sm font-black text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-40">{t("نمایش خدمات مرتبط")}<ArrowLeft size={17} /></button>
                 </div>
 
                 <div className="premium-divider my-5" />
@@ -454,6 +483,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
         </>}
       </main>
 
+      <ContactChannels language={language} open={contactOpen} onOpenChange={setContactOpen}/>
       {selection && <Suspense fallback={<div role="status" className="dialog-loading">{t("در حال آماده‌سازی فرم…")}</div>}><DetailsDialog selection={selection} language={language} onClose={() => setSelection(null)} onRequest={openRequest} /></Suspense>}
       {!isInboundRoute && <footer id="contact" className="bg-[#070d17] py-14 text-slate-300">
         <div className="shell grid gap-9 md:grid-cols-4">
@@ -473,10 +503,12 @@ function App({initialPath}: {initialPath?: string} = {}) {
 
 
 
-      {!isInboundRoute && <div className="mobile-action-bar fixed inset-x-3 bottom-3 z-30 flex items-center gap-2 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-glass)] p-2 shadow-2xl backdrop-blur md:hidden">
-        <button onClick={request} className="flex-1 rounded-xl bg-[#09111f] px-3 py-3 text-xs font-black text-white">{t("شروع درخواست")}</button>
-        <a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 rounded-xl border border-[var(--fp-line)] px-4 py-3 text-xs font-black"><MessageCircle size={15} />{t("واتساپ")}</a>
-      </div>}
+      <nav aria-label={t("ناوبری پایین")} data-active-tab={navActive} className="mobile-action-bar fp-bottom-nav fixed inset-x-3 bottom-3 z-30 grid grid-cols-4 gap-1 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-glass)] p-2 shadow-2xl backdrop-blur md:hidden">
+        <a className={'fp-bottom-item'+(navActive==='home'?' fp-bottom-active':'')} aria-current={navActive==='home'?'page':undefined} href={'/?lang='+language}><House size={18} aria-hidden="true"/><span>{t("خانه")}</span></a>
+        <a className={'fp-bottom-item'+(navActive==='services'?' fp-bottom-active':'')} aria-current={navActive==='services'?'location':undefined} href={isInboundRoute?'#inbound-services':isCountryRoute?'/?lang='+language+'#services':'#services'} onClick={()=>{setContactOpen(false);setNavSection('services')}}><LayoutGrid size={18} aria-hidden="true"/><span>{isInboundRoute?inboundNav.services:t("خدمات")}</span></a>
+        <button type="button" className={'fp-bottom-item fp-bottom-primary'+(navActive==='request'?' fp-bottom-active':'')} aria-pressed={navActive==='request'} onClick={isInboundRoute?()=>{setContactOpen(false);setNavSection('request');document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"})}:request}><ClipboardList size={18} aria-hidden="true"/><span>{isInboundRoute?inboundNav.enquire:t("شروع درخواست")}</span></button>
+        <button type="button" className={'fp-bottom-item'+(navActive==='contact'?' fp-bottom-active':'')} aria-controls="fp-contact-dialog" aria-expanded={contactOpen} aria-pressed={navActive==='contact'} onClick={()=>{setMobileOpen(false);setContactOpen(true)}}><Headphones size={18} aria-hidden="true"/><span>{t("تماس")}</span></button>
+      </nav>
     </div>
   )
 }

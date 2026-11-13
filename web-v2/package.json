@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build && node scripts/prerender-inbound.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b",
-    "test:seo": "node tests/seo-pages.mjs",
+    "test:seo": "node tests/i18n-contract.mjs && node tests/seo-pages.mjs",
     "test:smoke": "node tests/smoke.mjs",
     "export:preview": "node scripts/export-preview.mjs",
     "test:intake": "node --test tests/intake-client.test.mjs server/intake/handler.test.mjs server/intake/fp04-scenarios.test.mjs",

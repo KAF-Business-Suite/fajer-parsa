@@ -126,10 +126,10 @@ try {
       await page.waitForFunction(lang=>document.documentElement.lang===lang,htmlLang)
       // The desktop header can be visually hidden at 393px; the fixed mobile CTA must be visible.
       const expectedCta=code==='en'?'Start enquiry':'ابدأ الطلب'
-      await page.waitForFunction(label=>document.querySelector('.mobile-action-bar button')?.textContent?.includes(label),expectedCta)
-      assert.equal(await page.locator('.mobile-action-bar button').isVisible(),true)
+      await page.waitForFunction(label=>document.querySelector('.mobile-action-bar button.fp-bottom-primary')?.textContent?.includes(label),expectedCta)
+      assert.equal(await page.locator('.mobile-action-bar button.fp-bottom-primary').isVisible(),true)
       assert.ok((await page.locator('.floating-header').textContent()).includes(expectedCta))
-      await page.locator('.mobile-action-bar button').click()
+      await page.locator('.mobile-action-bar button.fp-bottom-primary').click()
       const dialog=page.getByRole('dialog')
       await dialog.waitFor()
       await dialog.locator('#draft-service').selectOption({index:1})
@@ -180,6 +180,121 @@ try {
       const serviceCount=await page.locator('#services [role="status"]').first().innerText()
       assert.equal(serviceCount.includes('خدمت پیدا شد'),false)
       // No favorite toggling, data submission or external messaging.
+    }
+  })
+  await test('FP-NAV-01 branded controls, mobile destinations and verified contact channel',async()=>{
+    for(const [code,htmlLang,expected,themeLabel] of [
+      ['fa','fa-AF','شروع درخواست','فعال کردن حالت'],
+      ['en','en','Start enquiry','Switch to'],
+      ['ar','ar','ابدأ الطلب','التبديل إلى'],
+    ]){
+      await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
+      await page.waitForFunction(lang=>document.documentElement.lang===lang,htmlLang)
+      for(const width of [320,360,393,430]){
+        await page.setViewportSize({width,height:852})
+        const sizes=await page.evaluate(()=>{
+          const area=(selector)=>{const e=document.querySelector(selector);if(!e)return null;const r=e.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height}}
+          return {viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,header:area('.floating-header'),language:area('.fp-lang-trigger'),theme:area('.theme-toggle'),menu:area('.fp-menu-toggle'),bottom:area('.fp-bottom-nav'),items:[...document.querySelectorAll('.fp-bottom-item')].map(el=>el.getBoundingClientRect().width)}
+        })
+        assert.ok(sizes.scrollWidth<=sizes.viewport,code+' horizontal overflow '+width)
+        assert.ok(sizes.header.left>=-0.5 && sizes.header.right<=sizes.viewport+0.5,code+' header clipped '+width)
+        for(const name of ['language','theme','menu'])assert.ok(sizes[name].height>=44&&sizes[name].width>=44,code+' '+name+' touch target '+width)
+        assert.ok(sizes.bottom.left>=0 && sizes.bottom.right<=sizes.viewport,code+' bottom clipped '+width)
+        assert.ok(await page.locator('.fp-bottom-nav').evaluate(el=>el.getBoundingClientRect().height<=64),code+' bottom bar too tall '+width)
+        assert.equal(sizes.items.length,4)
+        assert.ok(sizes.items.every(value=>value>=44),code+' bottom target '+width)
+      }
+      await page.setViewportSize({width:393,height:852})
+      const bottom=page.locator('.fp-bottom-nav')
+      assert.equal(await bottom.locator('a').count(),2)
+      assert.equal(await bottom.locator('button').count(),2)
+      assert.ok((await bottom.locator('button').first().innerText()).includes(expected))
+      assert.ok((await page.locator('.theme-toggle').getAttribute('aria-label')).includes(themeLabel))
+      await bottom.locator('button[aria-controls="fp-contact-dialog"]').click()
+      const contact=page.locator('#fp-contact-dialog')
+      await contact.waitFor()
+      const sheetBounds=await contact.evaluate(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,viewportW:innerWidth,viewportH:innerHeight}})
+      assert.ok(sheetBounds.left>=0 && sheetBounds.right<=sheetBounds.viewportW && sheetBounds.top>=0 && sheetBounds.bottom<=sheetBounds.viewportH,code+' contact sheet outside viewport '+JSON.stringify(sheetBounds))
+      assert.equal(await contact.getByRole('link').count(),1,'Only verified WhatsApp is an active contact link')
+      assert.match(await contact.getByRole('link').first().getAttribute('href'),/^https:\/\/wa\.me\/93777377774$/)
+      assert.equal(await contact.locator('.fp-channel-pending').count(),3)
+      assert.equal(await contact.locator('a[href^="mailto:"],a[href*="t.me"]').count(),0)
+      await page.keyboard.press('Escape')
+      await contact.waitFor({state:'detached'})
+    }
+    await page.goto(origin+'/inbound?lang=en',{waitUntil:'networkidle'})
+    await page.locator('.inbound-form:not([inert])').waitFor()
+    const nav=page.locator('.fp-bottom-nav')
+    assert.equal(await nav.locator('a[href="#inbound-services"]').count(),1)
+    await nav.locator('button').first().click()
+    await page.waitForFunction(()=>document.querySelector('#inbound-request')?.getBoundingClientRect().top<500)
+  })
+  await test('Bottom active pill follows page, scroll, request and contact instead of permanently highlighting request',async()=>{
+    await page.setViewportSize({width:393,height:852})
+    await page.goto(origin+'/?lang=en',{waitUntil:'networkidle'})
+    const nav=page.locator('.fp-bottom-nav')
+    assert.equal(await nav.getAttribute('data-active-tab'),'home')
+    assert.equal(await nav.locator('a[aria-current="page"]').count(),1)
+    assert.equal(await nav.locator('.fp-bottom-active').count(),1)
+    assert.equal(await nav.locator('.fp-bottom-primary.fp-bottom-active').count(),0)
+    await nav.locator('a[href="#services"]').click()
+    await page.waitForFunction(()=>document.querySelector('.fp-bottom-nav')?.dataset.activeTab==='services')
+    assert.equal(await nav.locator('a[aria-current="location"]').count(),1)
+    await nav.locator('button.fp-bottom-primary').click()
+    await page.getByRole('dialog').waitFor()
+    await page.waitForFunction(()=>document.querySelector('.fp-bottom-nav')?.dataset.activeTab==='request')
+    assert.equal(await nav.locator('button.fp-bottom-primary').getAttribute('aria-pressed'),'true')
+    assert.equal(await nav.locator('.fp-bottom-active').count(),1)
+    await page.keyboard.press('Escape')
+    await nav.locator('button[aria-controls="fp-contact-dialog"]').click()
+    await page.locator('#fp-contact-dialog').waitFor()
+    await page.waitForFunction(()=>document.querySelector('.fp-bottom-nav')?.dataset.activeTab==='contact')
+    assert.equal(await nav.locator('.fp-bottom-active').count(),1)
+    await page.keyboard.press('Escape')
+    await nav.locator('a').first().click()
+    await page.waitForFunction(()=>location.pathname==='/' && !location.hash && document.querySelector('.fp-bottom-nav')?.dataset.activeTab==='home')
+  })
+  await test('Country list, finder, destination and request draft localize all countries (including Türkiye) in each language',async()=>{
+    const expected=[['fa','fa-AF','ترکیه','خدمات سفر به','مقصد:'],
+      ['en','en','Türkiye','Travel services in','Destination:'],
+      ['ar','ar','تركيا','خدمات السفر إلى','الوجهة:']]
+    for(const [code,htmlLang,turkey,heading,destinationLabel] of expected){
+      await page.setViewportSize({width:393,height:852})
+      await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
+      await page.waitForFunction(lang=>document.documentElement.lang===lang,htmlLang)
+      const options=await page.locator('#destination option').evaluateAll(els=>els.map(x=>({value:x.value,label:x.textContent?.trim()})))
+      assert.equal(options.length,16,'All fifteen destination countries must have visible options')
+      assert.equal(options.find(x=>x.value==='ترکیه')?.label,turkey)
+      for(const option of options.slice(1)){
+        assert.ok(option.label,code+' missing translated country '+option.value)
+        if(code==='en')assert.doesNotMatch(option.label,/[\u0600-\u06ff]/,'English country leaked untranslated Dari: '+option.value)
+      }
+      await page.locator('#destination').selectOption('ترکیه')
+      await page.locator('#purpose').selectOption('سیاحت')
+      await page.locator('#finder button').last().click()
+      let dialog=page.getByRole('dialog')
+      await dialog.waitFor()
+      const text=await dialog.innerText()
+      assert.ok(text.includes(heading+' '+turkey),code+' finder heading not localized')
+      assert.ok(!text.includes(code==='fa'?'UNEXPECTED':'خدمات سفر به ترکیه'),code+' leaked Dari country heading')
+      await dialog.locator('.dialog-actions .primary-action').click()
+      assert.equal(await dialog.locator('#draft-destination').inputValue(),turkey,code+' prefilled destination not localized')
+      await dialog.locator('#draft-service').selectOption({index:1})
+      await dialog.locator('button[type="submit"]').first().click()
+      const summary=await dialog.locator('#request-summary-text').inputValue()
+      assert.ok(summary.includes(destinationLabel+' '+turkey),code+' prepared message not localized')
+      if(code!=='fa')assert.ok(!summary.includes('مقصد: ترکیه'),code+' leaked raw Dari country into message')
+      await page.keyboard.press('Escape')
+      const card=page.locator('#destinations .destination-card').filter({hasText:turkey}).first()
+      await card.locator('.destination-copy button').click()
+      dialog=page.getByRole('dialog')
+      await dialog.waitFor()
+      assert.ok((await dialog.innerText()).includes(turkey),code+' destination detail title is unlocalized')
+      await page.keyboard.press('Escape')
+      await page.goto(origin+'/?lang='+code+'#/country/tr',{waitUntil:'networkidle'})
+      await page.locator('.country-page h1').waitFor()
+      assert.ok((await page.locator('.country-page h1').innerText()).includes(turkey),code+' country route is unlocalized')
+      assert.equal(await page.locator('.fp-bottom-nav').getAttribute('data-active-tab'),'services')
     }
   })
   await test('One global language control, native labels and shareable language state',async()=>{
@@ -239,7 +354,7 @@ try {
     assert.equal(await page.locator('html').getAttribute('dir'),'rtl')
     assert.equal(await page.locator('link[rel="canonical"]').count(),0)
     assert.equal(await page.locator('meta[property="og:title"]').count(),0)
-    await page.getByRole('link',{name:'Visit Afghanistan',exact:true}).click()
+    await page.locator('.hero-actions a[href^="/inbound?lang="]').click()
     await page.locator('.inbound-form:not([inert])').waitFor()
     assert.equal(new URL(page.url()).pathname,'/inbound')
     await page.goBack();await page.locator('.hero-scene').waitFor()

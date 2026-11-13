@@ -5,7 +5,7 @@ export function MenuToggle({ open, onToggle, label='منوی موبایل' }: { 
   return (
     <button type="button" data-state={open ? 'active' : 'closed'} onClick={onToggle}
       aria-label={label} aria-expanded={open} aria-controls="mobile-navigation"
-      className="fp-menu-toggle relative grid h-11 w-11 place-items-center rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] lg:hidden">
+      className="fp-menu-toggle fp-control relative grid h-11 w-11 place-items-center rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] lg:hidden">
       <span aria-hidden="true" className="fp-menu-bars flex w-[18px] flex-col items-center justify-center gap-[6px] transition duration-200">
         <span className="h-0.5 w-full rounded-full bg-current" />
         <span className="h-0.5 w-full rounded-full bg-current" />
