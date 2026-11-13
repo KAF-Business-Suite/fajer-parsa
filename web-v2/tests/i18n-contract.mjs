@@ -24,6 +24,9 @@ const inData=[
  ...[...services.matchAll(/\b(?:title|desc|label):\s*'([^']+)'/g)].map(m=>m[1]),
  ...screens.flatMap(src=>[...src.matchAll(/\bt\(\s*(['"])(.*?)\1\s*\)/g)].map(m=>m[2])),
 ].filter(x=>/[\u0600-\u06ff]/.test(x))
+// Iran page generates these seven country-specific labels dynamically.
+const iranVisaChoices=['سیاحتی','زیارتی','تجارتی','تحصیلی','کاری','درمانی','دیدار خانواده']
+for(const suffix of iranVisaChoices)inData.push('ویزای '+suffix)
 const missing=[...new Set(inData)].filter(key=>!keys.has(key))
 assert.deepEqual(missing,[], 'Untranslated inventory/source keys: '+JSON.stringify(missing))
 assert.equal(names.length,15, 'Review the complete country inventory if number changes')
