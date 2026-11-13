@@ -126,10 +126,10 @@ try {
       await page.waitForFunction(lang=>document.documentElement.lang===lang,htmlLang)
       // The desktop header can be visually hidden at 393px; the fixed mobile CTA must be visible.
       const expectedCta=code==='en'?'Start enquiry':'ابدأ الطلب'
-      await page.waitForFunction(label=>document.querySelector('.mobile-action-bar button')?.textContent?.includes(label),expectedCta)
-      assert.equal(await page.locator('.mobile-action-bar button').isVisible(),true)
+      await page.waitForFunction(label=>document.querySelector('.mobile-action-bar button.fp-bottom-primary')?.textContent?.includes(label),expectedCta)
+      assert.equal(await page.locator('.mobile-action-bar button.fp-bottom-primary').isVisible(),true)
       assert.ok((await page.locator('.floating-header').textContent()).includes(expectedCta))
-      await page.locator('.mobile-action-bar button').click()
+      await page.locator('.mobile-action-bar button.fp-bottom-primary').click()
       const dialog=page.getByRole('dialog')
       await dialog.waitFor()
       await dialog.locator('#draft-service').selectOption({index:1})
