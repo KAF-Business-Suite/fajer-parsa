@@ -166,6 +166,22 @@ try {
       await page.keyboard.press('Escape')
     }
   })
+  await test('Localized favorites and accessible destination controls in both foreign languages',async()=>{
+    await page.setViewportSize({width:393,height:852})
+    for (const [code,label,addWord] of [['en','My favorites','Add '],['ar','المفضلة','إضافة ']]) {
+      await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
+      await page.waitForFunction(l=>document.documentElement.lang===l,code)
+      const gallery=page.locator('#destinations')
+      await gallery.locator('.favorites-filter').waitFor()
+      assert.ok((await gallery.locator('.favorites-filter').innerText()).includes(label))
+      const add=gallery.locator('.favorite-button').first()
+      assert.ok((await add.getAttribute('aria-label')).startsWith(addWord))
+      assert.equal((await page.locator('.skip-link').innerText()).includes('رفتن'),false)
+      const serviceCount=await page.locator('#services [role="status"]').first().innerText()
+      assert.equal(serviceCount.includes('خدمت پیدا شد'),false)
+      // No favorite toggling, data submission or external messaging.
+    }
+  })
   await test('One global language control, native labels and shareable language state',async()=>{
     await page.goto(origin+'/',{waitUntil:'networkidle'})
     const trigger=page.locator('.fp-lang-trigger')
