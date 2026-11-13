@@ -1109,6 +1109,7 @@ const textMap: Record<string, {en:string;ar:string}> = {
   "مسیر صفحه": {"en":"Breadcrumb navigation","ar":"مسار الصفحة"},
   "کپی متن یا باز کردن واتساپ به معنی ثبت مرکزی نیست؛ نتیجهٔ ثبت در بخش پایین نمایش داده می‌شود.": {"en":"Copying the text or opening WhatsApp does not register an enquiry. A confirmed registration result, if any, is displayed below.","ar":"نسخ النص أو فتح واتساب لا يعني تسجيل الطلب. تظهر نتيجة التسجيل المؤكدة، إن وجدت، أدناه."},
   "معرفی خدمت به معنی تضمین صدور ویزا، ورود، اقامت یا دریافت کار نیست. شرایط سفر و تصمیم مراجع مربوط باید برای درخواست شما بررسی شود. برای بررسی اولیه، تصویر پاسپورت یا اسناد شخصی را در این صفحه ارسال نکنید.": {"en":"Listing a service does not guarantee a visa, entry, residence or employment. Requirements and decisions by relevant authorities must be checked for each case. Do not send passport photos or personal documents via this page for an initial enquiry.","ar":"عرض الخدمة لا يضمن إصدار تأشيرة أو الدخول أو الإقامة أو الحصول على عمل. يجب مراجعة الشروط وقرارات السلطات المختصة لكل حالة. لا ترسل صور جواز السفر أو الوثائق الشخصية عبر هذه الصفحة عند الاستفسار الأولي."},
+  "رفتن به محتوای اصلی": {"en":"Skip to main content","ar":"الانتقال إلى المحتوى الرئيسي"},
 }
 export function siteText(input:string, language:SiteLanguage):string {
   if (language==='fa') return input
