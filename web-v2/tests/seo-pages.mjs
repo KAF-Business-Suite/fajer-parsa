@@ -352,7 +352,9 @@ try {
     await page.locator('.inbound-bottom a').first().click()
     await page.locator('.hero-scene').waitFor()
     assert.equal(new URL(page.url()).pathname,'/')
-    assert.equal(await page.locator('html').getAttribute('dir'),'rtl')
+    // Returning from English inbound now retains the chosen language on the home page.
+    assert.equal(await page.locator('html').getAttribute('dir'),'ltr')
+    assert.equal(await page.locator('html').getAttribute('lang'),'en')
     assert.equal(await page.locator('link[rel="canonical"]').count(),0)
     assert.equal(await page.locator('meta[property="og:title"]').count(),0)
     await page.locator('.hero-actions a[href^="/inbound?lang="]').click()
