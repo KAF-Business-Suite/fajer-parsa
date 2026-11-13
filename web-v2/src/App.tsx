@@ -62,6 +62,53 @@ const inboundHeaderText = {
   ar: {nav:'التنقل للزوار',services:'الخدمات',how:'طريقة العمل',enquire:'استفسار',home:'الموقع الرئيسي',contact:'اتصل بنا',menu:'قائمة الهاتف',themeLight:'التبديل إلى الوضع الفاتح',themeDark:'التبديل إلى الوضع الداكن',skip:'الانتقال إلى المحتوى الرئيسي',visit:'زيارة أفغانستان',header:'ترويسة فجر بارسا',logo:'شعار فجر بارسا'},
 }
 
+const touristLanguages: {code:InboundLanguage;label:string;detail:string;htmlLang:string}[] = [
+  {code:'fa',label:'دری',detail:'Afghan Dari',htmlLang:'fa-AF'},
+  {code:'en',label:'English',detail:'English',htmlLang:'en'},
+  {code:'ar',label:'العربية',detail:'Arabic',htmlLang:'ar'},
+]
+
+function SiteLanguageMenu({language,inbound,onSelect}: {
+  language:InboundLanguage;inbound:boolean;onSelect:(code:InboundLanguage)=>void
+}) {
+  const [open,setOpen]=useState(false)
+  const host=useRef<HTMLDivElement>(null)
+  const trigger=useRef<HTMLButtonElement>(null)
+  useEffect(()=>{
+    if(!open)return
+    const outside=(event:PointerEvent)=>{
+      if(event.target instanceof Node && !host.current?.contains(event.target))setOpen(false)
+    }
+    const escape=(event:KeyboardEvent)=>{
+      if(event.key==='Escape'){setOpen(false);trigger.current?.focus()}
+    }
+    document.addEventListener('pointerdown',outside)
+    document.addEventListener('keydown',escape)
+    return ()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',escape)}
+  },[open])
+  const active=inbound?language:'fa'
+  const activeText=active==='fa'?'دری':active==='ar'?'العربية':'EN'
+  return <div ref={host} className="fp-lang-menu">
+    <button ref={trigger} type="button" className="fp-lang-trigger" aria-label="انتخاب زبان / Choose language / اختيار اللغة" aria-expanded={open} aria-controls="fp-language-options" onClick={()=>setOpen(value=>!value)}>
+      <Languages size={18} aria-hidden="true"/>
+      <span className="fp-lang-current">{activeText}</span>
+      <ChevronDown size={14} aria-hidden="true" className={open?'rotate-180 transition':'transition'}/>
+    </button>
+    {open && <div className="fp-lang-panel" id="fp-language-options" role="group" aria-label="زبان بخش گردشگری افغانستان">
+      <div className="fp-lang-heading">زبان گردشگری افغانستان <span lang="en">/ Travel language</span></div>
+      {touristLanguages.map(item=>inbound
+        ? <button type="button" key={item.code} lang={item.htmlLang} aria-label={item.label} aria-pressed={active===item.code} className="fp-lang-choice" onClick={()=>{onSelect(item.code);setOpen(false)}}>
+            <span>{item.label}</span><span aria-hidden="true" className="fp-lang-detail">{item.detail}</span>{active===item.code&&<CheckCircle2 size={17} aria-hidden="true" className="fp-lang-check"/>}
+          </button>
+        : <a key={item.code} href={'/inbound?lang='+item.code} lang={item.htmlLang} aria-label={item.label} className="fp-lang-choice">
+            <span>{item.label}</span><span aria-hidden="true" className="fp-lang-detail">{item.detail}</span>
+          </a>
+      )}
+      {!inbound && <p className="fp-lang-note">این زبان‌ها فعلاً برای گردشگری افغانستان فعال‌اند؛ خدمات عمومی سایت هنوز دری است.</p>}
+    </div>}
+  </div>
+}
+
 function App({initialPath}: {initialPath?: string} = {}) {
   const headerRef = useRef<HTMLElement>(null)
   const [routeHash,setRouteHash] = useState(typeof window === 'undefined' ? '' : window.location.hash)
@@ -172,6 +219,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
           </nav>}
 
           <div className="flex items-center gap-2">
+            <SiteLanguageMenu language={inboundLanguage} inbound={isInboundRoute} onSelect={changeInboundLanguage}/>
             <ThemeToggle labels={isInboundRoute ? {light:inboundNav.themeLight,dark:inboundNav.themeDark} : undefined} />
             {isInboundRoute ? <a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer" className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> {inboundNav.contact}</a> : <button onClick={() => inform('ارتباط با فجر پارسا', 'واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴. کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵. برای پیگیری، اطلاعات درج‌شده در رسید را آماده کنید.', {}, true)} className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> تماس</button>}
             <button onClick={isInboundRoute ? ()=>document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"}) : request} className="shine rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10">{isInboundRoute ? inboundNav.enquire : "شروع درخواست"}</button>
@@ -218,7 +266,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
 
       <a className="skip-link" href="#main-content">{isInboundRoute ? inboundNav.skip : "رفتن به محتوای اصلی"}</a>
       <main id="main-content">
-        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : isInboundRoute ? <InboundTourism language={inboundLanguage} onLanguageChange={changeInboundLanguage}/> : <>
+        {isCountryRoute ? <Suspense fallback={<div className="shell country-page" role="status">در حال آماده‌سازی صفحهٔ کشور…</div>}><CountryPage country={selectedCountry} onRequest={openRequest}/></Suspense> : isInboundRoute ? <InboundTourism language={inboundLanguage}/> : <>
         <section className="hero scenic-hero">
           <picture className="hero-scene"><source media="(max-width: 767px)" srcSet="/media/hero-dubai-mobile.webp"/><img src="/media/hero-dubai.webp" alt="چشم‌انداز روشن دبی و برج خلیفه" width="1800" height="1350" fetchPriority="high" decoding="async"/></picture>
           <div className="shell hero-layout">
@@ -227,12 +275,6 @@ function App({initialPath}: {initialPath?: string} = {}) {
               <h1>سفر بعدی شما،<br/>از همین‌جا آغاز می‌شود.</h1>
               <p className="hero-description">ویزا، تکت، هتل و خدمات سفر؛ گزینه‌ها را بررسی کنید و با اطلاعات روشن، قدم بعد را با مشاور فجر پارسا بردارید.</p>
               <div className="hero-actions"><button type="button" onClick={request} className="primary-action cta-button">شروع درخواست <ArrowLeft size={17}/></button><a href="/inbound?lang=en" className="secondary-action" lang="en">Visit Afghanistan <Globe2 size={17}/></a></div>
-              <nav aria-label="انتخاب زبان گردشگری افغانستان" className="mt-5 flex max-w-full flex-wrap items-center gap-1.5 rounded-2xl border border-white/40 bg-white/90 p-2 shadow-md backdrop-blur-sm">
-                <span className="px-2 text-xs font-extrabold text-[#1b2b34]">گردشگری افغانستان به زبان:</span>
-                <a href="/inbound?lang=fa" lang="fa-AF" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#d5d9d7] bg-white px-3 text-xs font-bold text-[#1b2b34]">دری</a>
-                <a href="/inbound?lang=en" lang="en" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#d5d9d7] bg-white px-3 text-xs font-bold text-[#1b2b34]">English</a>
-                <a href="/inbound?lang=ar" lang="ar" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#d5d9d7] bg-white px-3 text-xs font-bold text-[#1b2b34]">العربية</a>
-              </nav>
               <div className="hero-services"><span>ویزا و اقامت</span><span>پرواز و هتل</span><span>سفرهای گروهی</span></div>
             </div>
             <div className="hero-caption"><span>مقصدی برای ایده گرفتن</span><strong>دبی، امارات متحده عربی</strong><a href="#destinations">کشف مقصدها <ArrowLeft size={14}/></a></div>
