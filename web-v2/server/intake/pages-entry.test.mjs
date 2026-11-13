@@ -9,7 +9,7 @@ const live='https://fajr-parsa-qa.pages.dev'
 const testEnv=()=>({
   FAJR_INTAKE_ENABLED:'true',
   FAJR_INTAKE_ORIGIN:qa,
-  SUPABASE_URL:'https://example.supabase.co',
+  SUPABASE_URL:'https://krzxajtrhvupyywovdzy.supabase.co',
   SUPABASE_SERVER_KEY:'synthetic-server-secret-never-log',
   TURNSTILE_SECRET_KEY:'synthetic-turnstile-secret-never-log',
   FAJR_RATE_LIMIT:{limit:async()=>{throw Error('limiter must never be called')}}
@@ -42,6 +42,8 @@ test('Preview requires exact server-binding origin and all dependencies',async()
     {...base,FAJR_INTAKE_ENABLED:'false'},
     {...base,FAJR_RATE_LIMIT:undefined},
     {...base,SUPABASE_URL:undefined},
+    {...base,SUPABASE_URL:'https://other.supabase.co'},
+    {...base,SUPABASE_URL:'https://krzxajtrhvupyywovdzy.supabase.co/unsafe'},
     {...base,SUPABASE_SERVER_KEY:undefined},
     {...base,TURNSTILE_SECRET_KEY:undefined}
   ]
