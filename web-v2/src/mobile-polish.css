@@ -169,3 +169,18 @@ footer .text-slate-400 { color:#b2c0cc; }
 .fp-lang-note{margin:9px 5px 2px;padding-block:9px 2px;border-top:1px solid var(--fp-line);color:var(--fp-muted);font-size:11px;line-height:1.8}
 @media(max-width:359px){.fp-lang-trigger{min-width:44px;padding:8px}.fp-lang-trigger .fp-lang-current,.fp-lang-trigger svg:last-child{display:none}.floating-header a>div>div:first-child{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.fp-lang-trigger *{transition:none!important}}
+
+/* FP-UX-01 mobile containment fix: keep language options inside the floating header, never beyond viewport. */
+@media(max-width:767px){
+  .fp-lang-menu{position:static}
+  .fp-lang-panel{
+    position:absolute;
+    top:calc(100% + 8px);
+    inset-inline-end:auto;
+    left:12px;
+    right:12px;
+    width:auto;
+    max-width:none;
+    transform:none;
+  }
+}
