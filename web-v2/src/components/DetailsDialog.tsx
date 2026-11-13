@@ -32,7 +32,7 @@ function RequestDraft({initial,language}: {initial:RequestContext;language:SiteL
   const [copyStatus,setCopyStatus] = useState('')
   const summaryRef=useRef<HTMLTextAreaElement>(null)
   const formRef=useRef<HTMLFormElement>(null)
-  const fieldLabels=language==='en'?['Service type','Travel purpose','Nationality','Package']:language==='ar'?['نوع الخدمة','غرض السفر','الجنسية','الباقة']:language==='ps'?['د خدمت ډول','د سفر موخه','تابعیت','بسته']:['نوع خدمت','هدف سفر','تابعیت','بسته']
+  const fieldLabels=language==='en'?['Service type','Travel purpose','Nationality','Package']:language==='ar'?['نوع الخدمة','غرض السفر','الجنسية','الباقة']:language==='ps'?['د خدمت ډول','د سفر موخه','د تابعیت هېواد','بسته']:['نوع خدمت','هدف سفر','تابعیت','بسته']
   const contextLines=[variant && `${fieldLabels[0]}: ${t(variant)}`,initial.purpose && `${fieldLabels[1]}: ${t(initial.purpose)}`,initial.passport && `${fieldLabels[2]}: ${t(initial.passport)}`,initial.bundle && `${fieldLabels[3]}: ${t(initial.bundle)}`].filter(Boolean).join('\n')
   const summary=language==='en'
     ? `Hello Fajr Parsa, I would like to enquire about travel services.\nService: ${t(service)}\nDestination: ${t(destination)}\nTravellers: ${travelers}\nApproximate date: ${date || t('هنوز مشخص نیست')}${contextLines ? '\n'+contextLines : ''}`
