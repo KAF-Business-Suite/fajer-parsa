@@ -182,6 +182,50 @@ try {
       // No favorite toggling, data submission or external messaging.
     }
   })
+  await test('FP-NAV-01 branded controls, mobile destinations and verified contact channel',async()=>{
+    for(const [code,htmlLang,expected,themeLabel] of [
+      ['fa','fa-AF','شروع درخواست','فعال کردن حالت'],
+      ['en','en','Start enquiry','Switch to'],
+      ['ar','ar','ابدأ الطلب','التبديل إلى'],
+    ]){
+      await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
+      await page.waitForFunction(lang=>document.documentElement.lang===lang,htmlLang)
+      for(const width of [320,360,393,430]){
+        await page.setViewportSize({width,height:852})
+        const sizes=await page.evaluate(()=>{
+          const area=(selector)=>{const e=document.querySelector(selector);if(!e)return null;const r=e.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height}}
+          return {viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth,header:area('.floating-header'),language:area('.fp-lang-trigger'),theme:area('.theme-toggle'),menu:area('.fp-menu-toggle'),bottom:area('.fp-bottom-nav'),items:[...document.querySelectorAll('.fp-bottom-item')].map(el=>el.getBoundingClientRect().width)}
+        })
+        assert.ok(sizes.scrollWidth<=sizes.viewport,code+' horizontal overflow '+width)
+        assert.ok(sizes.header.left>=-0.5 && sizes.header.right<=sizes.viewport+0.5,code+' header clipped '+width)
+        for(const name of ['language','theme','menu'])assert.ok(sizes[name].height>=44&&sizes[name].width>=44,code+' '+name+' touch target '+width)
+        assert.ok(sizes.bottom.left>=0 && sizes.bottom.right<=sizes.viewport,code+' bottom clipped '+width)
+        assert.equal(sizes.items.length,4)
+        assert.ok(sizes.items.every(value=>value>=44),code+' bottom target '+width)
+      }
+      await page.setViewportSize({width:393,height:852})
+      const bottom=page.locator('.fp-bottom-nav')
+      assert.equal(await bottom.locator('a').count(),2)
+      assert.equal(await bottom.locator('button').count(),2)
+      assert.ok((await bottom.locator('button').first().innerText()).includes(expected))
+      assert.ok((await page.locator('.theme-toggle').getAttribute('aria-label')).includes(themeLabel))
+      await bottom.locator('button[aria-controls="fp-contact-dialog"]').click()
+      const contact=page.locator('#fp-contact-dialog')
+      await contact.waitFor()
+      assert.equal(await contact.getByRole('link').count(),1,'Only verified WhatsApp is an active contact link')
+      assert.match(await contact.getByRole('link').first().getAttribute('href'),/^https:\/\/wa\.me\/93777377774$/)
+      assert.equal(await contact.locator('.fp-channel-pending').count(),3)
+      assert.equal(await contact.locator('a[href^="mailto:"],a[href*="t.me"]').count(),0)
+      await page.keyboard.press('Escape')
+      await contact.waitFor({state:'detached'})
+    }
+    await page.goto(origin+'/inbound?lang=en',{waitUntil:'networkidle'})
+    await page.locator('.inbound-form:not([inert])').waitFor()
+    const nav=page.locator('.fp-bottom-nav')
+    assert.equal(await nav.locator('a[href="#inbound-services"]').count(),1)
+    await nav.locator('button').first().click()
+    await page.waitForFunction(()=>document.querySelector('#inbound-request')?.getBoundingClientRect().top<500)
+  })
   await test('One global language control, native labels and shareable language state',async()=>{
     await page.goto(origin+'/',{waitUntil:'networkidle'})
     const trigger=page.locator('.fp-lang-trigger')
