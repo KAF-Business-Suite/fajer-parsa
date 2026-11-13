@@ -8,6 +8,26 @@ export function turnstileVerifier(secret:string,hostname:string,fetcher:typeof f
     return data.success===true&&data.hostname===hostname&&data.action==='fajr_intake'
   }
 }
+
+
+// Shared, transaction-safe intake quota already provisioned in the existing KAF database.
+// The RPC atomically checks fajr_private.intake_control (enabled + 12/min + 100/day).
+// This requires service_role server-side and MUST NOT be called from the browser.
+export function supabaseIntakeQuota(projectUrl:string,serverKey:string,fetcher:typeof fetch=fetch) {
+  const url=new URL('/rest/v1/rpc/fajr_take_intake_slot',projectUrl)
+  if(url.protocol!=='https:'||!url.hostname.endsWith('.supabase.co')||!serverKey)throw new Error('invalid server quota URL')
+  return async():Promise<boolean>=>{
+    const response=await fetcher(url,{
+      method:'POST',headers:{apikey:serverKey,Authorization:'Bearer '+serverKey,'Content-Type':'application/json'},
+      body:'{}',redirect:'error',signal:AbortSignal.timeout(8000)
+    })
+    if(!response.ok)throw new Error('intake quota unavailable')
+    const allowed:unknown=await response.json()
+    if(typeof allowed!=='boolean')throw new Error('invalid quota response')
+    return allowed
+  }
+}
+
 export function supabaseSaver(projectUrl:string,serverKey:string,fetcher:typeof fetch=fetch) {
   const url=new URL('/rest/v1/rpc/fajr_receive_web_request',projectUrl)
   if(url.protocol!=='https:' || !url.hostname.endsWith('.supabase.co'))throw new Error('invalid server database URL')
