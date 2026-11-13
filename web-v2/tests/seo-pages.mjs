@@ -119,6 +119,28 @@ try {
     assert.match(link.searchParams.get('text'),/Synthetic Visitor/)
     assert.equal(await page.locator('input[type="date"]').getAttribute('min'),await page.evaluate(()=>{const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Kabul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const values=Object.fromEntries(parts.map(p=>[p.type,p.value]));return `${values.year}-${values.month}-${values.day}`}))
   })
+  await test('Multilingual navigation and WhatsApp draft preserve selected locale',async()=>{
+    await page.setViewportSize({width:393,height:852})
+    for(const [code,htmlLang,expected] of [['en','en','Nationality:'],['ar','ar','الجنسية:']]){
+      await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
+      await page.waitForFunction(lang=>document.documentElement.lang===lang,htmlLang)
+      assert.ok((await page.locator('.floating-header').innerText()).includes(code==='en'?'Start enquiry':'ابدأ الطلب'))
+      await page.locator('.mobile-action-bar button').click()
+      const dialog=page.getByRole('dialog')
+      await dialog.waitFor()
+      await dialog.locator('#draft-service').selectOption({index:1})
+      await dialog.locator('#draft-destination').fill('Synthetic Dubai')
+      await dialog.locator('button[type="submit"]').first().click()
+      const message=await dialog.locator('#request-summary-text').inputValue()
+      assert.ok(message.includes(expected),code+' WhatsApp summary did not localize nationality')
+      assert.ok(!message.includes('تابعیت:'),code+' WhatsApp summary leaked Dari field')
+      const link=await dialog.locator('a[href*="wa.me/"]').getAttribute('href')
+      const url=new URL(link)
+      assert.equal(url.host,'wa.me')
+      assert.ok(url.searchParams.get('text').includes(expected))
+      // Do not open WhatsApp or submit real customer data.
+    }
+  })
   await test('One global language control, native labels and shareable language state',async()=>{
     await page.goto(origin+'/',{waitUntil:'networkidle'})
     const trigger=page.locator('.fp-lang-trigger')
