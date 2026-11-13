@@ -169,7 +169,7 @@ export function InboundTourism({language='en'}: {language?:Language}) {
           <div className="inbound-art-ring"/>
           <div className="inbound-art-plate">
             <span>FAJR PARSA</span>
-            <strong>AFGHANISTAN</strong>
+            <strong>{lang==='ps'?'افغانستان':'AFGHANISTAN'}</strong>
             <small>{lang==='ps'?'کابل · سیمه‌ییزه همغږي':'KABUL · LOCAL COORDINATION'}</small>
           </div>
           <div className="inbound-art-route"><MapPin size={19}/><span>{lang==='ps'?'ستاسو سفر، په پام سره تنظیم شوی':'YOUR JOURNEY, THOUGHTFULLY ARRANGED'}</span></div>
