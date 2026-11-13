@@ -1,7 +1,7 @@
 // Prepared Cloudflare Pages entrypoint. Deliberately NOT mounted in functions/.
 // QA-only opt-in. No production request is accepted by this module.
 import {handleIntake} from './handler.ts'
-import {supabaseSaver,turnstileVerifier} from './adapters.ts'
+import {supabaseSaver,supabaseIntakeQuota,turnstileVerifier} from './adapters.ts'
 
 type Env={
   FAJR_INTAKE_ENABLED?:string;
@@ -9,7 +9,6 @@ type Env={
   SUPABASE_URL?:string;
   SUPABASE_SERVER_KEY?:string;
   TURNSTILE_SECRET_KEY?:string;
-  FAJR_RATE_LIMIT?:{limit:(options:{key:string})=>Promise<{success:boolean}>}
 }
 
 // This legacy Fajr intake RPC belongs to the existing KAF data authority.
@@ -44,17 +43,18 @@ export async function onRequest(context:{request:Request;env:Env}):Promise<Respo
   let origin:string
   try{origin=new URL(request.url).origin}catch{return unavailable()}
   // No implicit secrets, no production wildcard, no in-memory limiter fallback.
+  // The shared, atomic rate limit is enforced by KAF's existing service-only database RPC.
   if(!safePreviewOrigin(origin,env.FAJR_INTAKE_ORIGIN)||
-    env.FAJR_INTAKE_ENABLED!=='true'||!env.FAJR_RATE_LIMIT||
+    env.FAJR_INTAKE_ENABLED!=='true'||
     !safeProjectUrl(env.SUPABASE_URL)||!env.SUPABASE_SERVER_KEY||!env.TURNSTILE_SECRET_KEY)return unavailable()
 
   try{
     const saver=supabaseSaver(env.SUPABASE_URL,env.SUPABASE_SERVER_KEY)
     const verifyChallenge=turnstileVerifier(env.TURNSTILE_SECRET_KEY,new URL(origin).hostname)
-    const limit=env.FAJR_RATE_LIMIT
+    const quota=supabaseIntakeQuota(env.SUPABASE_URL,env.SUPABASE_SERVER_KEY)
     return await handleIntake(request,request.headers.get('CF-Connecting-IP')||'',{
       enabled:true,origin,
-      rateLimit:async ip=>(await limit.limit({key:'fajr-intake:'+ip})).success,
+      rateLimit:async () => quota(),
       verifyChallenge,save:saver
     })
   }catch{return unavailable()}
