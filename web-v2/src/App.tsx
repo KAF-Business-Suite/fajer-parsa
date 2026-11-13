@@ -193,14 +193,14 @@ function App({initialPath}: {initialPath?: string} = {}) {
       <ScrollProgress className="fp-scroll-progress" aria-hidden="true" />
       <header ref={headerRef} data-scrolled={headerScrolled} className="floating-header" aria-label={isInboundRoute ? inboundNav.header : "سربرگ فجر پارسا"}>
         <div className="shell flex h-[74px] items-center justify-between gap-4">
-          <a href={isInboundRoute ? "/" : "#"} className="flex items-center gap-3">
+          <a href={isInboundRoute ? '/?lang='+language : "#"} className="flex items-center gap-3">
             <div className="relative">
               <img src="/media/logo.png" alt={isInboundRoute ? inboundNav.logo : "لوگوی فجر پارسا"} className="h-12 w-12 rounded-[15px] border border-[var(--fp-line)] bg-[var(--fp-surface)] object-contain p-1 shadow-sm" />
 
             </div>
             <div>
-              <div className="text-[17px] font-black tracking-[-.02em]">{isInboundRoute ? "FAJR PARSA" : "فجر پارسا"}</div>
-              <div className="font-latin text-[9px] font-bold tracking-[.16em] text-slate-400">{isInboundRoute ? "AFGHANISTAN TRAVEL" : "سفر • ویزا • تجارت"}</div>
+              <div className="text-[17px] font-black tracking-[-.02em]">{isInboundRoute ? "FAJR PARSA" : t("فجر پارسا")}</div>
+              <div className="font-latin text-[9px] font-bold tracking-[.16em] text-slate-400">{isInboundRoute ? "AFGHANISTAN TRAVEL" : t("سفر • ویزا • تجارت")}</div>
             </div>
           </a>
 
@@ -208,12 +208,12 @@ function App({initialPath}: {initialPath?: string} = {}) {
             <button className="rounded-xl px-3 py-2.5" onClick={()=>document.getElementById('inbound-services')?.scrollIntoView({behavior:'smooth'})}>{inboundNav.services}</button>
             <button className="rounded-xl px-3 py-2.5" onClick={()=>document.getElementById('inbound-process')?.scrollIntoView({behavior:'smooth'})}>{inboundNav.how}</button>
             <button className="rounded-xl px-3 py-2.5" onClick={()=>document.getElementById('inbound-request')?.scrollIntoView({behavior:'smooth'})}>{inboundNav.enquire}</button>
-            <a className="rounded-xl px-3 py-2.5" href="/">{inboundNav.home}</a>
+            <a className="rounded-xl px-3 py-2.5" href={'/?lang='+language}>{inboundNav.home}</a>
           </nav> : <nav className="hidden items-center gap-1 text-[13px] font-extrabold lg:flex">
             <button aria-expanded={megaOpen} aria-controls="services-mega" onClick={() => setMegaOpen(!megaOpen)} className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5">
-              خدمات <ChevronDown size={15} className={megaOpen ? 'rotate-180 transition' : 'transition'} />
+              {t("خدمات")} <ChevronDown size={15} className={megaOpen ? 'rotate-180 transition' : 'transition'} />
             </button>
-            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="/inbound">Afghanistan Tourism</a>
+            <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href={'/inbound?lang='+language}>{t("سفر به افغانستان")}</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#country-services">{t("کشورها")}</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#journey">{t("درخواست سفر")}</a>
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#track">{t("پیگیری")}</a>
@@ -223,8 +223,8 @@ function App({initialPath}: {initialPath?: string} = {}) {
             <SiteLanguageMenu language={inboundLanguage} inbound={isInboundRoute} onSelect={changeInboundLanguage}/>
             <ThemeToggle labels={isInboundRoute ? {light:inboundNav.themeLight,dark:inboundNav.themeDark} : undefined} />
             {isInboundRoute ? <a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer" className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> {inboundNav.contact}</a> : <button onClick={() => inform('ارتباط با فجر پارسا', 'واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴. کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵. برای پیگیری، اطلاعات درج‌شده در رسید را آماده کنید.', {}, true)} className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} />{t("تماس")}</button>}
-            <button onClick={isInboundRoute ? ()=>document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"}) : request} className="shine rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10">{isInboundRoute ? inboundNav.enquire : "شروع درخواست"}</button>
-            <MenuToggle open={mobileOpen} onToggle={() => setMobileOpen(!mobileOpen)} label={isInboundRoute ? inboundNav.menu : undefined} />
+            <button onClick={isInboundRoute ? ()=>document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"}) : request} className="shine rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10">{isInboundRoute ? inboundNav.enquire : t("شروع درخواست")}</button>
+            <MenuToggle open={mobileOpen} onToggle={() => setMobileOpen(!mobileOpen)} label={isInboundRoute ? inboundNav.menu : language==='en'?'Mobile menu':language==='ar'?'قائمة الهاتف':'منوی موبایل'} />
           </div>
         </div>
 
@@ -241,8 +241,8 @@ function App({initialPath}: {initialPath?: string} = {}) {
                 {serviceGroups.map(({ title, icon: Icon, desc }) => (
                   <a key={title} href="#services" onClick={() => setMegaOpen(false)} className="action-card rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-surface)] p-4">
                     <Icon size={20} className="mb-3 text-[#9a6f20]" />
-                    <div className="text-sm font-black">{title}</div>
-                    <div className="mt-1 text-[10px] leading-5 text-[var(--fp-muted)]">{desc}</div>
+                    <div className="text-sm font-black">{t(title)}</div>
+                    <div className="mt-1 text-[10px] leading-5 text-[var(--fp-muted)]">{t(desc)}</div>
                   </a>
                 ))}
               </div>
@@ -252,13 +252,13 @@ function App({initialPath}: {initialPath?: string} = {}) {
 
         {mobileOpen && (
           <nav id="mobile-navigation" aria-label={isInboundRoute ? inboundNav.nav : "ناوبری گوشی"} className="mobile-navigation-panel lg:hidden">
-            {isInboundRoute ? <div className="mobile-nav-group"><p>{inboundNav.visit}</p><div className="mobile-nav-links">{[[inboundNav.services,"inbound-services"],[inboundNav.how,"inbound-process"],[inboundNav.enquire,"inbound-request"]].map(([label,id])=><a href={'#'+id} key={id} onClick={e=>{e.preventDefault();setMobileOpen(false);document.getElementById(id)?.scrollIntoView({behavior:"smooth"})}}>{label}<ArrowLeft size={15}/></a>)}<a href="/" onClick={()=>setMobileOpen(false)}>{inboundNav.home} <ArrowLeft size={15}/></a></div></div> : <>
+            {isInboundRoute ? <div className="mobile-nav-group"><p>{inboundNav.visit}</p><div className="mobile-nav-links">{[[inboundNav.services,"inbound-services"],[inboundNav.how,"inbound-process"],[inboundNav.enquire,"inbound-request"]].map(([label,id])=><a href={'#'+id} key={id} onClick={e=>{e.preventDefault();setMobileOpen(false);document.getElementById(id)?.scrollIntoView({behavior:"smooth"})}}>{label}<ArrowLeft size={15}/></a>)}<a href={'/?lang='+language} onClick={()=>setMobileOpen(false)}>{inboundNav.home} <ArrowLeft size={15}/></a></div></div> : <>
             <div className="mobile-nav-group"><p>{t("سفر خود را برنامه‌ریزی کنید")}</p><div className="mobile-nav-links">
-              {[['کشورها','country-services'],['خدمات','services'],['تکت و بوکینگ سراسری','worldwide-booking'],['بسته‌های خدمات','deals']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
+              {[['کشورها','country-services'],['خدمات','services'],['تکت و بوکینگ سراسری','worldwide-booking'],['بسته‌های خدمات','deals']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{t(item)}<ArrowLeft size={15}/></a>)}
             </div></div>
-            <div className="mobile-nav-group"><p>{t("انتخاب سریع خدمت")}</p><div className="mobile-service-links">{serviceGroups.map(({title,icon:Icon,desc})=><button type="button" key={title} onClick={()=>{setMobileOpen(false);inform(title,desc+' شرایط و هزینه با دفتر بررسی می‌شود.',{service:title})}}><Icon size={18}/><span>{title}</span></button>)}</div></div>
+            <div className="mobile-nav-group"><p>{t("انتخاب سریع خدمت")}</p><div className="mobile-service-links">{serviceGroups.map(({title,icon:Icon,desc})=><button type="button" key={title} onClick={()=>{setMobileOpen(false);inform(title,t(desc)+(language==='en'?' Terms and costs are confirmed by the office.':language==='ar'?' يؤكد المكتب الشروط والتكاليف.':' شرایط و هزینه با دفتر بررسی می‌شود.'),{service:title})}}><Icon size={18}/><span>{t(title)}</span></button>)}</div></div>
             <div className="mobile-nav-group"><p>{t("راهنما و ارتباط")}</p><div className="mobile-nav-links">
-              {[['راهنمای انتخاب خدمت','finder'],['درخواست سفر','journey'],['الهام سفر','destinations'],['پرسش‌های رایج','faq'],['پیگیری پرونده','track'],['معرفی و تماس دفتر','contact']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{item}<ArrowLeft size={15}/></a>)}
+              {[['راهنمای انتخاب خدمت','finder'],['درخواست سفر','journey'],['الهام سفر','destinations'],['پرسش‌های رایج','faq'],['پیگیری پرونده','track'],['معرفی و تماس دفتر','contact']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{t(item)}<ArrowLeft size={15}/></a>)}
             </div></div>
             </>}
           </nav>
