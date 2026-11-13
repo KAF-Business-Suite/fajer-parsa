@@ -54,8 +54,8 @@ const trustItems = [
 ]
 type InboundLanguage = SiteLanguage
 
-// The Dari homepage is not yet translated. These links intentionally open
-// the already-localized Afghanistan inbound page; never relabel untranslated UI.
+// Keep the same selected language across homepage and inbound route.
+// English is LTR; Dari, Afghan Pashto and Arabic are RTL.
 function inboundLanguageFromUrl(): InboundLanguage {
   // The static /inbound HTML is rendered at build time, before window exists.
   if (typeof window === 'undefined') return 'en'
@@ -105,7 +105,7 @@ function SiteLanguageMenu({language,inbound,onSelect}: {
       <ChevronDown size={14} aria-hidden="true" className={open?'rotate-180 transition':'transition'}/>
     </button>
     {open && <div className="fp-lang-panel" id="fp-language-options" role="group" aria-label={t("زبان بخش گردشگری افغانستان")}>
-      <div className="fp-lang-heading">{t("زبان گردشگری افغانستان")}<span lang="en">/ Travel language</span></div>
+      <div className="fp-lang-heading">{t("زبان گردشگری افغانستان")}</div>
       {touristLanguages.map(item=><button type="button" key={item.code} lang={item.htmlLang} aria-label={item.label} aria-pressed={active===item.code} className="fp-lang-choice" onClick={()=>{onSelect(item.code);setOpen(false)}}>
         <span>{item.label}</span><span aria-hidden="true" className="fp-lang-detail">{item.detail}</span>{active===item.code&&<CheckCircle2 size={17} aria-hidden="true" className="fp-lang-check"/>}
       </button>)}
