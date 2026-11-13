@@ -82,8 +82,9 @@ try {
   await test('Direct entry, reload, languages and metadata agree',async()=>{
     await page.goto(origin+'/inbound',{waitUntil:'networkidle'})
     await page.locator('.inbound-form:not([inert])').waitFor()
-    for(const [label,lang,dir,title] of [['دری','fa-AF','rtl','گردشگری ورودی افغانستان'],['العربية','ar','rtl','السياحة الوافدة'],['EN','en','ltr','Afghanistan Inbound Tourism']]) {
-      await page.getByRole('button',{name:label,exact:true}).click()
+    for(const [label,lang,dir,title] of [['دری','fa-AF','rtl','گردشگری ورودی افغانستان'],['العربية','ar','rtl','السياحة الوافدة'],['English','en','ltr','Afghanistan Inbound Tourism']]) {
+      await page.locator('.fp-lang-trigger').click()
+      await page.locator('.fp-lang-panel').getByRole('button',{name:label,exact:true}).click()
       await page.waitForFunction(({lang,dir})=>document.documentElement.lang===lang&&document.documentElement.dir===dir,{lang,dir})
       assert.ok((await page.title()).includes(title))
       assert.equal(await page.locator('meta[property="og:title"]').getAttribute('content'),await page.title())
