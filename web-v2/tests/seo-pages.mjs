@@ -145,6 +145,27 @@ try {
       // Do not open WhatsApp or submit real customer data.
     }
   })
+  await test('Offline case follow-up has localized opt-in WhatsApp draft and no case data',async()=>{
+    await page.setViewportSize({width:393,height:852})
+    for(const [code,lang,phrase] of [['en','en','follow up'],['ar','ar','متابعة'],['fa','fa-AF','پیگیری']]){
+      await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
+      await page.waitForFunction(expected=>document.documentElement.lang===expected,lang)
+      await page.locator('#track button').click()
+      const dialog=page.getByRole('dialog')
+      await dialog.waitFor()
+      const visible=await dialog.innerText()
+      assert.ok(visible.includes(code==='en'?'not connected':code==='ar'?'غير متصل':'متصل نیست'))
+      const link=await dialog.locator('a[href*="wa.me/"]').getAttribute('href')
+      const url=new URL(link)
+      assert.equal(url.hostname,'wa.me')
+      assert.equal(url.pathname,'/93777377774')
+      const msg=url.searchParams.get('text')
+      assert.ok(msg?.includes(phrase),code+' follow-up message must be localized')
+      assert.ok(!/\bQA-\d+|passport photo|رقم جواز\b/i.test(msg))
+      assert.equal(new URL(page.url()).hostname,new URL(origin).hostname)
+      await page.keyboard.press('Escape')
+    }
+  })
   await test('One global language control, native labels and shareable language state',async()=>{
     await page.goto(origin+'/',{waitUntil:'networkidle'})
     const trigger=page.locator('.fp-lang-trigger')
