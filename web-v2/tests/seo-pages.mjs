@@ -126,6 +126,13 @@ try {
     assert.equal(await trigger.evaluate(el=>el.getBoundingClientRect().height>=44),true)
     await trigger.click()
     const panel=page.locator('.fp-lang-panel')
+    // The locale popup must fit in the visual viewport for every supported phone size.
+    for (const width of [320,360,393,430]) {
+      await page.setViewportSize({width,height:852})
+      const bounds=await panel.evaluate(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:window.innerWidth}})
+      assert.ok(bounds.left>=8 && bounds.right<=bounds.width-8,`Language popup clipped at ${width}: ${JSON.stringify(bounds)}`)
+    }
+    await page.setViewportSize({width:393,height:852})
     assert.equal(await panel.getByRole('link',{name:'دری',exact:true}).getAttribute('href'),'/inbound?lang=fa')
     assert.equal(await panel.getByRole('link',{name:'English',exact:true}).getAttribute('href'),'/inbound?lang=en')
     await panel.getByRole('link',{name:'العربية',exact:true}).click()
