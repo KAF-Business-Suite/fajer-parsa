@@ -1,3 +1,43 @@
+# FP-PS | FINAL RELEASE STATUS — 14 November 2026 (Asia/Kabul)
+
+**CURRENT: FP-PS-01/02/03 CLOSED — PASS for code, tests, preview, authorized production release, and live Chromium QA.**
+**NEXT: FP-PS-04 OPEN — independent Afghan Pashto language review + physical Samsung Galaxy S21 acceptance (UNVERIFIED).**
+
+This section replaces the obsolete DRAFT/PENDING claims preserved below only as historical evidence. The deployed application is public now; do not interpret the old checkpoint as a current no-deploy instruction.
+
+## Current authoritative release
+
+- Official repo: `KAF-Business-Suite/fajer-parsa`, one source of truth; canonical [merged PR #19](https://github.com/KAF-Business-Suite/fajer-parsa/pull/19). Merge SHA `9ded561eae7394f38eb633d3ec890be51df3f830`.
+- Duplicate [PR #20](https://github.com/KAF-Business-Suite/fajer-parsa/pull/20): **CLOSED / SUPERSEDED / not merged**. Its additional 20 guarded form notices and the nationality label correction were incorporated in PR #19 before review and release. No second website or translation catalog.
+- Language menu: **دری → پښتو → English → العربية**; Pashto `ps-AF`, RTL and `?lang=ps`. Existing English, Dari, Arabic unaffected in the scoped checks.
+- Locales and services: 324/324 checked Pashto display strings, 15 country options, inbound five services, user-controlled draft WhatsApp and consent warnings. Stable service/data IDs unchanged.
+- Runtime: existing Cloudflare Pages project `fajr-parsa-qa`, environment **production**, branch `main`, live SHA `9ded561eae7394f38eb633d3ec890be51df3f830`, deployment **`16950d0e-b5f6-42e5-bb83-3fc3bdd26e55`**, provider status **success**.
+- Live links: [main site in Pashto](https://fajr-parsa-qa.pages.dev/?lang=ps); [Afghanistan inbound in Pashto](https://fajr-parsa-qa.pages.dev/inbound?lang=ps).
+
+## Acceptance evidence — exact execution
+
+| Gate | Status | Evidence |
+|---|---|---|
+| FP-PS-01 i18n, unit tests, TypeScript/build and SEO | **PASS** | [Independent candidate CI #43498447726](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/43498447726) SUCCESS, candidate SHA `4d96b1465c98070891e780f9e1f598c8aa8c1d19` |
+| FP-PS-02 Cloudflare Preview and protected checks | **PASS** | [Preview deployment workflow #43498676629](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/43498676629) SUCCESS; [immutable Preview](https://4dcb4408.fajr-parsa-qa.pages.dev/?lang=ps), ID `4dcb4408-9135-49de-91bd-87ae159179ae`, exact candidate SHA |
+| FP-PS-02 browser review | **PASS** | Independent Chromium main/inbound **20/20** checks across four languages and widths 320, 393, 768 and 1440px; plus eight language, navigation, form and user-privacy interaction checks. Zero console page errors or horizontal overflow in those cases |
+| FP-PS-03 controlled merge | **PASS** | Canonical PR #19 merged. [Post-merge `main` CI #43499282955](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/43499282955) SUCCESS; automatic deploy intentionally SKIPPED |
+| FP-PS-03 owner-approved protected Production | **PASS** | [Manual Production workflow #43499362133](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/43499362133) completed SUCCESS, guard and deployment steps PASS; direct Cloudflare deployment readback matched merge SHA |
+| FP-PS-03 live-browser verification | **PASS** | Independent Chromium **14/14** checks on public Production at 320/393px: four locales, correct RTL/LTR, menu order, main/inbound, 15 country options, five tourism services, Turkey destination, no horizontal overflow or JavaScript errors |
+| FP-PS-04 real Samsung S21 (100% zoom, keyboard & hardware Back) | **UNVERIFIED** | No physical-device user acceptance; emulation is not sufficient |
+| FP-PS-04 human Pashto editorial/legal terminology | **UNVERIFIED** | Full static key coverage does not prove native copy accuracy or legal phrasing |
+
+**Non-goals / safety:** No live intake-to-office or Pipedrive connector was enabled, no customer records, database/secret changes, payments, emails or automatically sent WhatsApp messages. Form opens only an opt-in draft. The separate `FP-INTAKE-01` integration is not certified by this language release.
+
+**Recovery:** prior successful Production deployment `15771551-eaec-4d52-844b-b94857494586` at application SHA `c6245e4d5ac043e1287fd202ebabaa84b7f554b9`; rollback has **not** been executed or proven. A docs-only follow-up commit can advance Git `main` without redeploying the unchanged application; do not treat that as deployment/source drift.
+
+**Next single gate:** `FP-PS-04` editorial and real-device acceptance; record screenshots, visual issues, text corrections and named reviewer signoff before a future separate patch/Production promotion. Keep umbrella [Linear KAF-31](https://linear.app/rpcfpta/issue/KAF-31) open for unrelated FP-08 work.
+
+---
+
+## Historical record — original pre-release checkpoint (superseded)
+The following original 13 November text is retained for historical traceability. Its DRAFT/PENDING statuses no longer describe the live production state.
+
 # FP-PS-01 — Afghan Pashto as fourth Fajr Parsa website language
 
 Date: 2026-11-13
