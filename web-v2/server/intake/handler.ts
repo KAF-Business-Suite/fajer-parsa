@@ -22,7 +22,7 @@ export async function handleIntake(request:Request,ip:string,deps:Dependencies):
   if(new URL(request.url).protocol!=='https:' || request.headers.get('Origin')!==deps.origin)return reply(403,{error:'origin_denied'})
   if(request.headers.get('Content-Type')?.split(';')[0].trim()!=='application/json')return reply(415,{error:'json_required'})
   try {
-    if(!ip || !await deps.rateLimit(ip))return reply(429,{error:'try_later'})
+    if(!ip)return reply(429,{error:'try_later'})
     let body:Record<string,unknown>
     try {body=await boundedJson(request)}catch{return reply(400,{error:'invalid_request'})}
     if(!body || typeof body!=='object' || Array.isArray(body))return reply(400,{error:'invalid_request'})
@@ -34,6 +34,9 @@ export async function handleIntake(request:Request,ip:string,deps:Dependencies):
     if(contact.length<7)return reply(400,{error:'invalid_contact'})
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) && !/^\+?[0-9 ()-]{7,24}$/.test(contact))return reply(400,{error:'invalid_contact'})
     if(!await deps.verifyChallenge(body.challenge as string,ip))return reply(403,{error:'challenge_failed'})
+    // Spend the shared database quota only after bounded validation + genuine Turnstile.
+    // Malformed/bot traffic must not exhaust the global office intake capacity.
+    if(!await deps.rateLimit(ip))return reply(429,{error:'try_later'})
     const result=await deps.save({requestId:body.requestId as string,service:body.service as string,destination:(body.destination as string).trim(),variant:(body.variant as string).trim(),contact,consent:true})
     if(!uuid.test(result.receipt))throw new Error('invalid receipt')
     return reply(result.replayed?200:201,{status:'received',receipt:result.receipt,replayed:result.replayed})
