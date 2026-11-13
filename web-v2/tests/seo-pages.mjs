@@ -212,6 +212,8 @@ try {
       await bottom.locator('button[aria-controls="fp-contact-dialog"]').click()
       const contact=page.locator('#fp-contact-dialog')
       await contact.waitFor()
+      const sheetBounds=await contact.evaluate(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,viewportW:innerWidth,viewportH:innerHeight}})
+      assert.ok(sheetBounds.left>=0 && sheetBounds.right<=sheetBounds.viewportW && sheetBounds.top>=0 && sheetBounds.bottom<=sheetBounds.viewportH,code+' contact sheet outside viewport '+JSON.stringify(sheetBounds))
       assert.equal(await contact.getByRole('link').count(),1,'Only verified WhatsApp is an active contact link')
       assert.match(await contact.getByRole('link').first().getAttribute('href'),/^https:\/\/wa\.me\/93777377774$/)
       assert.equal(await contact.locator('.fp-channel-pending').count(),3)
