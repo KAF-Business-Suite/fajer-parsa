@@ -13,11 +13,12 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'Deployment target; preview never replaces production'
+        description: 'Verify checks Cloudflare credentials READ-ONLY, with no Pages deployment'
         type: choice
         required: true
-        default: preview
+        default: verify
         options:
+          - verify
           - preview
           - production
       confirmation:
@@ -119,7 +120,10 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/main && "$AUTO_DEPLOY" == enabled && "$RELEASE_ARMED" == verified-after-first-manual-release ]]; then
             deploy=production
           elif [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
-            if [[ "$TARGET" == preview ]]; then
+            if [[ "$TARGET" == verify ]]; then
+              echo "FP08_AUTH_ONLY_NO_DEPLOY=ENFORCED"
+              deploy=none
+            elif [[ "$TARGET" == preview ]]; then
               deploy=preview
             elif [[ "$TARGET" == production && "$GITHUB_REF" == refs/heads/main && "$CONFIRMATION" == DEPLOY-FAJR-PRODUCTION ]]; then
               deploy=production
@@ -131,7 +135,8 @@ jobs:
           echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
           echo "Selected release: $deploy"
       - name: Check credentials and block stale production sources
-        if: steps.policy.outputs.deploy != 'none'
+        # Manual verify invokes read-only token and exact project GET; the deploy step stays gated on deploy != none.
+        if: steps.policy.outputs.deploy != 'none' || (github.event_name == 'workflow_dispatch' && inputs.target == 'verify')
         id: guard
         shell: bash
         env:
