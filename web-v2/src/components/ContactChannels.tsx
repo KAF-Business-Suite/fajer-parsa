@@ -18,7 +18,7 @@ export function ContactChannels({ language, open, onOpenChange }: {
     {key:'دستیار هوشمند',Icon:Bot},
   ]
   return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="fp-contact-dialog" dir={language==='en'?'ltr':'rtl'} aria-describedby="fp-contact-description">
+    <DialogContent id="fp-contact-dialog" className="fp-contact-dialog" dir={language==='en'?'ltr':'rtl'} aria-describedby="fp-contact-description">
       <DialogHeader>
         <p className="fp-contact-kicker">{t('ارتباط مستقیم با دفتر')}</p>
         <DialogTitle className="fp-contact-title">{t('راه‌های ارتباط')}</DialogTitle>
