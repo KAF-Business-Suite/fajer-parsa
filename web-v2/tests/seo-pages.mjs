@@ -124,7 +124,11 @@ try {
     for(const [code,htmlLang,expected] of [['en','en','Nationality:'],['ar','ar','الجنسية:']]){
       await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
       await page.waitForFunction(lang=>document.documentElement.lang===lang,htmlLang)
-      assert.ok((await page.locator('.floating-header').innerText()).includes(code==='en'?'Start enquiry':'ابدأ الطلب'))
+      // The desktop header can be visually hidden at 393px; the fixed mobile CTA must be visible.
+      const expectedCta=code==='en'?'Start enquiry':'ابدأ الطلب'
+      await page.waitForFunction(label=>document.querySelector('.mobile-action-bar button')?.textContent?.includes(label),expectedCta)
+      assert.equal(await page.locator('.mobile-action-bar button').isVisible(),true)
+      assert.ok((await page.locator('.floating-header').textContent()).includes(expectedCta))
       await page.locator('.mobile-action-bar button').click()
       const dialog=page.getByRole('dialog')
       await dialog.waitFor()
