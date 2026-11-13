@@ -1,7 +1,7 @@
 import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {handleIntake} from './handler.ts'
-import {turnstileVerifier,supabaseSaver} from './adapters.ts'
+import {turnstileVerifier,supabaseSaver,supabaseIntakeQuota} from './adapters.ts'
 const id='d5072836-0d50-4dfa-88dc-596e9befd276'
 const receipt='31122fb7-582a-4b5a-8db9-4f371ceac3bf'
 const origin='https://qa.example.test'
@@ -24,4 +24,52 @@ test('Supabase outage rejects instead of making local receipt',async()=>{const s
 test('prepared entrypoint fails closed without server bindings or on production host',async()=>{
  const {onRequest}=await import('./pages-entry.ts')
  for(const url of ['https://qa-fajr-visual-review-202610.fajr-parsa-qa.pages.dev/api/requests','https://fajr-parsa-qa.pages.dev/api/requests']){const r=await onRequest({request:new Request(url),env:{FAJR_INTAKE_ENABLED:'true'}});assert.equal(r.status,503);assert.deepEqual(await r.json(),{error:'intake_not_enabled'})}
+})
+
+
+test('KAF atomic intake quota adapter is service-only, accepts only booleans and fails closed',async()=>{
+ const origin='https://krzxajtrhvupyywovdzy.supabase.co'
+ for(const [value,status] of [[true,true],[false,false]]){
+   let seen=0
+   const take=supabaseIntakeQuota(origin,'synthetic-server-key',async(url,init)=>{
+     seen++
+     assert.equal(String(url),origin+'/rest/v1/rpc/fajr_take_intake_slot')
+     assert.equal(init.headers.Authorization,'Bearer synthetic-server-key')
+     assert.equal(init.headers.apikey,'synthetic-server-key')
+     assert.equal(init.redirect,'error')
+     assert.equal(init.body,'{}')
+     return Response.json(value)
+   })
+   assert.equal(await take(),status)
+   assert.equal(seen,1)
+ }
+ for(const malformed of [null,0,{enabled:true},'true']){
+   const take=supabaseIntakeQuota(origin,'synthetic-only',async()=>Response.json(malformed))
+   await assert.rejects(()=>take(),/invalid quota response/)
+ }
+ const offline=supabaseIntakeQuota(origin,'synthetic-only',async()=>Response.json({code:'private'},{status:503}))
+ await assert.rejects(()=>offline(),/intake quota unavailable/)
+ for(const bad of ['http://krzxajtrhvupyywovdzy.supabase.co','https://evil.example','']){
+   assert.throws(()=>supabaseIntakeQuota(bad,'synthetic-only'))
+ }
+})
+test('Invalid contact and bot payloads never consume shared quota or call Turnstile',async()=>{
+ for(const patch of [{contact:'bad'},{website:'spam'},{consent:false}]){
+   let quotas=0,turnstiles=0
+   const setupDone=setup({
+      rateLimit:async()=>{quotas++;return true},
+      verifyChallenge:async()=>{turnstiles++;return true}
+   })
+   assert.equal((await handleIntake(req({...valid,...patch}),'test-ip',setupDone.deps)).status,400)
+   assert.equal(quotas,0)
+   assert.equal(turnstiles,0)
+   assert.equal(setupDone.writes(),0)
+ }
+})
+test('Failed challenge never spends KAF shared quota',async()=>{
+ let quotas=0
+ const s=setup({verifyChallenge:async()=>false,rateLimit:async()=>{quotas++;return true}})
+ assert.equal((await handleIntake(req(),'test-ip',s.deps)).status,403)
+ assert.equal(quotas,0)
+ assert.equal(s.writes(),0)
 })
