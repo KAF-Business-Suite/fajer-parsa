@@ -1,7 +1,13 @@
 # FP-PS | FINAL RELEASE STATUS — 14 November 2026 (Asia/Kabul)
 
 **CURRENT: FP-PS-01/02/03 CLOSED — PASS for code, tests, preview, authorized production release, and live Chromium QA.**
-**NEXT: FP-PS-04 OPEN — independent Afghan Pashto language review + physical Samsung Galaxy S21 acceptance (UNVERIFIED).**
+**LATEST GATE DECISION — FP-PS-04 CLOSED (ENGINEERING) / 14 November 2026.** Four-language production still live. Owner independently opened the live site and saw Pashto across the interface, but did not inspect individual defects. Regression PR [#21](https://github.com/KAF-Business-Suite/fajer-parsa/pull/21) was squash-merged at `7fb578a4356eff8fe0967dc86fc2b85be437df62`: only `web-v2/tests/seo-pages.mjs` changed (+47 lines), no new shipped frontend. Independent [CI #43502341416](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/43502341416) and [safe CI #43502341561](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/43502341561) both SUCCESS, with Pashto mobile Back/Forward, consent, synthetic draft and no outbound messages. Linear [KAF-34](https://linear.app/rpcfpta/issue/KAF-34) is **DONE as a timeboxed engineering gate**. **Physical Galaxy S21 keyboard/hardware-Back acceptance and native Pashto editorial/legal review remain UNVERIFIED, explicitly non-blocking and NOT certified PASS.** Carry this debt in existing parent [KAF-31](https://linear.app/rpcfpta/issue/KAF-31); fix specific defects if subsequently found. **Next live engineering priority: existing [KAF-22 / FP-04](https://linear.app/rpcfpta/issue/KAF-22), safe public-website-to-office intake.**
+
+**Runtime vs source SHA:** Cloudflare Production deployment `16950d0e-b5f6-42e5-bb83-3fc3bdd26e55` still deploys `9ded561eae7394f38eb633d3ec890be51df3f830`. The later `main` commits updated only documentation and a browser test. The different SHA is intentional, not proof of changed production code. No rollback was necessary.
+
+> Earlier section below is the Nov 14 release checkpoint before FP-PS-04 was closed. Its `NEXT: FP-PS-04 OPEN` line is superseded by the status above.
+
+
 
 This section replaces the obsolete DRAFT/PENDING claims preserved below only as historical evidence. The deployed application is public now; do not interpret the old checkpoint as a current no-deploy instruction.
 
