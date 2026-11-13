@@ -308,7 +308,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
             <div className="mobile-nav-group"><p>{t("سفر خود را برنامه‌ریزی کنید")}</p><div className="mobile-nav-links">
               {[['کشورها','country-services'],['خدمات','services'],['تکت و بوکینگ سراسری','worldwide-booking'],['بسته‌های خدمات','deals']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{t(item)}<ArrowLeft size={15}/></a>)}
             </div></div>
-            <div className="mobile-nav-group"><p>{t("انتخاب سریع خدمت")}</p><div className="mobile-service-links">{serviceGroups.map(({title,icon:Icon,desc})=><button type="button" key={title} onClick={()=>{setMobileOpen(false);inform(title,t(desc)+(language==='en'?' Terms and costs are confirmed by the office.':language==='ar'?' يؤكد المكتب الشروط والتكاليف.':' شرایط و هزینه با دفتر بررسی می‌شود.'),{service:title})}}><Icon size={18}/><span>{t(title)}</span></button>)}</div></div>
+            <div className="mobile-nav-group"><p>{t("انتخاب سریع خدمت")}</p><div className="mobile-service-links">{serviceGroups.map(({title,icon:Icon,desc})=><button type="button" key={title} onClick={()=>{setMobileOpen(false);inform(title,t(desc)+(language==='en'?' Terms and costs are confirmed by the office.':language==='ar'?' يؤكد المكتب الشروط والتكاليف.':language==='ps'?' شرایط او لګښتونه له دفتر سره تاییدېږي.':' شرایط و هزینه با دفتر بررسی می‌شود.'),{service:title})}}><Icon size={18}/><span>{t(title)}</span></button>)}</div></div>
             <div className="mobile-nav-group"><p>{t("راهنما و ارتباط")}</p><div className="mobile-nav-links">
               {[['راهنمای انتخاب خدمت','finder'],['درخواست سفر','journey'],['الهام سفر','destinations'],['پرسش‌های رایج','faq'],['پیگیری پرونده','track'],['معرفی و تماس دفتر','contact']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{t(item)}<ArrowLeft size={15}/></a>)}
             </div></div>
@@ -404,7 +404,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
                 <h3 className="mt-2 text-xl font-black">{t(title)}</h3>
                 <p className="mt-2 min-h-14 text-sm leading-7 text-[var(--fp-muted)]">{t(desc)}</p>
                 <div className="premium-divider my-5" />
-                <button onClick={() => inform(title, t(desc) + (language==='en'?' Requirements, timing and costs are confirmed after review.':language==='ar'?' يتم تأكيد الشروط والمدة والتكاليف بعد المراجعة.':' شرایط، زمان و هزینه پس از بررسی مدارک مشخص می‌شود.'), {service:title})} className="flex items-center gap-2 text-xs font-black text-[var(--fp-gold)]">{t("بررسی گزینه‌ها")}<ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
+                <button onClick={() => inform(title, t(desc) + (language==='en'?' Requirements, timing and costs are confirmed after review.':language==='ar'?' يتم تأكيد الشروط والمدة والتكاليف بعد المراجعة.':language==='ps'?' اړتیاوې، وخت او لګښتونه له ارزونې وروسته تاییدېږي.':' شرایط، زمان و هزینه پس از بررسی مدارک مشخص می‌شود.'), {service:title})} className="flex items-center gap-2 text-xs font-black text-[var(--fp-gold)]">{t("بررسی گزینه‌ها")}<ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
               </article></MagicCard></Reveal>
             ))}
           </div>
