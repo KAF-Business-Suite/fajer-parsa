@@ -1,6 +1,7 @@
 export const inboundSeo = {
   en: { title: 'Afghanistan Inbound Tourism | Fajr Parsa', description: 'Plan your Afghanistan visit with Fajr Parsa in Kabul: airport pickup, private transport, accommodation, interpreter and guide coordination. Enquire before booking.' },
   fa: { title: 'گردشگری ورودی افغانستان | فجر پارسا', description: 'هماهنگی سفر به افغانستان با فجر پارسا در کابل: استقبال میدان هوایی، ترانسپورت، اقامت، ترجمان و رهنمای گردشگری؛ بررسی پیش از رزرو.' },
+  ps: { title: 'افغانستان ته د راتلونکو سیلانیانو سفر | فجر پارسا', description: 'په کابل کې له فجر پارسا سره افغانستان ته د سفر همغږي: له هوایي ډګره استقبال، ترانسپورټ، استوګنه، ژباړن او لارښود. له ریزرف مخکې پوښتنه وکړئ.' },
   ar: { title: 'السياحة الوافدة إلى أفغانستان | فجر بارسا', description: 'خطط لزيارة أفغانستان مع فجر بارسا في كابول: الاستقبال والنقل والإقامة وتنسيق المترجمين والمرشدين. استفسر قبل الحجز.' },
 }
 export const inboundCanonical = 'https://fajr-parsa-qa.pages.dev/inbound'
@@ -28,7 +29,7 @@ export function updateInboundMetadata(language: keyof typeof inboundSeo, inbound
   let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
   if (!canonical) { canonical = document.createElement('link'); document.head.appendChild(canonical) }
   canonical.rel = 'canonical'; canonical.href = inboundCanonical; canonical.dataset.inboundSeo = ''
-  for (const [property,content] of Object.entries({'og:title':seo.title,'og:description':seo.description,'og:url':inboundCanonical,'og:type':'website','og:locale':language === 'fa' ? 'fa_AF' : language === 'ar' ? 'ar_AR' : 'en_US'})) {
+  for (const [property,content] of Object.entries({'og:title':seo.title,'og:description':seo.description,'og:url':inboundCanonical,'og:type':'website','og:locale':language === 'fa' ? 'fa_AF' : language === 'ps' ? 'ps_AF' : language === 'ar' ? 'ar_AR' : 'en_US'})) {
     set(`meta[property="${property}"]`, {property,content,'data-inbound-seo':''})
   }
 }
