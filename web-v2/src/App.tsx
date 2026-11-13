@@ -52,7 +52,7 @@ const trustItems = [
   ['درخواست کوتاه', 'جزئیات سفر را یک‌جا آماده کنید'],
   ['پیگیری از دفتر', 'اطلاعات رسید را همراه داشته باشید'],
 ]
-type InboundLanguage = 'en' | 'fa' | 'ar'
+type InboundLanguage = SiteLanguage
 
 // The Dari homepage is not yet translated. These links intentionally open
 // the already-localized Afghanistan inbound page; never relabel untranslated UI.
@@ -60,17 +60,19 @@ function inboundLanguageFromUrl(): InboundLanguage {
   // The static /inbound HTML is rendered at build time, before window exists.
   if (typeof window === 'undefined') return 'en'
   const code = new URLSearchParams(window.location.search).get('lang')
-  if (code === 'fa' || code === 'en' || code === 'ar') return code
+  if (code === 'fa' || code === 'ps' || code === 'en' || code === 'ar') return code
   return isInboundPath(window.location.pathname) ? 'en' : 'fa'
 }
 const inboundHeaderText = {
   en: {nav:'Visitor navigation',services:'Services',how:'How it works',enquire:'Enquire',home:'Main website',contact:'Contact',menu:'Mobile menu',themeLight:'Switch to light mode',themeDark:'Switch to dark mode',skip:'Skip to main content',visit:'VISIT AFGHANISTAN',header:'Fajr Parsa header',logo:'Fajr Parsa logo'},
   fa: {nav:'ناوبری گردشگران',services:'خدمات',how:'روش کار',enquire:'درخواست سفر',home:'سایت اصلی',contact:'تماس',menu:'منوی موبایل',themeLight:'فعال کردن حالت روشن',themeDark:'فعال کردن حالت تاریک',skip:'رفتن به محتوای اصلی',visit:'سفر به افغانستان',header:'سربرگ فجر پارسا',logo:'لوگوی فجر پارسا'},
+  ps: {nav:'د ګرځندوی لارښوونه',services:'خدمتونه',how:'د کار بهیر',enquire:'پوښتنه',home:'اصلي وېبپاڼه',contact:'اړیکه',menu:'د موبایل مېنو',themeLight:'روښانه بڼه فعاله کړئ',themeDark:'تیاره بڼه فعاله کړئ',skip:'اصلي منځپانګې ته لاړ شئ',visit:'افغانستان ته سفر',header:'د فجر پارسا سرلیک',logo:'د فجر پارسا لوګو'},
   ar: {nav:'التنقل للزوار',services:'الخدمات',how:'طريقة العمل',enquire:'استفسار',home:'الموقع الرئيسي',contact:'اتصل بنا',menu:'قائمة الهاتف',themeLight:'التبديل إلى الوضع الفاتح',themeDark:'التبديل إلى الوضع الداكن',skip:'الانتقال إلى المحتوى الرئيسي',visit:'زيارة أفغانستان',header:'ترويسة فجر بارسا',logo:'شعار فجر بارسا'},
 }
 
 const touristLanguages: {code:InboundLanguage;label:string;detail:string;htmlLang:string}[] = [
   {code:'fa',label:'دری',detail:'Afghan Dari',htmlLang:'fa-AF'},
+  {code:'ps',label:'پښتو',detail:'Afghan Pashto',htmlLang:'ps-AF'},
   {code:'en',label:'English',detail:'English',htmlLang:'en'},
   {code:'ar',label:'العربية',detail:'Arabic',htmlLang:'ar'},
 ]
@@ -95,7 +97,7 @@ function SiteLanguageMenu({language,inbound,onSelect}: {
     return ()=>{document.removeEventListener('pointerdown',outside);document.removeEventListener('keydown',escape)}
   },[open])
   const active=language
-  const activeText=active==='fa'?'دری':active==='ar'?'العربية':'EN'
+  const activeText=active==='fa'?'دری':active==='ps'?'پښتو':active==='ar'?'العربية':'EN'
   return <div ref={host} className="fp-lang-menu">
     <button ref={trigger} type="button" className="fp-lang-trigger fp-control" aria-label={t("انتخاب زبان / Choose language / اختيار اللغة")} aria-expanded={open} aria-controls="fp-language-options" onClick={()=>setOpen(value=>!value)}>
       <Languages size={17} aria-hidden="true"/>
@@ -117,6 +119,10 @@ const followUpContent: Record<SiteLanguage,{description:string;message:string}> 
   fa:{
     description:'پیگیری آنلاین هنوز به پرونده‌های دفتر متصل نیست. برای بررسی وضعیت، از واتساپ دفتر پیام آماده کنید. هیچ سند یا شمارهٔ شخصی در این صفحه درخواست یا ارسال نمی‌شود و ارسال نهایی به انتخاب شماست.',
     message:'سلام فجر پارسا، می‌خواهم یک درخواست قبلی را از دفتر پیگیری کنم. لطفاً راهنمایی کنید برای بررسی وضعیت و ارائهٔ شمارهٔ رسید از چه راه مصونی استفاده کنم.'
+  },
+  ps:{
+    description:'د دوسیې انلاین حالت لا د دفتر له ریکارډونو سره نه دی نښلول شوی. د تعقیب لپاره د دفتر په واتساپ کې پیغام چمتو کولای شئ. دا پاڼه شخصي اسناد یا د دوسیې شمېرې نه غواړي؛ د پیغام لېږل ستاسو په خوښه دي.',
+    message:'سلام فجر پارسا، غواړم خپله پخوانۍ غوښتنه تعقیب کړم. مهرباني وکړئ راته ووایاست چې د رسید شمېره څنګه په خوندي ډول وړاندې او د غوښتنې حالت معلوم کړم.'
   },
   en:{
     description:'Online case status is not connected yet. You can prepare a message to our office on WhatsApp. This page requests no personal documents or case identifiers; you decide whether to send the message.',
@@ -155,7 +161,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
   const [query, setQuery] = useState('')
   const [headerScrolled, setHeaderScrolled] = useState(false)
   const [navSection, setNavSection] = useState<'home'|'services'|'request'>('home')
-  const openRequest = ({destination=selectedCountry?.name || finder.destination,purpose=selectedCountry ? undefined : finder.purpose,passport=finder.passport,service,bundle,variant}: RequestContext = {}) => setSelection({ destination,purpose,passport,service,bundle,variant, title: t('آماده‌سازی درخواست'), description: language==='en'?'Prepare your trip details. You choose when to send the final WhatsApp message.':language==='ar'?'جهز تفاصيل رحلتك. أنت من يقرر إرسال الرسالة النهائية عبر واتساب.':'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true })
+  const openRequest = ({destination=selectedCountry?.name || finder.destination,purpose=selectedCountry ? undefined : finder.purpose,passport=finder.passport,service,bundle,variant}: RequestContext = {}) => setSelection({ destination,purpose,passport,service,bundle,variant, title: t('آماده‌سازی درخواست'), description: language==='en'?'Prepare your trip details. You choose when to send the final WhatsApp message.':language==='ar'?'جهز تفاصيل رحلتك. أنت من يقرر إرسال الرسالة النهائية عبر واتساب.':language==='ps'?'د خپل سفر خدمت، وخت او جزئیات چمتو کړئ. په واتساپ کې د وروستي پیغام لېږل ستاسو په خوښه دي.':'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true })
   const request = () => {setContactOpen(false);openRequest()}
   const inform = (title: string, description: string, context: RequestContext = {}, contactOnly = false) => setSelection({ ...finder, ...context, title:t(title), description:t(description), contactOnly })
   const [megaOpen, setMegaOpen] = useState(false)
@@ -164,7 +170,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
   const [finder, setFinder] = useState<FinderState>({ passport: 'افغانستان', destination: '', purpose: '' })
   const finderReady = useMemo(() => Boolean(finder.destination && finder.purpose), [finder])
   const navActive = contactOpen ? 'contact' : selection?.request ? 'request' : isCountryRoute ? 'services' : navSection
-  const finderTitle = (language==='en' ? 'Travel services in ' : language==='ar' ? 'خدمات السفر إلى ' : 'خدمات سفر به ') + t(finder.destination)
+  const finderTitle = language==='ps' ? t(finder.destination)+' ته سفري خدمتونه' : (language==='en' ? 'Travel services in ' : language==='ar' ? 'خدمات السفر إلى ' : 'خدمات سفر به ') + t(finder.destination)
   const finderDescription = `${t('هدف سفر')}: ${t(finder.purpose)} — ${t('تابعیت')}: ${t(finder.passport)}. ${t('برای راهنمایی اولیه است؛ امکان ارائه، شرایط و مدارک هر خدمت باید با دفتر بررسی شود.')}`
 
   useEffect(()=>{
@@ -175,8 +181,8 @@ function App({initialPath}: {initialPath?: string} = {}) {
   },[])
   useEffect(()=>{
     updateInboundMetadata(inboundLanguage,isInboundRoute)
-    document.title=isInboundRoute ? inboundSeo[inboundLanguage].title : selectedCountry ? (language==='en'?'Travel services in ':language==='ar'?'خدمات السفر إلى ':'خدمات ')+t(selectedCountry.name)+' | '+t('فجر پارسا') : t('فجر پارسا')+' | '+(language==='en'?'Travel, visas & business':language==='ar'?'السفر والتأشيرات والأعمال':'سفر، ویزا و تجارت')
-    document.documentElement.lang=language==='fa'?'fa-AF':language
+    document.title=isInboundRoute ? inboundSeo[inboundLanguage].title : selectedCountry ? (language==='en'?'Travel services in ':language==='ar'?'خدمات السفر إلى ':language==='ps'?'د سفر خدمتونه: ':'خدمات ')+t(selectedCountry.name)+' | '+t('فجر پارسا') : t('فجر پارسا')+' | '+(language==='en'?'Travel, visas & business':language==='ar'?'السفر والتأشيرات والأعمال':language==='ps'?'سفر، ویزه او سوداګري':'سفر، ویزا و تجارت')
+    document.documentElement.lang=language==='fa'?'fa-AF':language==='ps'?'ps-AF':language
     document.documentElement.dir=language==='en'?'ltr':'rtl'
     if (isInboundRoute) {
       // Keep section anchors useful; only a fresh route entry resets to the top.
@@ -235,7 +241,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
     return () => { document.removeEventListener('pointerdown', outside); desktop.removeEventListener('change', resize) }
   }, [megaOpen, mobileOpen])
   return (
-    <div lang={language==='fa'?'fa-AF':language} dir={language==='en'?'ltr':'rtl'} className="min-h-screen overflow-x-clip fp-app bg-[var(--fp-ivory)] text-[var(--fp-ink)]">
+    <div lang={language==='fa'?'fa-AF':language==='ps'?'ps-AF':language} dir={language==='en'?'ltr':'rtl'} className="min-h-screen overflow-x-clip fp-app bg-[var(--fp-ivory)] text-[var(--fp-ink)]">
       <ScrollProgress className="fp-scroll-progress" aria-hidden="true" />
       <header ref={headerRef} data-scrolled={headerScrolled} className="floating-header" aria-label={isInboundRoute ? inboundNav.header : "سربرگ فجر پارسا"}>
         <div className="shell fp-header-inner flex h-[74px] items-center justify-between gap-2 lg:gap-4">
@@ -270,7 +276,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
             <ThemeToggle labels={{light:inboundNav.themeLight,dark:inboundNav.themeDark}} />
             <button type="button" onClick={()=>{setMobileOpen(false);setContactOpen(true)}} className="fp-header-contact hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold xl:inline-flex"><Headphones size={17} aria-hidden="true"/>{isInboundRoute?inboundNav.contact:t("تماس")}</button>
             <button type="button" onClick={isInboundRoute ? ()=>document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"}) : request} className="shine fp-header-request hidden items-center rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10 lg:inline-flex">{isInboundRoute ? inboundNav.enquire : t("شروع درخواست")}</button>
-            <MenuToggle open={mobileOpen} onToggle={() => {setContactOpen(false);setMobileOpen(!mobileOpen)}} label={isInboundRoute ? inboundNav.menu : language==='en'?'Mobile menu':language==='ar'?'قائمة الهاتف':'منوی موبایل'} />
+            <MenuToggle open={mobileOpen} onToggle={() => {setContactOpen(false);setMobileOpen(!mobileOpen)}} label={isInboundRoute ? inboundNav.menu : language==='en'?'Mobile menu':language==='ar'?'قائمة الهاتف':language==='ps'?'د موبایل مېنو':'منوی موبایل'} />
           </div>
         </div>
 
@@ -302,7 +308,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
             <div className="mobile-nav-group"><p>{t("سفر خود را برنامه‌ریزی کنید")}</p><div className="mobile-nav-links">
               {[['کشورها','country-services'],['خدمات','services'],['تکت و بوکینگ سراسری','worldwide-booking'],['بسته‌های خدمات','deals']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{t(item)}<ArrowLeft size={15}/></a>)}
             </div></div>
-            <div className="mobile-nav-group"><p>{t("انتخاب سریع خدمت")}</p><div className="mobile-service-links">{serviceGroups.map(({title,icon:Icon,desc})=><button type="button" key={title} onClick={()=>{setMobileOpen(false);inform(title,t(desc)+(language==='en'?' Terms and costs are confirmed by the office.':language==='ar'?' يؤكد المكتب الشروط والتكاليف.':' شرایط و هزینه با دفتر بررسی می‌شود.'),{service:title})}}><Icon size={18}/><span>{t(title)}</span></button>)}</div></div>
+            <div className="mobile-nav-group"><p>{t("انتخاب سریع خدمت")}</p><div className="mobile-service-links">{serviceGroups.map(({title,icon:Icon,desc})=><button type="button" key={title} onClick={()=>{setMobileOpen(false);inform(title,t(desc)+(language==='en'?' Terms and costs are confirmed by the office.':language==='ar'?' يؤكد المكتب الشروط والتكاليف.':language==='ps'?' شرایط او لګښتونه د دفتر له خوا تاییدېږي.':' شرایط و هزینه با دفتر بررسی می‌شود.'),{service:title})}}><Icon size={18}/><span>{t(title)}</span></button>)}</div></div>
             <div className="mobile-nav-group"><p>{t("راهنما و ارتباط")}</p><div className="mobile-nav-links">
               {[['راهنمای انتخاب خدمت','finder'],['درخواست سفر','journey'],['الهام سفر','destinations'],['پرسش‌های رایج','faq'],['پیگیری پرونده','track'],['معرفی و تماس دفتر','contact']].map(([item,id])=><a key={id} href={'#'+id} onClick={()=>setMobileOpen(false)}>{t(item)}<ArrowLeft size={15}/></a>)}
             </div></div>
@@ -385,7 +391,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
             <label className="catalog-search"><Search size={18}/><input type="search" aria-label={t("جستجوی خدمات")} placeholder={t("جستجو در خدمات")} value={query} onChange={e => setQuery(e.target.value)}/></label>
           </div></Reveal>
 
-          <p className="sr-only" role="status">{visibleServices.length} {language==='en'?'services found':language==='ar'?'خدمة متاحة':'خدمت پیدا شد'}</p>
+          <p className="sr-only" role="status">{visibleServices.length} {language==='en'?'services found':language==='ar'?'خدمة متاحة':language==='ps'?'خدمتونه وموندل شول':'خدمت پیدا شد'}</p>
           {visibleServices.length === 0 && <p className="py-8 text-center">{t("خدمتی با این عبارت پیدا نشد. عبارت کوتاه‌تری بنویسید.")}</p>}
           <div className="service-grid grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {visibleServices.map(({ title, icon: Icon, desc, label }, index) => (
@@ -398,7 +404,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
                 <h3 className="mt-2 text-xl font-black">{t(title)}</h3>
                 <p className="mt-2 min-h-14 text-sm leading-7 text-[var(--fp-muted)]">{t(desc)}</p>
                 <div className="premium-divider my-5" />
-                <button onClick={() => inform(title, t(desc) + (language==='en'?' Requirements, timing and costs are confirmed after review.':language==='ar'?' يتم تأكيد الشروط والمدة والتكاليف بعد المراجعة.':' شرایط، زمان و هزینه پس از بررسی مدارک مشخص می‌شود.'), {service:title})} className="flex items-center gap-2 text-xs font-black text-[var(--fp-gold)]">{t("بررسی گزینه‌ها")}<ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
+                <button onClick={() => inform(title, t(desc) + (language==='en'?' Requirements, timing and costs are confirmed after review.':language==='ar'?' يتم تأكيد الشروط والمدة والتكاليف بعد المراجعة.':language==='ps'?' شرایط، وخت او لګښتونه له ارزونې وروسته تاییدېږي.':' شرایط، زمان و هزینه پس از بررسی مدارک مشخص می‌شود.'), {service:title})} className="flex items-center gap-2 text-xs font-black text-[var(--fp-gold)]">{t("بررسی گزینه‌ها")}<ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
               </article></MagicCard></Reveal>
             ))}
           </div>
