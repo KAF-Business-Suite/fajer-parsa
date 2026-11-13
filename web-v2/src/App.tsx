@@ -73,6 +73,7 @@ const touristLanguages: {code:InboundLanguage;label:string;detail:string;htmlLan
 function SiteLanguageMenu({language,inbound,onSelect}: {
   language:InboundLanguage;inbound:boolean;onSelect:(code:InboundLanguage)=>void
 }) {
+  const t=(value:string)=>siteText(value,language)
   const [open,setOpen]=useState(false)
   const host=useRef<HTMLDivElement>(null)
   const trigger=useRef<HTMLButtonElement>(null)
