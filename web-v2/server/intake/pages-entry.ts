@@ -11,6 +11,18 @@ type Env={
   TURNSTILE_SECRET_KEY?:string;
   FAJR_RATE_LIMIT?:{limit:(options:{key:string})=>Promise<{success:boolean}>}
 }
+
+// This legacy Fajr intake RPC belongs to the existing KAF data authority.
+// A changed provider/project is a separate reviewed data-boundary gate.
+const approvedProjectOrigin='https://krzxajtrhvupyywovdzy.supabase.co'
+function safeProjectUrl(value:string|undefined):boolean {
+  if(!value)return false
+  try {
+    const url=new URL(value)
+    return url.origin===approvedProjectOrigin && url.pathname==='/' &&
+      !url.username && !url.password && !url.search && !url.hash
+  }catch{return false}
+}
 const unavailable=()=>Response.json({error:'intake_not_enabled'},{status:503,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}})
 
 // Project-specific Cloudflare preview *subdomain* only; never the stable production origin.
@@ -34,7 +46,7 @@ export async function onRequest(context:{request:Request;env:Env}):Promise<Respo
   // No implicit secrets, no production wildcard, no in-memory limiter fallback.
   if(!safePreviewOrigin(origin,env.FAJR_INTAKE_ORIGIN)||
     env.FAJR_INTAKE_ENABLED!=='true'||!env.FAJR_RATE_LIMIT||
-    !env.SUPABASE_URL||!env.SUPABASE_SERVER_KEY||!env.TURNSTILE_SECRET_KEY)return unavailable()
+    !safeProjectUrl(env.SUPABASE_URL)||!env.SUPABASE_SERVER_KEY||!env.TURNSTILE_SECRET_KEY)return unavailable()
 
   try{
     const saver=supabaseSaver(env.SUPABASE_URL,env.SUPABASE_SERVER_KEY)
