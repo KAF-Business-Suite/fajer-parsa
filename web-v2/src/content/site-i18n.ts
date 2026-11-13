@@ -1143,6 +1143,7 @@ const textMap: Record<string, {en:string;ar:string}> = {
   "تصویرسازی با هوش مصنوعی، الهام‌گرفته از هنزه؛ تصویر مستندِ تور یا اقامتگاه نیست.": {"en":"AI-generated illustration inspired by Hunza; not a documentary photo of a tour or accommodation.","ar":"صورة مولدة بالذكاء الاصطناعي مستوحاة من هونزا؛ وليست صورة توثيقية لجولة أو مكان إقامة."},
   "برای راهنمایی اولیه است؛ امکان ارائه، شرایط و مدارک هر خدمت باید با دفتر بررسی شود.": {"en":"This is only preliminary guidance; service availability, conditions and documents must be confirmed with the office.","ar":"هذه إرشادات أولية فقط؛ يجب تأكيد توفر الخدمة وشروطها ووثائقها مع المكتب."},
   "خدمات سفر به": {"en":"Travel services in","ar":"خدمات السفر إلى"},
+  "تابعیت": {"en":"Nationality","ar":"الجنسية"},
 }
 export function siteText(input:string, language:SiteLanguage):string {
   if (language==='fa') return input
