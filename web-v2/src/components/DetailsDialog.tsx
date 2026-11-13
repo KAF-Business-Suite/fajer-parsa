@@ -32,7 +32,7 @@ function RequestDraft({initial,language}: {initial:RequestContext;language:SiteL
   const [copyStatus,setCopyStatus] = useState('')
   const summaryRef=useRef<HTMLTextAreaElement>(null)
   const formRef=useRef<HTMLFormElement>(null)
-  const fieldLabels=language==='en'?['Service type','Travel purpose','Nationality','Package']:language==='ar'?['نوع الخدمة','غرض السفر','الجنسية','الباقة']:language==='ps'?['د خدمت ډول','د سفر موخه','تابعیت','بسته']:['نوع خدمت','هدف سفر','تابعیت','بسته']
+  const fieldLabels=language==='en'?['Service type','Travel purpose','Nationality','Package']:language==='ar'?['نوع الخدمة','غرض السفر','الجنسية','الباقة']:language==='ps'?['د خدمت ډول','د سفر موخه','د تابعیت هېواد','بسته']:['نوع خدمت','هدف سفر','تابعیت','بسته']
   const contextLines=[variant && `${fieldLabels[0]}: ${t(variant)}`,initial.purpose && `${fieldLabels[1]}: ${t(initial.purpose)}`,initial.passport && `${fieldLabels[2]}: ${t(initial.passport)}`,initial.bundle && `${fieldLabels[3]}: ${t(initial.bundle)}`].filter(Boolean).join('\n')
   const summary=language==='en'
     ? `Hello Fajr Parsa, I would like to enquire about travel services.\nService: ${t(service)}\nDestination: ${t(destination)}\nTravellers: ${travelers}\nApproximate date: ${date || t('هنوز مشخص نیست')}${contextLines ? '\n'+contextLines : ''}`
@@ -66,7 +66,7 @@ function RequestDraft({initial,language}: {initial:RequestContext;language:SiteL
     <p className="draft-note">{t("پیش از ارسال، خلاصه را مرور کنید. این فرم تصویر اسناد یا اطلاعات هویتی نمی‌خواهد و پیام را خودکار ارسال نمی‌کند.")}</p>
     <button type="submit" disabled={submissionLocked} className="primary-action">{t("مرور پیام درخواست")}<ArrowLeft size={16}/></button>
     {reviewed && <div className="request-summary" aria-live="polite"><h3>{t("خلاصه برای مشاور")}</h3><label htmlFor="request-summary-text">{t("متن آمادهٔ درخواست")}</label><textarea id="request-summary-text" ref={summaryRef} className="request-summary-text" readOnly value={summary} rows={9}/><button type="button" className="secondary-action" onClick={copySummary}><Copy size={16}/>{t("کپی خلاصهٔ درخواست")}</button><div role="status">{copyStatus}</div><small>{centralIntakeEnabled ? t('کپی متن یا باز کردن واتساپ به معنی ثبت مرکزی نیست؛ نتیجهٔ ثبت در بخش پایین نمایش داده می‌شود.') : t('می‌توانید متن را در ایمیل یا پیام‌رسان دلخواه بفرستید. این صفحه درخواست را در دفتر ثبت نمی‌کند.')}</small><a className="primary-action" href={'https://wa.me/93777377774?text='+encodeURIComponent(summary)} target="_blank" rel="noopener noreferrer"><MessageCircle size={17}/>{t("باز کردن واتساپ دفتر")}</a><small>{t("پیام تنها پس از انتخاب «ارسال» در واتساپ فرستاده می‌شود.")}</small></div>}
-    {reviewed && centralIntakeEnabled && <CentralRequest service={service} destination={destination} variant={variant} onLock={()=>setSubmissionLocked(true)}/>}
+    {reviewed && centralIntakeEnabled && <CentralRequest service={service} destination={destination} variant={variant} language={language} onLock={()=>setSubmissionLocked(true)}/>}
     <button type="button" className="draft-download" disabled={submissionLocked} onClick={download}><Download size={15}/>{t("دریافت پیش‌نویس")}</button>
     <div role="status">{saved ? t('فایل پیش‌نویس آمادهٔ دریافت شد؛ درخواست به دفتر ارسال نشده است.') : ''}</div>
   </form>
