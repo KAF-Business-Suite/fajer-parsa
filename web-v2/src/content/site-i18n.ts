@@ -1110,6 +1110,19 @@ const textMap: Record<string, {en:string;ar:string}> = {
   "کپی متن یا باز کردن واتساپ به معنی ثبت مرکزی نیست؛ نتیجهٔ ثبت در بخش پایین نمایش داده می‌شود.": {"en":"Copying the text or opening WhatsApp does not register an enquiry. A confirmed registration result, if any, is displayed below.","ar":"نسخ النص أو فتح واتساب لا يعني تسجيل الطلب. تظهر نتيجة التسجيل المؤكدة، إن وجدت، أدناه."},
   "معرفی خدمت به معنی تضمین صدور ویزا، ورود، اقامت یا دریافت کار نیست. شرایط سفر و تصمیم مراجع مربوط باید برای درخواست شما بررسی شود. برای بررسی اولیه، تصویر پاسپورت یا اسناد شخصی را در این صفحه ارسال نکنید.": {"en":"Listing a service does not guarantee a visa, entry, residence or employment. Requirements and decisions by relevant authorities must be checked for each case. Do not send passport photos or personal documents via this page for an initial enquiry.","ar":"عرض الخدمة لا يضمن إصدار تأشيرة أو الدخول أو الإقامة أو الحصول على عمل. يجب مراجعة الشروط وقرارات السلطات المختصة لكل حالة. لا ترسل صور جواز السفر أو الوثائق الشخصية عبر هذه الصفحة عند الاستفسار الأولي."},
   "رفتن به محتوای اصلی": {"en":"Skip to main content","ar":"الانتقال إلى المحتوى الرئيسي"},
+  "خانه": {"en":"Home","ar":"الرئيسية"},
+  "ناوبری پایین": {"en":"Bottom navigation","ar":"التنقل السفلي"},
+  "ارتباط مستقیم با دفتر": {"en":"Contact our office","ar":"تواصل مع المكتب"},
+  "فقط کانال‌های تأییدشده فعال هستند.": {"en":"Only verified contact channels are enabled.","ar":"قنوات التواصل المعتمدة فقط هي المتاحة."},
+  "واتساپ دفتر": {"en":"Office WhatsApp","ar":"واتساب المكتب"},
+  "پیام را خودتان در واتساپ ارسال می‌کنید.": {"en":"You review and send the message in WhatsApp.","ar":"تراجع الرسالة وترسلها بنفسك عبر واتساب."},
+  "تلگرام": {"en":"Telegram","ar":"تيليغرام"},
+  "ایمیل": {"en":"Email","ar":"البريد الإلكتروني"},
+  "دستیار هوشمند": {"en":"AI assistant","ar":"المساعد الذكي"},
+  "پس از تأیید نشانی رسمی فعال می‌شود.": {"en":"Available once the official address is verified.","ar":"تتوفر بعد التحقق من العنوان الرسمي."},
+  "فعال": {"en":"Available","ar":"متاح"},
+  "در انتظار تأیید": {"en":"Pending verification","ar":"بانتظار التحقق"},
+  "این صفحه هیچ پیام یا درخواست را خودکار ارسال نمی‌کند.": {"en":"This page never sends messages or enquiries automatically.","ar":"لا ترسل هذه الصفحة أي رسالة أو طلب تلقائياً."},
 }
 export function siteText(input:string, language:SiteLanguage):string {
   if (language==='fa') return input
