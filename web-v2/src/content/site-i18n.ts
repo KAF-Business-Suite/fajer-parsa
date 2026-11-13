@@ -1144,6 +1144,13 @@ const textMap: Record<string, {en:string;ar:string}> = {
   "برای راهنمایی اولیه است؛ امکان ارائه، شرایط و مدارک هر خدمت باید با دفتر بررسی شود.": {"en":"This is only preliminary guidance; service availability, conditions and documents must be confirmed with the office.","ar":"هذه إرشادات أولية فقط؛ يجب تأكيد توفر الخدمة وشروطها ووثائقها مع المكتب."},
   "خدمات سفر به": {"en":"Travel services in","ar":"خدمات السفر إلى"},
   "تابعیت": {"en":"Nationality","ar":"الجنسية"},
+  "ویزای سیاحتی": {"en":"Tourist visa","ar":"تأشيرة سياحية"},
+  "ویزای زیارتی": {"en":"Pilgrimage visa","ar":"تأشيرة زيارة دينية"},
+  "ویزای تجارتی": {"en":"Business visa","ar":"تأشيرة أعمال"},
+  "ویزای تحصیلی": {"en":"Student visa","ar":"تأشيرة دراسة"},
+  "ویزای کاری": {"en":"Work visa","ar":"تأشيرة عمل"},
+  "ویزای درمانی": {"en":"Medical visa","ar":"تأشيرة علاج"},
+  "ویزای دیدار خانواده": {"en":"Family visit visa","ar":"تأشيرة زيارة عائلية"},
 }
 export function siteText(input:string, language:SiteLanguage):string {
   if (language==='fa') return input
