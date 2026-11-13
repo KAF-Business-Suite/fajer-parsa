@@ -129,7 +129,9 @@ try {
     assert.equal(await panel.getByRole('link',{name:'دری',exact:true}).getAttribute('href'),'/inbound?lang=fa')
     assert.equal(await panel.getByRole('link',{name:'English',exact:true}).getAttribute('href'),'/inbound?lang=en')
     await panel.getByRole('link',{name:'العربية',exact:true}).click()
-    await page.locator('.inbound h1').waitFor()
+    // Pages serves prerendered English HTML before React enhances the localized route.
+    await page.locator('.inbound-form:not([inert])').waitFor()
+    await page.waitForFunction(()=>document.documentElement.lang==='ar')
     assert.equal(new URL(page.url()).pathname,'/inbound')
     assert.equal(new URL(page.url()).searchParams.get('lang'),'ar')
     assert.equal(await page.locator('html').getAttribute('lang'),'ar')
