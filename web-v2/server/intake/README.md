@@ -13,3 +13,11 @@ Activation prerequisites (explicit owner approval required):
 Current tests exercise handler/adapters with stubs. They do not prove real Turnstile, rate-limit binding, HTTP-to-database delivery, email delivery or staff/case integration. Separate database QA has verified SQL execution, persisted synthetic storage, replay and access restrictions. No customer message is sent.
 
 Run: `node --test server/intake/handler.test.mjs` with Node 24.22.1.
+
+## FP-INTAKE-01 — 2026-11-14 Preview HTTP boundary (review candidate)
+
+The prepared server `pages-entry.ts` now admits **only an explicitly configured, exact HTTPS Cloudflare Pages preview subdomain** of the existing `fajr-parsa-qa.pages.dev` project. It deliberately blocks the public stable Production hostname, all other domains, missing `FAJR_INTAKE_ORIGIN`, missing `FAJR_RATE_LIMIT`, credentials or opt-in. `FAJR_INTAKE_ORIGIN` is server-side only. The current branch does **not** add a `functions/` route or deploy a Worker: it cannot process public web submissions.
+
+Mandatory CI `npm run test:intake` now includes `server/intake/pages-entry.test.mjs`. These tests demonstrate rejection on the public host and malformed/missing preview bindings, and that a configured preview enters the existing HTTP handler only. No network, database or customer writes are made by this test. The server key strings in tests are synthetic.
+
+**Still BLOCKED for operational launch:** reviewed runtime binding/credentials in a real isolated HTTPS preview, durable/shared rate limiter, Turnstile action and hostname verification, schema/authorized Fajr-office workspace mapping and a staff-account readback of one synthetic request. A passing unit test is not evidence for database persistence or a connected Office. Never mount this entrypoint in Cloudflare `functions/` or enable the front-end environment flag in Production until the separate FP-INTAKE-01 release/security gate is satisfied.
