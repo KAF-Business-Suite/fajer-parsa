@@ -17,8 +17,7 @@ const data={
 function config(overrides={}){
   return {
     FAJR_INTAKE_ENABLED:'true',FAJR_INTAKE_ORIGIN:qa,SUPABASE_URL:project,
-    SUPABASE_SERVER_KEY:'synthetic-server-only',TURNSTILE_SECRET_KEY:'synthetic-secret',
-    FAJR_RATE_LIMIT:{limit:async()=>({success:true})},...overrides
+    SUPABASE_SERVER_KEY:'synthetic-server-only',TURNSTILE_SECRET_KEY:'synthetic-secret',...overrides
   }
 }
 function request(body=data,{host=qa,origin=qa,ip='192.0.2.42',type='application/json'}={}){
@@ -33,8 +32,8 @@ async function intercept(mock,fn){
 }
 function syntheticProvider(){
   const persisted=new Map()
-  const calls={challenge:0,save:0}
-  let tokenOK=true,rpcFailure=false,wrongReceipt=false
+  const calls={challenge:0,quota:0,save:0}
+  let tokenOK=true,quotaOK=true,quotaFailure=false,rpcFailure=false,wrongReceipt=false
   async function provider(input,options){
     const url=String(input)
     if(url==='https://challenges.cloudflare.com/turnstile/v0/siteverify'){
@@ -43,6 +42,15 @@ function syntheticProvider(){
       assert.equal(form.get('secret'),'synthetic-secret')
       assert.equal(form.get('remoteip'),'192.0.2.42')
       return Response.json({success:tokenOK,hostname:'fajr-ci-preview.fajr-parsa-qa.pages.dev',action:'fajr_intake'})
+    }
+    if(url===project+'/rest/v1/rpc/fajr_take_intake_slot'){
+      calls.quota++
+      assert.equal(options.headers.apikey,'synthetic-server-only')
+      assert.equal(options.headers.Authorization,'Bearer synthetic-server-only')
+      assert.equal(options.redirect,'error')
+      assert.equal(options.body,'{}')
+      if(quotaFailure)return Response.json({code:'quota_unavailable'},{status:503})
+      return Response.json(quotaOK)
     }
     if(url===project+'/rest/v1/rpc/fajr_receive_web_request'){
       calls.save++
@@ -67,7 +75,7 @@ function syntheticProvider(){
     }
     throw Error('UNEXPECTED_EXTERNAL_REQUEST: '+new URL(url).origin)
   }
-  return {provider,persisted,calls,setTokenOK:v=>tokenOK=v,setRpcFailure:v=>rpcFailure=v,setWrongReceipt:v=>wrongReceipt=v}
+  return {provider,persisted,calls,setTokenOK:v=>tokenOK=v,setQuotaOK:v=>quotaOK=v,setQuotaFailure:v=>quotaFailure=v,setRpcFailure:v=>rpcFailure=v,setWrongReceipt:v=>wrongReceipt=v}
 }
 
 test('Complete synthetic ingress: 201 -> persisted receipt -> 200 idempotent replay, no leaked contact',async()=>{
@@ -82,6 +90,7 @@ test('Complete synthetic ingress: 201 -> persisted receipt -> 200 idempotent rep
     assert.deepEqual(await again.json(),{status:'received',receipt,replayed:true})
     assert.equal(p.persisted.size,1)
     assert.equal(p.calls.save,2)
+    assert.equal(p.calls.quota,2)
     assert.equal(p.calls.challenge,2)
     assert.equal(JSON.stringify(await p.persisted.get(id)).includes('passport'),false)
   })
@@ -104,10 +113,13 @@ test('Invalid consent, bot field, Origin, rate limit, trusted IP and challenge a
     assert.equal((await onRequest({request:request({...data,website:'bot'}),env:config()})).status,400)
     assert.equal((await onRequest({request:request(data,{origin:'https://evil.example'}),env:config()})).status,403)
     assert.equal((await onRequest({request:request(data,{ip:''}),env:config()})).status,429)
-    assert.equal((await onRequest({request:request(),env:config({FAJR_RATE_LIMIT:{limit:async()=>({success:false})}})})).status,429)
+    p.setQuotaOK(false)
+    assert.equal((await onRequest({request:request(),env:config()})).status,429)
+    p.setQuotaOK(true)
     p.setTokenOK(false)
     assert.equal((await onRequest({request:request(),env:config()})).status,403)
     assert.equal(p.calls.save,0)
+    assert.equal(p.calls.quota,1) // only the challenge-passed quota-denial consumed a quota check
     assert.equal(p.persisted.size,0)
   })
 })
@@ -126,6 +138,20 @@ test('Provider outage and malformed receipt fail closed without echoing server s
     assert.equal(p.persisted.size,0)
   })
 })
+test('Database quota outage refuses to store and never invents a receipt',async()=>{
+  const p=syntheticProvider()
+  p.setQuotaFailure(true)
+  await intercept(p.provider,async()=>{
+    const r=await onRequest({request:request(),env:config()})
+    assert.equal(r.status,503)
+    assert.deepEqual(await r.json(),{error:'temporarily_unavailable'})
+    assert.equal(p.calls.challenge,1)
+    assert.equal(p.calls.quota,1)
+    assert.equal(p.calls.save,0)
+    assert.equal(p.persisted.size,0)
+  })
+})
+
 test('Configured foreign Supabase project fails before Turnstile or any network request',async()=>{
   let outbound=0
   await intercept(async()=>{outbound++;throw Error('Not allowed')},async()=>{
