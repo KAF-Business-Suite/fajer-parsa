@@ -82,7 +82,7 @@ const serviceCards: Array<{id:TravelService;icon:typeof PlaneLanding;title:Local
   {id:'guide',icon:Languages,title:{en:'Interpreter & guide coordination',fa:'ترجمان و رهنمای گردشگری',ar:'تنسيق المترجمين والمرشدين'},description:{en:'Language support and local guides subject to applicable requirements.',fa:'خدمات ترجمانی و رهنمای محلی مطابق شرایط مربوط.',ar:'الترجمة والمرشدون المحليون وفق المتطلبات المعمول بها.'}},
   {id:'journey',icon:Compass,title:{en:'Tailored journeys',fa:'برنامه سفر اختصاصی',ar:'برامج رحلات مخصصة'},description:{en:'A thoughtful itinerary matched to your dates and interests.',fa:'طرح سفر بر اساس زمان و علاقه‌مندی‌های شما.',ar:'برنامج يناسب مواعيدك واهتماماتك.'}}
 ]
-export function InboundTourism({language='en',onLanguageChange}: {language?:Language;onLanguageChange?: (language:Language)=>void}) {
+export function InboundTourism({language='en'}: {language?:Language}) {
   const [interactive,setInteractive]=useState(false)
   useEffect(()=>setInteractive(true),[])
   const lang=language
@@ -129,10 +129,7 @@ export function InboundTourism({language='en',onLanguageChange}: {language?:Lang
   return <div className="inbound" dir={rtl?'rtl':'ltr'} lang={lang==='fa'?'fa-AF':lang}>
     <div className="inbound-hero">
       <div className="shell inbound-topbar">
-        <span className="inbound-mark"><Globe2 size={16}/> Afghanistan Travel</span>
-        <div className="inbound-lang" role="group" aria-label="Choose language">
-          {(['en','fa','ar'] as Language[]).map(code=><button type="button" key={code} lang={code==='fa'?'fa-AF':code} aria-pressed={lang===code} onClick={()=>onLanguageChange?.(code)}>{code==='en'?'EN':code==='fa'?'دری':'العربية'}</button>)}
-        </div>
+        <span className="inbound-mark"><Globe2 size={16}/>{lang==='fa'?'سفر به افغانستان':lang==='ar'?'السفر إلى أفغانستان':'Afghanistan Travel'}</span>
       </div>
       <div className="shell inbound-hero-body">
         <div className="inbound-copy">
