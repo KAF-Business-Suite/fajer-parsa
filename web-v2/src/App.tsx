@@ -6,6 +6,7 @@ import { siteText, type SiteLanguage } from './content/site-i18n'
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { MenuToggle } from './components/ui/menu-toggle'
 import { ThemeToggle } from './components/ThemeToggle'
+import { ContactChannels } from './components/ContactChannels'
 import { ScrollProgress } from './components/magicui/scroll-progress'
 import { DestinationGallery } from './components/DestinationGallery'
 import { FaqSection } from './components/FaqSection'
@@ -18,6 +19,9 @@ import { inboundSeo, isInboundPath, normalizeLegacyInbound, updateInboundMetadat
 const DetailsDialog = lazy(() => import('./components/DetailsDialog').then(m => ({default:m.DetailsDialog})))
 import {
   ArrowLeft,
+  House,
+  LayoutGrid,
+  ClipboardList,
   BadgeCheck,
   CheckCircle2,
   ChevronDown,
@@ -93,8 +97,8 @@ function SiteLanguageMenu({language,inbound,onSelect}: {
   const active=language
   const activeText=active==='fa'?'دری':active==='ar'?'العربية':'EN'
   return <div ref={host} className="fp-lang-menu">
-    <button ref={trigger} type="button" className="fp-lang-trigger" aria-label={t("انتخاب زبان / Choose language / اختيار اللغة")} aria-expanded={open} aria-controls="fp-language-options" onClick={()=>setOpen(value=>!value)}>
-      <Languages size={18} aria-hidden="true"/>
+    <button ref={trigger} type="button" className="fp-lang-trigger fp-control" aria-label={t("انتخاب زبان / Choose language / اختيار اللغة")} aria-expanded={open} aria-controls="fp-language-options" onClick={()=>setOpen(value=>!value)}>
+      <Languages size={17} aria-hidden="true"/>
       <span className="fp-lang-current">{activeText}</span>
       <ChevronDown size={14} aria-hidden="true" className={open?'rotate-180 transition':'transition'}/>
     </button>
@@ -151,15 +155,16 @@ function App({initialPath}: {initialPath?: string} = {}) {
   const [query, setQuery] = useState('')
   const [headerScrolled, setHeaderScrolled] = useState(false)
   const openRequest = ({destination=selectedCountry?.name || finder.destination,purpose=selectedCountry ? undefined : finder.purpose,passport=finder.passport,service,bundle,variant}: RequestContext = {}) => setSelection({ destination,purpose,passport,service,bundle,variant, title: t('آماده‌سازی درخواست'), description: language==='en'?'Prepare your trip details. You choose when to send the final WhatsApp message.':language==='ar'?'جهز تفاصيل رحلتك. أنت من يقرر إرسال الرسالة النهائية عبر واتساب.':'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true })
-  const request = () => openRequest()
+  const request = () => {setContactOpen(false);openRequest()}
   const inform = (title: string, description: string, context: RequestContext = {}, contactOnly = false) => setSelection({ ...finder, ...context, title:t(title), description:t(description), contactOnly })
   const [megaOpen, setMegaOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [contactOpen, setContactOpen] = useState(false)
   const [finder, setFinder] = useState<FinderState>({ passport: 'افغانستان', destination: '', purpose: '' })
   const finderReady = useMemo(() => Boolean(finder.destination && finder.purpose), [finder])
 
   useEffect(()=>{
-    const sync=()=>{normalizeLegacyInbound();setInboundLanguage(inboundLanguageFromUrl());setRouteHash(window.location.hash);setRoutePath(window.location.pathname);setMegaOpen(false);setMobileOpen(false);setSelection(null)}
+    const sync=()=>{normalizeLegacyInbound();setInboundLanguage(inboundLanguageFromUrl());setRouteHash(window.location.hash);setRoutePath(window.location.pathname);setMegaOpen(false);setMobileOpen(false);setContactOpen(false);setSelection(null)}
     window.addEventListener('hashchange',sync)
     window.addEventListener('popstate',sync)
     return ()=>{window.removeEventListener('hashchange',sync);window.removeEventListener('popstate',sync)}
@@ -190,7 +195,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
     return () => window.removeEventListener('scroll', sync)
   }, [])
   useEffect(() => {
-    const escape = (e: KeyboardEvent) => { if (e.key === 'Escape') { headerRef.current?.querySelector<HTMLElement>('[aria-expanded="true"]')?.focus(); setMegaOpen(false); setMobileOpen(false) } }
+    const escape = (e: KeyboardEvent) => { if (e.key === 'Escape') { headerRef.current?.querySelector<HTMLElement>('[aria-expanded="true"]')?.focus(); setMegaOpen(false); setMobileOpen(false); setContactOpen(false) } }
     window.addEventListener('keydown', escape)
     return () => window.removeEventListener('keydown', escape)
   }, [])
@@ -209,8 +214,8 @@ function App({initialPath}: {initialPath?: string} = {}) {
     <div lang={language==='fa'?'fa-AF':language} dir={language==='en'?'ltr':'rtl'} className="min-h-screen overflow-x-clip fp-app bg-[var(--fp-ivory)] text-[var(--fp-ink)]">
       <ScrollProgress className="fp-scroll-progress" aria-hidden="true" />
       <header ref={headerRef} data-scrolled={headerScrolled} className="floating-header" aria-label={isInboundRoute ? inboundNav.header : "سربرگ فجر پارسا"}>
-        <div className="shell flex h-[74px] items-center justify-between gap-4">
-          <a href={isInboundRoute ? '/?lang='+language : "#"} className="flex items-center gap-3">
+        <div className="shell fp-header-inner flex h-[74px] items-center justify-between gap-2 lg:gap-4">
+          <a href={isInboundRoute ? '/?lang='+language : "#"} className="fp-brand flex min-w-0 items-center gap-3">
             <div className="relative">
               <img src="/media/logo.png" alt={isInboundRoute ? inboundNav.logo : "لوگوی فجر پارسا"} className="h-12 w-12 rounded-[15px] border border-[var(--fp-line)] bg-[var(--fp-surface)] object-contain p-1 shadow-sm" />
 
@@ -236,12 +241,12 @@ function App({initialPath}: {initialPath?: string} = {}) {
             <a className="rounded-xl px-4 py-2.5 transition hover:bg-slate-900/5" href="#track">{t("پیگیری")}</a>
           </nav>}
 
-          <div className="flex items-center gap-2">
+          <div className="fp-header-actions flex items-center gap-2">
             <SiteLanguageMenu language={inboundLanguage} inbound={isInboundRoute} onSelect={changeInboundLanguage}/>
-            <ThemeToggle labels={isInboundRoute ? {light:inboundNav.themeLight,dark:inboundNav.themeDark} : undefined} />
-            {isInboundRoute ? <a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer" className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} /> {inboundNav.contact}</a> : <button onClick={() => inform('ارتباط با فجر پارسا', 'واتساپ دفتر: ۰۷۷۷۳۷۷۷۷۴. کابل، دشت برچی، مارکیت پیوند، منزل دوم، دفتر ۸۵. برای پیگیری، اطلاعات درج‌شده در رسید را آماده کنید.', {}, true)} className="hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold shadow-sm sm:flex"><Headphones size={16} />{t("تماس")}</button>}
-            <button onClick={isInboundRoute ? ()=>document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"}) : request} className="shine rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10">{isInboundRoute ? inboundNav.enquire : t("شروع درخواست")}</button>
-            <MenuToggle open={mobileOpen} onToggle={() => setMobileOpen(!mobileOpen)} label={isInboundRoute ? inboundNav.menu : language==='en'?'Mobile menu':language==='ar'?'قائمة الهاتف':'منوی موبایل'} />
+            <ThemeToggle labels={{light:inboundNav.themeLight,dark:inboundNav.themeDark}} />
+            <button type="button" onClick={()=>{setMobileOpen(false);setContactOpen(true)}} className="fp-header-contact hidden items-center gap-2 rounded-xl border border-[var(--fp-line)] bg-[var(--fp-surface)] px-3.5 py-2.5 text-xs font-extrabold xl:inline-flex"><Headphones size={17} aria-hidden="true"/>{isInboundRoute?inboundNav.contact:t("تماس")}</button>
+            <button type="button" onClick={isInboundRoute ? ()=>document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"}) : request} className="shine fp-header-request hidden items-center rounded-xl bg-[#09111f] px-4 py-2.5 text-xs font-black text-white shadow-lg shadow-slate-950/10 lg:inline-flex">{isInboundRoute ? inboundNav.enquire : t("شروع درخواست")}</button>
+            <MenuToggle open={mobileOpen} onToggle={() => {setContactOpen(false);setMobileOpen(!mobileOpen)}} label={isInboundRoute ? inboundNav.menu : language==='en'?'Mobile menu':language==='ar'?'قائمة الهاتف':'منوی موبایل'} />
           </div>
         </div>
 
@@ -454,6 +459,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
         </>}
       </main>
 
+      <ContactChannels language={language} open={contactOpen} onOpenChange={setContactOpen}/>
       {selection && <Suspense fallback={<div role="status" className="dialog-loading">{t("در حال آماده‌سازی فرم…")}</div>}><DetailsDialog selection={selection} language={language} onClose={() => setSelection(null)} onRequest={openRequest} /></Suspense>}
       {!isInboundRoute && <footer id="contact" className="bg-[#070d17] py-14 text-slate-300">
         <div className="shell grid gap-9 md:grid-cols-4">
@@ -473,10 +479,12 @@ function App({initialPath}: {initialPath?: string} = {}) {
 
 
 
-      {!isInboundRoute && <div className="mobile-action-bar fixed inset-x-3 bottom-3 z-30 flex items-center gap-2 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-glass)] p-2 shadow-2xl backdrop-blur md:hidden">
-        <button onClick={request} className="flex-1 rounded-xl bg-[#09111f] px-3 py-3 text-xs font-black text-white">{t("شروع درخواست")}</button>
-        <a href="https://wa.me/93777377774" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 rounded-xl border border-[var(--fp-line)] px-4 py-3 text-xs font-black"><MessageCircle size={15} />{t("واتساپ")}</a>
-      </div>}
+      <nav aria-label={t("ناوبری پایین")} className="mobile-action-bar fp-bottom-nav fixed inset-x-3 bottom-3 z-30 grid grid-cols-4 gap-1 rounded-2xl border border-[var(--fp-line)] bg-[var(--fp-glass)] p-2 shadow-2xl backdrop-blur md:hidden">
+        <a className="fp-bottom-item" href={'/?lang='+language}><House size={19} aria-hidden="true"/><span>{t("خانه")}</span></a>
+        <a className="fp-bottom-item" href={isInboundRoute?'#inbound-services':isCountryRoute?'/?lang='+language+'#services':'#services'} onClick={()=>setContactOpen(false)}><LayoutGrid size={19} aria-hidden="true"/><span>{isInboundRoute?inboundNav.services:t("خدمات")}</span></a>
+        <button type="button" className="fp-bottom-item fp-bottom-primary" onClick={isInboundRoute?()=>{setContactOpen(false);document.getElementById("inbound-request")?.scrollIntoView({behavior:"smooth"})}:request}><ClipboardList size={19} aria-hidden="true"/><span>{isInboundRoute?inboundNav.enquire:t("شروع درخواست")}</span></button>
+        <button type="button" className="fp-bottom-item" aria-controls="fp-contact-dialog" aria-expanded={contactOpen} onClick={()=>{setMobileOpen(false);setContactOpen(true)}}><Headphones size={19} aria-hidden="true"/><span>{t("تماس")}</span></button>
+      </nav>
     </div>
   )
 }
