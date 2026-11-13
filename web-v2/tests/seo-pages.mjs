@@ -185,7 +185,7 @@ try {
   await test('FP-NAV-01 branded controls, mobile destinations and verified contact channel',async()=>{
     for(const [code,htmlLang,expected,themeLabel] of [
       ['fa','fa-AF','شروع درخواست','فعال کردن حالت'],
-      ['ps','ps-AF','غوښتنه پیل کړئ','روښانه بڼه'],
+      ['ps','ps-AF','غوښتنه پیل کړئ','بڼه فعاله کړئ'],
       ['en','en','Start enquiry','Switch to'],
       ['ar','ar','ابدأ الطلب','التبديل إلى'],
     ]){
