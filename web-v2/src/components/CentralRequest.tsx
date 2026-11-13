@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react'
 import {submitIntake,intakeErrorMessage} from '../lib/intake-client'
+import {siteText,type SiteLanguage} from '../content/site-i18n'
 type Widget={render:(el:HTMLElement,options:Record<string,unknown>)=>string;remove:(id:string)=>void;reset:(id:string)=>void}
 declare global {interface Window{turnstile?:Widget}}
 let scriptPromise:Promise<void>|undefined
@@ -15,36 +16,37 @@ function loadWidget(){
   }).catch(error=>{scriptPromise=undefined;throw error})
   return scriptPromise
 }
-export function CentralRequest({service,destination,variant,onLock}:{service:string;destination:string;variant:string;onLock:()=>void}){
+export function CentralRequest({service,destination,variant,onLock,language='fa'}:{service:string;destination:string;variant:string;onLock:()=>void;language?:SiteLanguage}){
+  const t=(value:string)=>siteText(value,language)
   const [contact,setContact]=useState('');const [consent,setConsent]=useState(false);const [token,setToken]=useState('')
   const [busy,setBusy]=useState(false);const [started,setStarted]=useState(false);const [error,setError]=useState('');const [receipt,setReceipt]=useState('')
   const requestId=useRef(crypto.randomUUID());const container=useRef<HTMLDivElement>(null);const widget=useRef<string|undefined>(undefined);const sending=useRef(false)
   const active=useRef(true)
   const sitekey=(import.meta.env as Record<string,string>).VITE_FAJR_TURNSTILE_SITEKEY
   useEffect(()=>{active.current=true;let canceled=false
-    loadWidget().then(()=>{if(canceled||!container.current)return;widget.current=window.turnstile!.render(container.current,{sitekey,action:'fajr_intake',size:'flexible',callback:(value:string)=>{if(active.current)setToken(value)},'expired-callback':()=>{if(active.current)setToken('')},'error-callback':()=>{if(active.current){setToken('');setError('تأیید امنیتی بارگذاری نشد؛ دوباره تلاش کنید.')}}})}).catch(()=>{if(!canceled)setError('تأیید امنیتی در دسترس نیست؛ فعلاً از راه تماس دفتر استفاده کنید.')})
+    loadWidget().then(()=>{if(canceled||!container.current)return;widget.current=window.turnstile!.render(container.current,{sitekey,action:'fajr_intake',size:'flexible',callback:(value:string)=>{if(active.current)setToken(value)},'expired-callback':()=>{if(active.current)setToken('')},'error-callback':()=>{if(active.current){setToken('');setError(t('تأیید امنیتی بارگذاری نشد؛ دوباره تلاش کنید.'))}}})}).catch(()=>{if(!canceled)setError(t('تأیید امنیتی در دسترس نیست؛ فعلاً از راه تماس دفتر استفاده کنید.'))})
     return()=>{canceled=true;active.current=false;if(widget.current)window.turnstile?.remove(widget.current)}
-  },[sitekey])
+  },[sitekey,language])
   async function send(){
     if(sending.current||receipt)return
-    if(!consent){setError('برای ثبت، رضایت تماس را تأیید کنید.');return}
+    if(!consent){setError(t('برای ثبت، رضایت تماس را تأیید کنید.'));return}
     const value=contact.trim()
-    if(value.length<7||value.length>120||(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)&&!/^\+?[0-9 ()-]{7,24}$/.test(value))){setError('شماره تماس یا ایمیل معتبر بنویسید.');return}
-    if(!token){setError('ابتدا تأیید امنیتی را کامل کنید.');return}
+    if(value.length<7||value.length>120||(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)&&!/^\+?[0-9 ()-]{7,24}$/.test(value))){setError(t('شماره تماس یا ایمیل معتبر بنویسید.'));return}
+    if(!token){setError(t('ابتدا تأیید امنیتی را کامل کنید.'));return}
     sending.current=true;setBusy(true);setStarted(true);setError('');onLock()
     let completed=false
     try{const result=await submitIntake({requestId:requestId.current,service,destination,variant,contact:value,consent:true,challenge:token,website:''});completed=true;if(active.current)setReceipt(result.receipt)}
-    catch(reason){if(active.current)setError(intakeErrorMessage(reason))}
+    catch(reason){if(active.current)setError(t(intakeErrorMessage(reason)))}
     finally{sending.current=false;if(active.current){setBusy(false);setToken('');if(!completed&&widget.current)window.turnstile?.reset(widget.current)}}
   }
   return <section className="central-request" aria-labelledby="central-request-title">
-    <h3 id="central-request-title">ثبت بررسی اولیه در دفتر</h3>
-    <p className="draft-note">آزمایشی: فقط اطلاعات ساختگی وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.</p>
-    {receipt?<div role="status"><strong>درخواست اولیه ثبت شد</strong><p>رسید ثبت: <bdi>{receipt}</bdi></p><small>این رسید تأیید ویزا یا نتیجهٔ بررسی نیست. برای پیگیری آن را نگه دارید.</small></div>:<>
-      <label htmlFor="intake-contact">شماره تماس یا ایمیل</label><input id="intake-contact" type="text" dir="auto" maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
-      <label className="intake-consent"><input type="checkbox" checked={consent} disabled={started} onChange={event=>setConsent(event.target.checked)}/> رضایت دارم اطلاعات همین درخواست برای بررسی و تماس دفتر ذخیره شود.</label>
-      <div ref={container}/><button type="button" className="primary-action" disabled={busy||!token} onClick={send}>{busy?'در حال ثبت…':started?'بررسی دوبارهٔ همین درخواست':'ثبت درخواست اولیه'}</button>
-      {started&&<p className="draft-note">برای جلوگیری از ثبت تکراری، اطلاعات این تلاش ثابت مانده است. تازه‌کردن صفحه یا شروع فرم جدید ممکن است درخواست دیگری ایجاد کند.</p>}
+    <h3 id="central-request-title">{t("ثبت بررسی اولیه در دفتر")}</h3>
+    <p className="draft-note">{t("آزمایشی: فقط اطلاعات ساختگی وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.")}</p>
+    {receipt?<div role="status"><strong>{t("درخواست اولیه ثبت شد")}</strong><p>{t("رسید ثبت: ")}<bdi>{receipt}</bdi></p><small>{t("این رسید تأیید ویزا یا نتیجهٔ بررسی نیست. برای پیگیری آن را نگه دارید.")}</small></div>:<>
+      <label htmlFor="intake-contact">{t("شماره تماس یا ایمیل")}</label><input id="intake-contact" type="text" dir="auto" maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
+      <label className="intake-consent"><input type="checkbox" checked={consent} disabled={started} onChange={event=>setConsent(event.target.checked)}/> {t("رضایت دارم اطلاعات همین درخواست برای بررسی و تماس دفتر ذخیره شود.")}</label>
+      <div ref={container}/><button type="button" className="primary-action" disabled={busy||!token} onClick={send}>{busy?t('در حال ثبت…'):started?t('بررسی دوبارهٔ همین درخواست'):t('ثبت درخواست اولیه')}</button>
+      {started&&<p className="draft-note">{t("برای جلوگیری از ثبت تکراری، اطلاعات این تلاش ثابت مانده است. تازه‌کردن صفحه یا شروع فرم جدید ممکن است درخواست دیگری ایجاد کند.")}</p>}
     </>}
     {error&&<p role="alert">{error}</p>}
   </section>
