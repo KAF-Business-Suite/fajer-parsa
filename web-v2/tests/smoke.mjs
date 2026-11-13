@@ -209,7 +209,7 @@ try {
     assert.match(await page.locator('.floating-header nav').first().textContent(),/طريقة العمل/);
     assert.equal(await page.getByRole('button',{name:'قائمة الهاتف',exact:true}).isVisible(),true);
     await page.screenshot({path:resolve(output,'inbound-ar-phone.png'),fullPage:true});
-    await page.locator('.fp-lang-trigger').click();await page.locator('.fp-lang-panel').getByRole('button',{name:'EN',exact:true}).click();
+    await page.locator('.fp-lang-trigger').click();await page.locator('.fp-lang-panel').getByRole('button',{name:'English',exact:true}).click();
     await page.setViewportSize({width:1440,height:1000});
     await page.screenshot({path:resolve(output,'inbound-en-desktop.png'),fullPage:true});
     await page.setViewportSize({width:393,height:852});
