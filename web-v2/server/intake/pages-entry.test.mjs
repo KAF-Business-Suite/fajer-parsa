@@ -11,8 +11,7 @@ const testEnv=()=>({
   FAJR_INTAKE_ORIGIN:qa,
   SUPABASE_URL:'https://krzxajtrhvupyywovdzy.supabase.co',
   SUPABASE_SERVER_KEY:'synthetic-server-secret-never-log',
-  TURNSTILE_SECRET_KEY:'synthetic-turnstile-secret-never-log',
-  FAJR_RATE_LIMIT:{limit:async()=>{throw Error('limiter must never be called')}}
+  TURNSTILE_SECRET_KEY:'synthetic-turnstile-secret-never-log'
 })
 const make=(url,method='GET',headers={})=>new Request(url+'/api/requests',{method,headers})
 const checkClosed=async(request,env)=>{
@@ -34,13 +33,12 @@ test('Unapproved websites and malformed origins never enable preview',async()=>{
     'https://fajr-ci-preview.fajr-parsa-qa.pages.dev:8443'
   ])await checkClosed(make(origin),{...testEnv(),FAJR_INTAKE_ORIGIN:origin})
 })
-test('Preview requires exact server-binding origin and all dependencies',async()=>{
+test('Preview requires exact server-binding origin and credentials but no new Cloudflare limiter resource',async()=>{
   const base=testEnv()
   const variants=[
     {...base,FAJR_INTAKE_ORIGIN:undefined},
     {...base,FAJR_INTAKE_ORIGIN:'https://different.fajr-parsa-qa.pages.dev'},
     {...base,FAJR_INTAKE_ENABLED:'false'},
-    {...base,FAJR_RATE_LIMIT:undefined},
     {...base,SUPABASE_URL:undefined},
     {...base,SUPABASE_URL:'https://other.supabase.co'},
     {...base,SUPABASE_URL:'https://krzxajtrhvupyywovdzy.supabase.co/unsafe'},
