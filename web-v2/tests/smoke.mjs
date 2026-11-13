@@ -117,7 +117,7 @@ try {
     await page.getByRole('button',{name:'بسته سفر کاری',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'دعوتنامه و تجارت');await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();assert.match(await dialog.getByLabel('متن آمادهٔ درخواست',{exact:true}).inputValue(),/بسته: بسته سفر کاری/);await page.keyboard.press('Escape');
   })
   await test('Contact flow offers contact rather than new-order form',async()=>{
-    await page.getByRole('button',{name:'پیگیری پرونده',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).count(),0);assert.equal(await dialog.getByRole('link',{name:'تماس با دفتر در واتساپ',exact:true}).getAttribute('href'),'https://wa.me/93777377774');await page.keyboard.press('Escape');
+    await page.getByRole('button',{name:'پیگیری پرونده',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).count(),0);const followUp=new URL(await dialog.getByRole('link',{name:'تماس با دفتر در واتساپ',exact:true}).getAttribute('href'));assert.equal(followUp.origin,'https://wa.me');assert.equal(followUp.pathname,'/93777377774');assert.match(followUp.searchParams.get('text')||'',/پیگیری/);await page.keyboard.press('Escape');
     assert.equal(await page.locator('.floating-ai').count(),0);assert.equal(await page.locator('svg.lucide-sparkles').count(),0);
   })
   await test('Deferred dialog loads only after an explicit request',async()=>{
