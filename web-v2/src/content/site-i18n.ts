@@ -1101,7 +1101,7 @@ const textMap: Record<string, {en:string;ar:string}> = {
   "حج": {
     "en": "Hajj",
     "ar": "الحج"
-  }
+  },
   "سفر به افغانستان": {"en":"Visit Afghanistan","ar":"زيارة أفغانستان"},
   "انتخاب زبان / Choose language / اختيار اللغة": {"en":"Choose language","ar":"اختر اللغة"},
   "زبان بخش گردشگری افغانستان": {"en":"Website language","ar":"لغة الموقع"},
