@@ -53,7 +53,8 @@ type InboundLanguage = 'en' | 'fa' | 'ar'
 // The Dari homepage is not yet translated. These links intentionally open
 // the already-localized Afghanistan inbound page; never relabel untranslated UI.
 function inboundLanguageFromUrl(): InboundLanguage {
-  if (typeof window === 'undefined') return 'fa'
+  // The static /inbound HTML is rendered at build time, before window exists.
+  if (typeof window === 'undefined') return 'en'
   const code = new URLSearchParams(window.location.search).get('lang')
   if (code === 'fa' || code === 'en' || code === 'ar') return code
   return isInboundPath(window.location.pathname) ? 'en' : 'fa'
