@@ -170,7 +170,7 @@ try {
     await page.setViewportSize({width:393,height:852})
     for (const [code,label,addWord] of [['en','My favorites','Add '],['ar','المفضلة','إضافة '],['ps','زما خوښونه','خوښونو ته ورزیات کړئ: ']]) {
       await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
-      await page.waitForFunction(l=>document.documentElement.lang===l,code)
+      await page.waitForFunction(l=>document.documentElement.lang===l,code==='ps'?'ps-AF':code)
       const gallery=page.locator('#destinations')
       await gallery.locator('.favorites-filter').waitFor()
       assert.ok((await gallery.locator('.favorites-filter').innerText()).includes(label))
