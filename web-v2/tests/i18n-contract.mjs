@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
-// FP-UX-02: deterministic trilingual inventory gate for all catalog data.
+// FP-PS-01: deterministic four-language inventory gate for all catalog data.
 // Source labels remain stable Dari identifiers. Every customer-facing catalog
-// string must have a non-empty English and Arabic display equivalent.
+// string must have non-empty English, Arabic and Pashto display equivalents.
 const read=async path=>readFile(new URL('../'+path,import.meta.url),'utf8')
-const [dictionary,countries,destinations,presentation,services,...screens]=await Promise.all([
-  'src/content/site-i18n.ts','src/content/countries.ts','src/content/destinations.ts',
+const [dictionary,pashto,countries,destinations,presentation,services,...screens]=await Promise.all([
+  'src/content/site-i18n.ts','src/content/pashto-i18n.ts','src/content/countries.ts','src/content/destinations.ts',
   'src/content/country-presentation.ts','src/content/services.ts','src/App.tsx',
   'src/components/CountryPage.tsx','src/components/CountryExplorer.tsx',
   'src/components/DestinationGallery.tsx','src/components/DetailsDialog.tsx',
@@ -15,6 +15,12 @@ const [dictionary,countries,destinations,presentation,services,...screens]=await
 
 const keys=new Set([...dictionary.matchAll(/^\s{2}"([^"]+)":\s*\{/gm)].map(m=>m[1]))
 const names=[...countries.matchAll(/"name":\s*"([^"]+)"/g)].map(m=>m[1])
+const pashtoValues=new Map([...pashto.matchAll(/^\s{2}"([^"]+)":\s*"([^"]+)"/gm)].map(match=>[match[1],match[2]]))
+const missingPashto=[...keys].filter(key=>!pashtoValues.get(key)?.trim())
+assert.deepEqual(missingPashto,[], 'Missing Pashto labels: '+JSON.stringify(missingPashto))
+assert.equal(new Set(pashtoValues.keys()).size,pashtoValues.size, 'Duplicate Pashto keys')
+assert.ok(pashtoValues.get('ترکیه')==='ترکیه','Pashto Türkiye label should be stable')
+assert.equal(pashtoValues.get('خدمات'),'خدمتونه','Pashto catalog must not fall back to Dari')
 const inData=[
  ...names,
  ...[...countries.matchAll(/^\s+"([^"]+)"[,]?$/gm)].map(m=>m[1]),
@@ -33,4 +39,4 @@ assert.equal(names.length,15, 'Review the complete country inventory if number c
 assert.ok(dictionary.includes('"ترکیه": {'), 'Country Türkiye requires explicit translation')
 assert.ok(dictionary.includes('"تابعیت": '), 'Nationality label requires explicit translation')
 assert.ok(dictionary.includes('"خدمات سفر به": '), 'Country finder heading requires explicit translation')
-console.log(JSON.stringify({gate:'FP-UX-02',status:'PASS',countries:names.length,translatedKeys:keys.size,sourceLabelsAudited:new Set(inData).size,untranslated:missing.length}))
+console.log(JSON.stringify({gate:'FP-PS-01',status:'PASS',countries:names.length,translatedKeys:keys.size,pashtoKeys:pashtoValues.size,sourceLabelsAudited:new Set(inData).size,untranslated:missing.length,untranslatedPashto:missingPashto.length}))
