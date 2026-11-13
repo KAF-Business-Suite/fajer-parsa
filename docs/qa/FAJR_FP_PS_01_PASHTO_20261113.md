@@ -30,7 +30,7 @@ Owner request: Dari → Pashto → English → Arabic, with Pashto as a real sit
 | Source translation-key coverage | Static readback: 324/324 map keys, no missing or orphan keys | PASS (static only) |
 | Language order | Source shows fa → ps → en → ar | PASS (static only) |
 | TypeScript / full build | Run existing workflow on exact PR head | PENDING |
-| I18n catalog contract | Execute `npm run test:i18n` or equivalent CI test script | PENDING |
+| I18n catalog contract | Execute `node tests/i18n-contract.mjs` (within `web-v2/`), also included in `npm run test:seo` | PENDING |
 | Pages browser regression | `web-v2/tests/seo-pages.mjs` includes ps-AF (320–430px mobile) | PENDING |
 | Safe enquiry | Pashto request summary and consent, zero external sends | PENDING browser |
 | Real Samsung Galaxy S21 | 100% zoom, menu, scroll, keyboard/Back, RTL overflow, four-language change | NOT TESTED |
