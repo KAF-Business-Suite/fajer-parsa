@@ -106,7 +106,7 @@ footer .text-slate-400 { color:#b2c0cc; }
 .destination-image-button img { transition:transform .65s cubic-bezier(.2,.65,.3,1); }
 .photo-open-hint { position:absolute;bottom:14px;left:14px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(13,24,31,.82);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:999px;font-size:11px;font-weight:650;opacity:0;transform:translateY(6px);transition:opacity .22s,transform .22s;pointer-events:none; }
 .destination-card:focus-within .photo-open-hint { opacity:1;transform:none; }
-.destination-photo .favorite-button { position:absolute;top:12px;left:12px;width:44px;height:44px;min-height:44px;display:grid;place-items:center;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.94);color:#25343b;transition:transform .18s,background .18s; }
+.destination-photo .favorite-button { position:absolute;top:12px;left:12px;width:48px;height:48px;min-height:48px;display:grid;place-items:center;border-radius:50%;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.94);color:#25343b;transition:transform .18s,background .18s; }
 .favorite-button:active { transform:scale(.92); }
 .destination-photo .favorite-button[aria-pressed="true"] { color:#8a6122;background:#f4e2b3; }
 .favorite-button[aria-pressed="true"] svg { fill:currentColor;animation:fp-favorite .22s ease-out; }
@@ -151,3 +151,36 @@ footer .text-slate-400 { color:#b2c0cc; }
 .mobile-service-links svg { flex-shrink:0;color:var(--fp-gold); }
 .mobile-navigation-panel :is(a,button):focus-visible { outline:2px solid var(--fp-gold);outline-offset:2px; }
 @media(prefers-reduced-motion:no-preference) { .mobile-navigation-panel { animation:fp-dialog-enter .18s ease-out; } }
+
+/* FP-UX-01: one localized visitor-language control, mobile and desktop. */
+.fp-lang-menu{position:relative;flex:none;z-index:45}
+.fp-lang-trigger{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;min-width:86px;padding:8px 10px;border:1px solid var(--fp-line);border-radius:15px;color:var(--fp-ink);background:var(--fp-surface);font-size:12px;font-weight:800;box-shadow:0 3px 12px rgba(12,25,40,.06);white-space:nowrap}
+.fp-lang-trigger:hover{border-color:var(--fp-gold)}
+.fp-lang-trigger[aria-expanded="true"]{outline:2px solid var(--fp-gold);outline-offset:2px}
+.fp-lang-current{display:inline-flex;min-width:18px;justify-content:center}
+.fp-lang-panel{position:absolute;z-index:120;inset-inline-end:0;top:calc(100% + 10px);width:min(300px,calc(100vw - 30px));padding:12px;border:1px solid var(--fp-line);border-radius:20px;background:var(--fp-surface);color:var(--fp-ink);box-shadow:0 22px 60px rgba(12,25,40,.20);text-align:start}
+.fp-lang-heading{padding:6px 9px 13px;font-size:12px;font-weight:850;line-height:1.6}
+.fp-lang-heading span{font-size:11px;font-weight:550;color:var(--fp-muted)}
+.fp-lang-choice{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;margin:2px 0;padding:9px 12px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--fp-ink);text-align:start;font-size:14px;font-weight:750;text-decoration:none}
+.fp-lang-choice:hover,.fp-lang-choice:focus-visible{background:var(--fp-cream);border-color:var(--fp-line)}
+.fp-lang-choice[aria-pressed="true"]{background:color-mix(in srgb,var(--fp-gold-fill) 30%,var(--fp-surface));border-color:var(--fp-gold);color:var(--fp-ink)}
+.fp-lang-detail{margin-inline-start:auto;color:var(--fp-muted);font-size:11px;font-weight:500}
+.fp-lang-check{flex:none;color:var(--fp-gold)}
+.fp-lang-note{margin:9px 5px 2px;padding-block:9px 2px;border-top:1px solid var(--fp-line);color:var(--fp-muted);font-size:11px;line-height:1.8}
+@media(max-width:359px){.fp-lang-trigger{min-width:44px;padding:8px}.fp-lang-trigger .fp-lang-current,.fp-lang-trigger svg:last-child{display:none}.floating-header a>div>div:first-child{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.fp-lang-trigger *{transition:none!important}}
+
+/* FP-UX-01 mobile containment fix: keep language options inside the floating header, never beyond viewport. */
+@media(max-width:767px){
+  .fp-lang-menu{position:static}
+  .fp-lang-panel{
+    position:absolute;
+    top:calc(100% + 8px);
+    inset-inline-end:auto;
+    left:12px;
+    right:12px;
+    width:auto;
+    max-width:none;
+    transform:none;
+  }
+}

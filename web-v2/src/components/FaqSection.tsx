@@ -1,3 +1,4 @@
+import { siteText, type SiteLanguage } from '../content/site-i18n'
 import { ChevronDown } from 'lucide-react'
 import { Reveal } from './Reveal'
 const items=[
@@ -7,8 +8,9 @@ const items=[
   ['درخواست از این سایت چطور به دفتر می‌رسد؟','اطلاعات سفر را آماده می‌کنید، خلاصه را می‌بینید و با انتخاب خودتان آن را در واتساپ دفتر باز می‌کنید. ارسال نهایی در واتساپ با خود شماست.'],
   ['برای پروندهٔ قبلی چطور پیگیری کنم؟','شمارهٔ پرونده یا اطلاعات درج‌شده در رسید را آماده کنید و با دفتر تماس بگیرید. این صفحه وضعیت پرونده‌های مشتریان را نمایش نمی‌دهد.'],
 ]
-export function FaqSection() {
-  return <section id="faq" className="faq-section shell"><Reveal><div className="section-heading"><div><p className="eyebrow">پیش از تصمیم‌گیری</p><h2>پرسش‌هایی که شاید شما هم داشته باشید</h2></div></div></Reveal>
-    <div className="faq-list">{items.map(([title,body],index)=><Reveal key={title} delay={index*.025}><details><summary>{title}<ChevronDown size={18}/></summary><p>{body}</p></details></Reveal>)}</div>
+export function FaqSection({language}:{language:SiteLanguage}) {
+  const t=(v:string)=>siteText(v,language)
+  return <section id="faq" className="faq-section shell"><Reveal><div className="section-heading"><div><p className="eyebrow">{t("پیش از تصمیم‌گیری")}</p><h2>{t("پرسش‌هایی که شاید شما هم داشته باشید")}</h2></div></div></Reveal>
+    <div className="faq-list">{items.map(([title,body],index)=><Reveal key={title} delay={index*.025}><details><summary>{t(title)}<ChevronDown size={18}/></summary><p>{t(body)}</p></details></Reveal>)}</div>
   </section>
 }
