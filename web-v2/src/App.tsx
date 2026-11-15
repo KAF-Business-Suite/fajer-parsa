@@ -174,17 +174,23 @@ function App({initialPath}: {initialPath?: string} = {}) {
   // Samsung/Android browser Back first dismisses the modal or mobile navigation.
   const overlayOpen = Boolean(selection || contactOpen || mobileOpen || megaOpen)
   const overlayHistoryMarker = useRef<string | null>(null)
+  const overlayOpenedAt = useRef<string | null>(null)
   useEffect(() => {
     if (overlayOpen && !overlayHistoryMarker.current) {
       const marker = 'fp-ui-' + crypto.randomUUID()
       const previous = window.history.state
-      window.history.pushState({...(previous && typeof previous === 'object' ? previous : {}), __fpOverlay: marker}, '', window.location.href)
+      const openedAt = window.location.href
+      window.history.pushState({...(previous && typeof previous === 'object' ? previous : {}), __fpOverlay: marker}, '', openedAt)
       overlayHistoryMarker.current = marker
+      overlayOpenedAt.current = openedAt
     } else if (!overlayOpen && overlayHistoryMarker.current) {
       const marker = overlayHistoryMarker.current
+      const openedAt = overlayOpenedAt.current
       overlayHistoryMarker.current = null
-      // Native Back has already popped the marker; never go back twice.
-      if (window.history.state?.__fpOverlay === marker) window.history.back()
+      overlayOpenedAt.current = null
+      // A menu link already navigated when the URL changed: never undo its destination.
+      // Native Back has already popped this marker: never go back twice.
+      if (window.location.href === openedAt && window.history.state?.__fpOverlay === marker) window.history.back()
     }
   }, [overlayOpen])
   const finderTitle = language==='ps' ? t(finder.destination)+' ته سفري خدمتونه' : (language==='en' ? 'Travel services in ' : language==='ar' ? 'خدمات السفر إلى ' : 'خدمات سفر به ') + t(finder.destination)
