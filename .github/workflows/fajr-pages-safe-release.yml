@@ -233,7 +233,7 @@ jobs:
             --branch="$branch" \
             --commit-hash="$GITHUB_SHA"
 
-      - name: FP-07: publish protected synthetic service-guide preview
+      - name: FP-07 publish protected synthetic service-guide preview
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 24 && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'work/fp07-service-trust-catalog-20261115' && github.event.pull_request.head.repo.full_name == github.repository }}
         working-directory: web-v2
         shell: bash
