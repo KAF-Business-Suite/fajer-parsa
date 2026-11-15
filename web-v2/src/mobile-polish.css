@@ -291,3 +291,83 @@ footer .text-slate-400 { color:#b2c0cc; }
 
 /* On 320px with a visible RTL scrollbar, min-width:320px shifts the header off screen. */
 @media(max-width:359px){body{min-width:0}}
+ 
+
+/* FP-INTAKE-01 — one bounded sheet scroller; its close control must never scroll away. */
+.fp-detail-dialog {
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  width:min(640px,calc(100vw - 24px));
+  max-width:calc(100vw - 24px);
+  max-height:calc(100dvh - 24px);
+  min-width:0;
+  padding:0;
+  overflow:hidden;
+  overscroll-behavior:contain;
+}
+.fp-detail-scroll {
+  flex:1 1 auto;
+  min-height:0;
+  min-width:0;
+  width:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior-y:contain;
+  padding:25px 20px 24px;
+  scrollbar-width:thin;
+}
+.fp-detail-dialog [data-slot="dialog-close"] {
+  z-index:5;
+  top:10px;
+  inset-inline-start:10px;
+  inset-inline-end:auto;
+  background:var(--fp-surface);
+  border:1px solid var(--fp-line);
+  border-radius:12px;
+  opacity:1;
+  box-shadow:0 4px 16px rgba(0,0,0,.1);
+}
+.fp-detail-dialog [data-slot="dialog-close"]:focus-visible {
+  outline:2px solid var(--fp-gold);
+  outline-offset:2px;
+}
+.fp-detail-dialog [data-slot="dialog-header"] {
+  padding-inline-start:48px;
+  padding-inline-end:0;
+}
+.fp-detail-scroll :is(.request-draft,.request-summary,.central-request,.draft-row,.draft-field,.dialog-actions) {
+  min-width:0;
+  max-width:100%;
+}
+.fp-detail-scroll .draft-row {
+  grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);
+}
+.fp-detail-scroll .request-summary-text {
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  direction:inherit;
+  resize:vertical;
+}
+.fp-detail-scroll :is(.primary-action,.secondary-action,.service-choice) {
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
+  white-space:normal;
+  text-align:center;
+}
+.fp-detail-scroll .central-request {
+  overflow-wrap:anywhere;
+}
+.fp-detail-scroll .central-request :is([role="status"],bdi) {
+  min-width:0;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.fp-detail-scroll :is(input,select,textarea) { min-width:0;max-width:100%; }
+@media(max-width:480px) {
+  .fp-detail-dialog { max-height:calc(100dvh - 16px); }
+  .fp-detail-scroll { padding:22px 14px 20px; }
+  .fp-detail-scroll .draft-row { grid-template-columns:minmax(0,1fr); }
+}
