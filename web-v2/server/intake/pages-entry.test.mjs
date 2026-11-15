@@ -35,6 +35,7 @@ test('FP-09 exact QA host only: production, immutable preview, old QA, other rou
     'https://fajr-parsa-qa.pages.dev/api/requests',
     'https://test-hash.fajr-parsa-qa.pages.dev/api/requests',
     'https://qa-fajr-visual-review-202610.fajr-parsa-qa.pages.dev/api/requests',
+    'https://fp07-service-catalog-preview.fajr-parsa-qa.pages.dev/api/requests',
     'https://evil.example/api/requests',
     qaOrigin+'/api/unrelated',
   ]){
