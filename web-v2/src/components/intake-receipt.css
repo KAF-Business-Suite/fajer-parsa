@@ -70,3 +70,7 @@
   .fp-intake-receipt-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
   .fp-intake-receipt-actions button{width:100%;min-height:44px;padding:8px 5px;font-size:11px}
 }
+
+
+.fp-receipt-brand{font-family:inherit;font-size:10px;line-height:1.5;letter-spacing:.12em;font-weight:800;color:var(--fp-muted);margin-bottom:8px;direction:ltr;text-align:start}
+.fp-receipt-brand span{display:inline-block;margin-inline:4px;color:var(--fp-gold)}
