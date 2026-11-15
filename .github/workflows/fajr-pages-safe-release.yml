@@ -241,10 +241,15 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           WRANGLER_SEND_METRICS: "false"
+          # This public sitekey is scoped to the single synthetic-only Cloudflare preview hostname.
+          VITE_FAJR_INTAKE_ENABLED: "true"
+          VITE_FAJR_TURNSTILE_SITEKEY: "0x4AAAAAAFrqV6izkeFDGOwS"
         run: |
           set -euo pipefail
           test "${{ github.event.pull_request.number }}" = "22"
           test "${{ github.event.pull_request.head.ref }}" = "work/fp-intake-01-preview-http-contract-20261114"
+          # Only this guarded preview step rebuilds with the synthetic-only form enabled.
+          npm run build
           test -s dist/index.html
           test ! -e dist/_worker.js
           test ! -e dist/_routes.json
