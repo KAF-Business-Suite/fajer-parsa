@@ -1,5 +1,6 @@
 import { countryPresentation } from './content/country-presentation'
 import { CountryExplorer } from './components/CountryExplorer'
+import { ServiceGuide } from './components/ServiceGuide'
 import { countryServices } from './content/countries'
 import { serviceGroups } from './content/services'
 import { siteText, type SiteLanguage } from './content/site-i18n'
@@ -159,6 +160,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
 
   const [selection, setSelection] = useState<Selection | null>(null)
   const [query, setQuery] = useState('')
+  const [guideService, setGuideService] = useState('ویزا و اقامت')
   const [headerScrolled, setHeaderScrolled] = useState(false)
   const [navSection, setNavSection] = useState<'home'|'services'|'request'>('home')
   const openRequest = ({destination=selectedCountry?.name || finder.destination,purpose=selectedCountry ? undefined : finder.purpose,passport=finder.passport,service,bundle,variant}: RequestContext = {}) => setSelection({ destination,purpose,passport,service,bundle,variant, title: t('آماده‌سازی درخواست'), description: language==='en'?'Prepare your trip details. You choose when to send the final WhatsApp message.':language==='ar'?'جهز تفاصيل رحلتك. أنت من يقرر إرسال الرسالة النهائية عبر واتساب.':language==='ps'?'د خپل سفر خدمت، وخت او جزئیات چمتو کړئ. په واتساپ کې د وروستي پیغام لېږل ستاسو په خوښه دي.':'خدمت، زمان و جزئیات سفرتان را آماده کنید. ارسال نهایی پیام در واتساپ با خود شماست.', request: true })
@@ -405,10 +407,13 @@ function App({initialPath}: {initialPath?: string} = {}) {
                 <p className="mt-2 min-h-14 text-sm leading-7 text-[var(--fp-muted)]">{t(desc)}</p>
                 <div className="premium-divider my-5" />
                 <button onClick={() => inform(title, t(desc) + (language==='en'?' Requirements, timing and costs are confirmed after review.':language==='ar'?' يتم تأكيد الشروط والمدة والتكاليف بعد المراجعة.':language==='ps'?' شرایط، وخت او لګښتونه له ارزونې وروسته تاییدېږي.':' شرایط، زمان و هزینه پس از بررسی مدارک مشخص می‌شود.'), {service:title})} className="flex items-center gap-2 text-xs font-black text-[var(--fp-gold)]">{t("بررسی گزینه‌ها")}<ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
+                <a className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--fp-line)] px-3 py-2 text-xs font-bold text-[var(--fp-ink)]" href="#service-guide" onClick={()=>setGuideService(title)}>{language==='en'?'Conditions & details':language==='ar'?'الشروط والتفاصيل':language==='ps'?'شرایط او جزییات':'شرایط و جزئیات'}<ArrowLeft size={15} aria-hidden="true"/></a>
               </article></MagicCard></Reveal>
             ))}
           </div>
         </section>
+
+        <ServiceGuide language={language} selected={guideService} onSelect={setGuideService} onRequest={openRequest} />
 
         <CountryExplorer language={language} onOpenCountry={openCountry} onRequest={openRequest} />
 
