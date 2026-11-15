@@ -9,3 +9,28 @@ test('HTTP errors never manufacture receipts',async()=>{for(const status of [400
 test('malformed server success is rejected',async()=>{for(const body of [{status:'received',receipt:'client-generated',replayed:false},{status:'pending',receipt,replayed:false},{status:'received',receipt},{status:'received',receipt,replayed:'false'}])await assert.rejects(()=>submitIntake(data,async()=>Response.json(body)),IntakeFailure)})
 test('network failure remains uncertain and does not claim receipt',async()=>{await assert.rejects(()=>submitIntake(data,async()=>{throw new TypeError('network')}));assert.match(intakeErrorMessage(new TypeError('network')),/وضعیت ثبت قطعی نیست/)})
 test('customer errors never echo server error or secrets',()=>{assert.doesNotMatch(intakeErrorMessage(new Error('server-secret')),/server-secret/);assert.match(intakeErrorMessage(new IntakeFailure(429)),/کمی بعد/);assert.match(intakeErrorMessage(new IntakeFailure(403)),/تأیید امنیتی/)})
+
+test('isolated HTTPS QA calls the existing synthetic-only Edge without exposing credentials',async()=>{
+ const hadWindow=Object.prototype.hasOwnProperty.call(globalThis,'window')
+ const previousWindow=globalThis.window
+ try{
+  globalThis.window={location:{hostname:'fp-intake-safe-review.fajr-parsa-qa.pages.dev'}}
+  let attempts=0
+  await assert.rejects(()=>submitIntake({...data,contact:'real@example.com'},async()=>{attempts++;throw Error('should never send')}),e=>e instanceof IntakeFailure&&e.status===400)
+  assert.equal(attempts,0)
+  const result=await submitIntake(data,async(url,options)=>{
+   attempts++
+   assert.equal(url,'https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-web-intake-qa')
+   assert.equal(options.credentials,'omit')
+   assert.equal(options.redirect,'error')
+   assert.equal(options.headers.Authorization,undefined)
+   assert.deepEqual(JSON.parse(options.body),data)
+   return Response.json({status:'received',receipt,replayed:false},{status:201})
+  })
+  assert.equal(result.receipt,receipt)
+  assert.equal(attempts,1)
+ }finally{
+  if(hadWindow)globalThis.window=previousWindow
+  else delete globalThis.window
+ }
+})
