@@ -47,4 +47,15 @@ test('live Supabase office API verifies signed-in JWT independently of Cloudflar
  assert.doesNotMatch(r.body,/service_role|contact|password|auth.users/)
 })
 
-test('unused old Cloudflare proxy is disabled',async()=>{const r=await grab('/api/office',{headers:{Authorization:'Bearer synthetic.invalid.token'}});assert.equal(r.status,410)})
+test('Cloudflare BFF denies cross-origin and unauthenticated access without leaking data',async()=>{
+ const noHeader=await grab('/api/session')
+ assert.equal(noHeader.status,403)
+ const session=await grab('/api/session',{headers:{'X-FP-Office-Request':'same-origin'}})
+ assert.equal(session.status,401)
+ assert.match(session.body,/sign_in_required/)
+ const office=await grab('/api/office?offset=0',{headers:{'X-FP-Office-Request':'same-origin'}})
+ assert.equal(office.status,401)
+ const legacy=await grab('/api/office',{headers:{Authorization:'Bearer synthetic.invalid.token'}})
+ assert.equal(legacy.status,403)
+ for(const data of [session,office,legacy])assert.doesNotMatch(data.body,/service_role|@example.invalid|refresh_token|auth.users/)
+})
