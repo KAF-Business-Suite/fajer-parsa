@@ -45,6 +45,14 @@ jobs:
           test -s "$RUNNER_TEMP/fp09-qa-only-worker.mjs"
           test ! -d functions
           echo "FP09_QA_FUNCTION_BUILD=PASS; NO_RELEASE=ENFORCED"
+      - name: FP-09 dry-run private QA Worker with rate-limit binding, no deploy
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --config qa-only/worker/wrangler.toml --dry-run --outdir "$RUNNER_TEMP/fp09-private-worker"
+          find "$RUNNER_TEMP/fp09-private-worker" -type f -name '*.js' -print -quit | grep -q .
+          echo "FP09_PRIVATE_WORKER_DRY_RUN=PASS; NO_EXTERNAL_MUTATION=ENFORCED"
       - name: Build the static site
         run: npm run build
       - name: Install Chromium for local browser QA
