@@ -7,7 +7,8 @@
 - The sensitive RPCs reject `anon` and `authenticated` direct execution; access is reserved to the server role.
 - Cloudflare Pages project `fajr-parsa-qa` uses production branch `main`. Project API readback on 2026-11-15 showed **no preview or production env_vars**.
 - A real public Pages API route `/api/requests` is **not deployed**: the handler is currently in `server/intake/pages-entry.ts`, not the production `functions/` directory. The public form still defaults to disabled. Email and WhatsApp contact links are functional but do **not** automatically create database cases.
-- The exact maintained QA alias is `https://fp07-service-catalog-preview.fajr-parsa-qa.pages.dev`. Its origin is now the one accepted by the prepared handler; production, older aliases and immutable hash previews fail closed.
+- The exact maintained QA alias is `https://fp-intake-safe-review.fajr-parsa-qa.pages.dev`. Its origin is now the one accepted by the prepared handler; production, older aliases and immutable hash previews fail closed.
+- Live Cloudflare readback 2026-11-15: the QA alias already had a successful deployment `34e9c86e-12f2-47cd-bb70-bb33e31b0721` on branch `fp-intake-safe-review`, and the existing `Fajr Parsa isolated intake QA` Turnstile widget permits this exact hostname. The regular catalog alias `fp07-service-catalog-preview` is a different site experience; its origin remains **DENIED** by the intake handler. No new Pages project or Turnstile widget is needed.
 
 ## Added in the existing PR #24
 - `server/intake/pages-entry.ts`: exact origin+path allowlist before making any external calls; missing `FAJR_INTAKE_ENABLED`, rate limiter, server Supabase URL/key or Turnstile secret => **503, no data write**.
