@@ -1,5 +1,25 @@
 # FP-09 / QA ingress contract — 2026-11-15
 
+## CURRENT — isolated QA Pages route published; live HTTP rejection tests PASS
+
+**Authoritative checkpoint after PR #24 code commit `b23cf575c54d8903e2ec05418b6b564fdf7b2c6a`.** The earlier private Worker and service-binding plan below is **historical only** and must not be implemented by default. Continue the same PR, KAF-25 and KAF-31; create no micro-gates.
+
+- **Actual QA route:** https://fp-intake-safe-review.fajr-parsa-qa.pages.dev, Pages project `fajr-parsa-qa`, preview branch `fp-intake-safe-review`, deployment `d4c00bff-2a9c-4491-8865-fe68273c134b`, build SHA `24b5b4537f15fa0f04c15532f051ee58ebc24fc8` (synthetic PR merge); Cloudflare readback SUCCESS. Production SHA `9ded561eae7394f38eb633d3ec890be51df3f830` unchanged.
+- **Existing CI:** The safeguarded PR-only workflow builds with the **public** pre-existing QA Turnstile sitekey and temporarily stages only `qa-only/functions/api/requests.ts` under the Pages `functions/` path. The ordinary production build remains static and intake OFF. The source `web-v2/functions/` is absent; nothing was merged into main.
+- **Backend reused:** Secret-free Pages Function checks exact QA Origin, POST path, 4-KiB body, and synthetic-only `@example.invalid` contact, then forwards to existing Supabase Edge `fajr-web-intake-qa` v4. Edge owns its existing server secret, real Turnstile hostname/action validation, database-wide QA quota, idempotency, and existing `fajr_receive_web_request` RPC. Database public anon/authenticated cannot execute the sensitive RPCs. Older Cloudflare `fajr-intake-gateway-qa` remains no-route, no-secret, deny-only.
+- **Evidence:** GitHub runs 43749355338 and 43749355339 are SUCCESS. Live GitHub runner HTTP smoke proved: QA HTML GET 200; wrong-Origin POST 503; non-synthetic contact POST 400; a syntactically valid synthetic request with deliberately invalid Turnstile challenge POST 403 `challenge_failed`. None of these tests creates a database receipt. Supabase readback still shows 4 old synthetic rows and 0 new rows from `qa-ci@example.invalid`.
+- **Still NOT VERIFIED:** a **valid** browser Turnstile token, accepted synthetic receipt UUID persisted in DB, staff-authorized office readback, and synthetic cleanup. QA preview is working, but end-to-end customer submission is not yet PASS; real Customer Production remains OFF.
+
+**One necessary owner action:** Using a trusted browser/device, open the QA alias, select `ویزا و اقامت` and `امارات`, use fictional contact `qa-fp09@example.invalid` only, consent to synthetic storage, finish the normal Turnstile widget, submit once, and return only the UUID receipt or a screenshot with contact concealed. If form/widget is missing, report the screen; never enter customer data, keys or real contact details.
+
+**Agent next step:** match that receipt in the existing KAF database, prove the staff-authorized Fajr Office readback, clean up the synthetic QA case under the existing authority, and update existing KAF-25/KAF-31 with precise evidence. No new database, billing, public release or messaging.
+
+**Rollback:** keep Production unchanged; in a QA problem, revert the QA preview deployment or PR-only workflow. Do not activate the private Worker as a bypass.
+
+---
+
+## Historical planning/bootstrap evidence (preserved below, superseded by CURRENT above)
+
 **Objective:** The existing public Fajr request form should eventually submit to the **existing** `public.fajr_receive_web_request` RPC and be readable through the already-authorized `fajr_office_list`. No new public database, client portal, staff login or production site.
 
 ## Current facts (verified, not inferred)
