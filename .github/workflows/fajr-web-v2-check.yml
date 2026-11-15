@@ -40,6 +40,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Verify website UX with local browser and synthetic data
         run: npm run test:smoke
+      - name: Verify isolated KAF-35 office dashboard in four languages and Android viewports
+        run: node tests/office-preview-ui.mjs
       - name: Verify crawlable inbound HTML and local Pages routing (no deploy)
         env:
           WRANGLER_SEND_METRICS: "false"
@@ -57,5 +59,6 @@ jobs:
             web-v2/test-results/inbound-seo-results.json
             web-v2/test-results/inbound-response.html
             web-v2/test-results/inbound-pages.log
+            web-v2/test-results/office-preview-mobile.png
           if-no-files-found: error
           retention-days: 3
