@@ -62,5 +62,7 @@ jobs:
             web-v2/test-results/inbound-seo-results.json
             web-v2/test-results/inbound-response.html
             web-v2/test-results/inbound-pages.log
+            web-v2/test-results/intake-form-results.json
+            web-v2/test-results/fp09-receipt-mobile.png
           if-no-files-found: error
           retention-days: 3
