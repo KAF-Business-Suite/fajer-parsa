@@ -51,6 +51,7 @@ export function CentralRequest({service,destination,variant,onLock,onReceipt,lan
   const requestId=useRef(crypto.randomUUID());const container=useRef<HTMLDivElement>(null);const widget=useRef<string|undefined>(undefined);const sending=useRef(false)
   const active=useRef(true)
   const sitekey=(import.meta.env as Record<string,string>).VITE_FAJR_TURNSTILE_SITEKEY
+  const syntheticOnly=(import.meta.env as Record<string,string>).VITE_FAJR_QA_SYNTHETIC_ONLY==='true'
   useEffect(()=>{active.current=true;let canceled=false
     loadWidget().then(()=>{if(canceled||!container.current)return;widget.current=window.turnstile!.render(container.current,{sitekey,action:'fajr_intake',size:'flexible',callback:(value:string)=>{if(active.current)setToken(value)},'expired-callback':()=>{if(active.current)setToken('')},'error-callback':()=>{if(active.current){setToken('');setError(t('تأیید امنیتی بارگذاری نشد؛ دوباره تلاش کنید.'))}}})}).catch(()=>{if(!canceled)setError(t('تأیید امنیتی در دسترس نیست؛ فعلاً از راه تماس دفتر استفاده کنید.'))})
     return()=>{canceled=true;active.current=false;if(widget.current)window.turnstile?.remove(widget.current)}
@@ -60,7 +61,7 @@ export function CentralRequest({service,destination,variant,onLock,onReceipt,lan
     if(!consent){setError(t('برای ثبت، رضایت تماس را تأیید کنید.'));return}
     const value=contact.trim()
     if(value.length<7||value.length>120||(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)&&!/^\+?[0-9 ()-]{7,24}$/.test(value))){setError(t('شماره تماس یا ایمیل معتبر بنویسید.'));return}
-    if(!value.toLowerCase().endsWith('@example.invalid')){setError(t('برای آزمون فقط ایمیل ساختگی با پایان @example.invalid پذیرفته می‌شود.'));return}
+    if(syntheticOnly&&!value.toLowerCase().endsWith('@example.invalid')){setError(t('برای آزمون فقط ایمیل ساختگی با پایان @example.invalid پذیرفته می‌شود.'));return}
     if(!token){setError(t('ابتدا تأیید امنیتی را کامل کنید.'));return}
     sending.current=true;setBusy(true);setStarted(true);setError('');onLock()
     let completed=false
@@ -70,9 +71,9 @@ export function CentralRequest({service,destination,variant,onLock,onReceipt,lan
   }
   return <section className="central-request" aria-labelledby="central-request-title">
     {!receipt && <><h3 id="central-request-title">{t("ثبت بررسی اولیه در دفتر")}</h3>
-    <p className="draft-note">{t("آزمایشی: فقط اطلاعات ساختگی وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.")}</p></>}
+    {syntheticOnly && <p className="draft-note">{t("آزمایشی: فقط اطلاعات ساختگی وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.")}</p>}</>}
     {receipt?<IntakeReceipt receipt={receipt} service={service} destination={destination} language={language}/>:<>
-      <label htmlFor="intake-contact">{t("ایمیل ساختگی برای آزمون")}</label><input id="intake-contact" type="email" dir="ltr" placeholder="qa-fp09@example.invalid" maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
+      <label htmlFor="intake-contact">{syntheticOnly?t("ایمیل ساختگی برای آزمون"):t("شماره تماس یا ایمیل")}</label><input id="intake-contact" type={syntheticOnly?"email":"text"} dir={syntheticOnly?"ltr":"auto"} placeholder={syntheticOnly?"qa-fp09@example.invalid":undefined} maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
       <label className="intake-consent"><input type="checkbox" checked={consent} disabled={started} onChange={event=>setConsent(event.target.checked)}/> {t("رضایت دارم اطلاعات همین درخواست برای بررسی و تماس دفتر ذخیره شود.")}</label>
       <div ref={container}/><button type="button" className="primary-action" disabled={busy||!token} onClick={send}>{busy?t('در حال ثبت…'):started?t('بررسی دوبارهٔ همین درخواست'):t('ثبت درخواست اولیه')}</button>
       {started&&<p className="draft-note">{t("برای جلوگیری از ثبت تکراری، اطلاعات این تلاش ثابت مانده است. تازه‌کردن صفحه یا شروع فرم جدید ممکن است درخواست دیگری ایجاد کند.")}</p>}
