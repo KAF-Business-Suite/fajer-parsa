@@ -1,5 +1,14 @@
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+const manifest=JSON.parse(readFileSync(new URL('../release/fp08-readiness.json',import.meta.url),'utf8'))
+assert.equal(manifest.documentaryReview?.issuerVerification,'pending')
+assert.equal(manifest.documentaryReview?.personalDataCopiedIntoRepository,false)
+assert.notEqual(manifest.checks.company_license_and_services.status,'approved','The agency license copy must not be mistaken for issuer validation')
+const review=readFileSync(new URL('../release/FP08_LICENSE_SCOPE_REVIEW_20261115.md',import.meta.url),'utf8')
+assert.match(review,/2027-03-22/)
+assert.match(review,/2027-03-23/)
+assert.match(review,/authenticity & service scope not yet verified/i)
 const exec=(mode)=>spawnSync(process.execPath,['scripts/fp08-release-gate.mjs',mode],{
   cwd:process.cwd(),encoding:'utf8',timeout:10000
 })
