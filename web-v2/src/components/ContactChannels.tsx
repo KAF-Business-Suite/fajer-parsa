@@ -1,10 +1,9 @@
 import { Mail, MessageCircle, ShieldCheck } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
 import { siteText, type SiteLanguage } from '../content/site-i18n'
+import { officeEmail, officeWhatsApp } from '../lib/office-contact'
 
 /** FP-CONTACT-02: Show usable, verified channels only. Never imply a draft was sent. */
-const officeEmail='fp.rpc.khwaja@gmail.com'
-const officeWhatsApp='93777377774'
 const copy:Record<SiteLanguage,{intro:string,email:string,emailNote:string,whatsappNote:string,privacy:string,subject:string}>={
   fa:{intro:'از راه واتساپ یا ایمیل با دفتر فجرپارسا در تماس شوید.',email:'ایمیل دفتر',emailNote:'برنامهٔ ایمیل باز می‌شود؛ ارسال با شماست.',whatsappNote:'گفت‌وگو در واتساپ باز می‌شود؛ ارسال با شماست.',privacy:'ارسال پیام تنها با اقدام شما در ایمیل یا واتساپ انجام می‌شود.',subject:'درخواست معلومات خدمات فجرپارسا'},
   ps:{intro:'د فجر پارسا دفتر سره د واتساپ یا برېښنالیک له لارې اړیکه ونیسئ.',email:'د دفتر برېښنالیک',emailNote:'د برېښنالیک پروګرام پرانیستل کېږي؛ لېږل ستاسو په خوښه دي.',whatsappNote:'په واتساپ کې خبرې پرانیستل کېږي؛ لېږل ستاسو په خوښه دي.',privacy:'پیغام یوازې ستاسو له تایید وروسته لېږل کېږي.',subject:'د فجر پارسا د خدمتونو پوښتنه'},

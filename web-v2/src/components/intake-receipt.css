@@ -74,3 +74,13 @@
 
 .fp-receipt-brand{font-family:inherit;font-size:10px;line-height:1.5;letter-spacing:.12em;font-weight:800;color:var(--fp-muted);margin-bottom:8px;direction:ltr;text-align:start}
 .fp-receipt-brand span{display:inline-block;margin-inline:4px;color:var(--fp-gold)}
+
+/* FP-09 after-registration follow-up is optional, never a second submit. */
+.fp-intake-receipt .fp-receipt-contact{margin-top:12px;padding-top:10px;border-top:1px solid var(--fp-line);min-width:0}
+.fp-intake-receipt .fp-receipt-contact summary{font-size:12px;line-height:1.7;font-weight:750;color:var(--fp-ink);cursor:pointer;min-height:40px;display:flex;align-items:center}
+.fp-intake-receipt .fp-receipt-contact summary:focus-visible{outline:2px solid var(--fp-gold);outline-offset:3px;border-radius:8px}
+.fp-intake-receipt .fp-receipt-contact-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fp-intake-receipt .fp-receipt-contact-links a{min-width:0;min-height:44px;padding:9px 7px;border:1px solid var(--fp-line);border-radius:12px;color:var(--fp-ink);display:flex;gap:6px;align-items:center;justify-content:center;text-align:center;font-size:12px;font-weight:750;text-decoration:none;overflow-wrap:anywhere}
+.fp-intake-receipt .fp-receipt-contact p{margin:8px 0 0;font-size:11px;line-height:1.75;color:var(--fp-muted)}
+.fp-dialog .central-request .fp-submit-explanation{margin:0;color:var(--fp-muted);font-size:12px;line-height:1.7}
+@media(max-width:360px){.fp-intake-receipt .fp-receipt-contact-links a{font-size:11px;padding:8px 5px}}

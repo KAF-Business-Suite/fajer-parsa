@@ -17,6 +17,7 @@ const mark=name=>results.push({name,status:'PASS'})
 try{
  await page.goto(url+'/#/country/ir');await page.getByRole('button',{name:'درخواست ویزای درمانی',exact:true}).click();await page.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();
  assert.equal(await page.locator('.request-alternatives').evaluate(node=>node.open),false,'optional contact methods are collapsed in QA');
+ assert.match(await page.locator('.request-alternatives summary').innerText(),/واتساپ و ایمیل دفتر/);
  const submit=page.getByRole('button',{name:'ثبت درخواست اولیه',exact:true});await submit.click();assert.equal(payloads.length,0);await page.getByText('برای ثبت، رضایت تماس را تأیید کنید.',{exact:true}).waitFor();mark('Consent required before any HTTP submission')
  const consent=page.locator('.intake-consent input');await consent.check();await submit.click();assert.equal(payloads.length,0);await page.getByText('شماره تماس یا ایمیل معتبر بنویسید.',{exact:true}).waitFor();mark('Contact validation blocks invalid submission')
  await page.getByLabel('ایمیل ساختگی برای آزمون',{exact:true}).fill('someone@example.com');await submit.click();assert.equal(payloads.length,0);await page.getByText('برای آزمون فقط ایمیل ساختگی با پایان @example.invalid پذیرفته می‌شود.',{exact:true}).waitFor();mark('Real contact is rejected early with a clear QA-only explanation');
@@ -24,7 +25,14 @@ try{
  await page.getByRole('button',{name:'بررسی دوبارهٔ همین درخواست',exact:true}).click();await page.getByText('درخواست شما ثبت شد',{exact:true}).waitFor();assert.equal(payloads.length,2);assert.equal(payloads[0].requestId,payloads[1].requestId);assert.notEqual(payloads[0].challenge,payloads[1].challenge);assert.equal(payloads[1].variant,'ویزای درمانی');assert.equal(payloads[1].destination,'ایران');assert.equal(await page.getByText(receipt,{exact:true}).count(),1);assert.equal(await page.getByRole('button',{name:'بررسی دوبارهٔ همین درخواست',exact:true}).count(),0);mark('Retry retains request ID, refreshes challenge and shows only server receipt')
  assert.equal(await page.locator('[data-receipt-source="server"]').count(),1,'Server confirmed receipt component only after persistence')
  assert.equal(await page.locator('.request-draft.is-confirmed').count(),1,'Server receipt switches to a compact completion view')
- assert.equal(await page.locator('.request-alternatives').count(),0,'Optional contact links disappear after receipt')
+ assert.equal(await page.locator('.request-alternatives').count(),0,'Pre-submit contact links disappear after receipt')
+ assert.equal(await page.locator('.fp-receipt-contact').count(),1,'Contact follow-up remains available after receipt')
+ assert.equal(await page.locator('.fp-receipt-contact').evaluate(node=>node.open),false,'Follow-up starts collapsed')
+ await page.locator('.fp-receipt-contact summary').click()
+ const links=await page.locator('.fp-receipt-contact-links a').evaluateAll(nodes=>nodes.map(a=>a.getAttribute('href')))
+ assert.equal(links.length,2);assert.equal(links[0],'https://wa.me/93777377774');assert.match(links[1],/^mailto:fp\.rpc\.khwaja@gmail\.com\?subject=/)
+ assert.equal(links.some(h=>h.includes(receipt)),false,'Receipt must not be leaked through external contact links')
+ await page.locator('.fp-receipt-contact summary').click()
  assert.equal(await page.locator('.draft-download').isVisible(),false,'Draft download is hidden after server confirmation')
  assert.equal(await page.getByText(receipt,{exact:true}).count(),1,'Full reference displayed without truncation')
  assert.equal(await page.locator('.fp-intake-receipt output').innerText(),receipt)

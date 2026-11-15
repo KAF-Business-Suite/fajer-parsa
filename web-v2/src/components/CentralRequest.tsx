@@ -6,6 +6,7 @@ import {IntakeReceipt} from './IntakeReceipt'
 // Localized only within the guarded, disabled-by-default synthetic intake component.
 // The 324-key site catalog stays canonical and keeps its exact-key contract.
 const centralCopy: Record<string, {ps:string;en:string;ar:string}> = {
+  "دکمهٔ ثبت، درخواست را به دفتر می‌فرستد. واتساپ و ایمیل جداگانه است.": {ps:"د ثبت تڼۍ غوښتنه دفتر ته لېږي. واتساپ او برېښنالیک جلا دي.",en:"Register sends this enquiry to the office. WhatsApp and email are separate.",ar:"زر التسجيل يرسل الطلب إلى المكتب. واتساب والبريد منفصلان."},
   "ایمیل ساختگی برای آزمون": {ps:"د ازموینې برېښنالیک",en:"Test email only",ar:"بريد تجريبي فقط"},
   "برای آزمون فقط ایمیل ساختگی با پایان @example.invalid پذیرفته می‌شود.": {ps:"د ازموینې لپاره یوازې په @example.invalid پای ته رسېدونکی برېښنالیک منل کېږي.",en:"For this test, use only an email ending @example.invalid.",ar:"لهذا الاختبار، استخدم بريداً ينتهي بـ @example.invalid فقط."},
   "تأیید امنیتی بارگذاری نشد؛ دوباره تلاش کنید.": {ps:"امنیتي تایید بار نه شو؛ بیا هڅه وکړئ.",en:"Security verification did not load; please try again.",ar:"تعذّر تحميل التحقق الأمني؛ حاول مرة أخرى."},
@@ -75,7 +76,7 @@ export function CentralRequest({service,destination,variant,onLock,onReceipt,lan
     {receipt?<IntakeReceipt receipt={receipt} service={service} destination={destination} language={language}/>:<>
       <label htmlFor="intake-contact">{syntheticOnly?t("ایمیل ساختگی برای آزمون"):t("شماره تماس یا ایمیل")}</label><input id="intake-contact" type={syntheticOnly?"email":"text"} dir={syntheticOnly?"ltr":"auto"} placeholder={syntheticOnly?"qa-fp09@example.invalid":undefined} maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
       <label className="intake-consent"><input type="checkbox" checked={consent} disabled={started} onChange={event=>setConsent(event.target.checked)}/> {t("رضایت دارم اطلاعات همین درخواست برای بررسی و تماس دفتر ذخیره شود.")}</label>
-      <div ref={container}/><button type="button" className="primary-action" disabled={busy||!token} onClick={send}>{busy?t('در حال ثبت…'):started?t('بررسی دوبارهٔ همین درخواست'):t('ثبت درخواست اولیه')}</button>
+      <div ref={container}/><p className="fp-submit-explanation">{t("دکمهٔ ثبت، درخواست را به دفتر می‌فرستد. واتساپ و ایمیل جداگانه است.")}</p><button type="button" className="primary-action" disabled={busy||!token} onClick={send}>{busy?t('در حال ثبت…'):started?t('بررسی دوبارهٔ همین درخواست'):t('ثبت درخواست اولیه')}</button>
       {started&&<p className="draft-note">{t("برای جلوگیری از ثبت تکراری، اطلاعات این تلاش ثابت مانده است. تازه‌کردن صفحه یا شروع فرم جدید ممکن است درخواست دیگری ایجاد کند.")}</p>}
     </>}
     {error&&<p role="alert">{error}</p>}
