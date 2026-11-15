@@ -383,7 +383,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
           </div>
         </section>
 
-        <section className="shell py-20" id="services">
+        <section className="shell py-12 sm:py-20" id="services">
           <Reveal><div className="mb-9 flex items-end justify-between gap-4">
             <div>
               <div className="eyebrow">{t("خدمات فجر پارسا")}</div>
@@ -397,17 +397,19 @@ function App({initialPath}: {initialPath?: string} = {}) {
           {visibleServices.length === 0 && <p className="py-8 text-center">{t("خدمتی با این عبارت پیدا نشد. عبارت کوتاه‌تری بنویسید.")}</p>}
           <div className="service-grid grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {visibleServices.map(({ title, icon: Icon, desc, label }, index) => (
-              <Reveal key={title} delay={index * 0.04}><MagicCard className="service-card rounded-[28px]" gradientFrom="#c9a75a" gradientTo="#35a994" gradientColor="var(--fp-glow)" gradientOpacity={0.25}><article className="group p-6">
+              <Reveal key={title} delay={index * 0.04}><MagicCard className="service-card rounded-[28px]" gradientFrom="#c9a75a" gradientTo="#35a994" gradientColor="var(--fp-glow)" gradientOpacity={0.25}><article className="group p-4 sm:p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f4ead5] to-[#fbf7ee] text-[#8a6423] shadow-inner"><Icon size={22} /></div>
                   <span className="font-latin text-[9px] font-bold uppercase tracking-[.12em] text-slate-300">0{index + 1}</span>
                 </div>
-                <div className="font-latin mt-6 text-[9px] font-extrabold uppercase tracking-[.15em] text-[#9b7730]">{t(label)}</div>
+                <div className="font-latin mt-3 text-[9px] font-extrabold uppercase tracking-[.15em] text-[#9b7730] sm:mt-6">{t(label)}</div>
                 <h3 className="mt-2 text-xl font-black">{t(title)}</h3>
-                <p className="mt-2 min-h-14 text-sm leading-7 text-[var(--fp-muted)]">{t(desc)}</p>
-                <div className="premium-divider my-5" />
-                <button onClick={() => inform(title, t(desc) + (language==='en'?' Requirements, timing and costs are confirmed after review.':language==='ar'?' يتم تأكيد الشروط والمدة والتكاليف بعد المراجعة.':language==='ps'?' شرایط، وخت او لګښتونه له ارزونې وروسته تاییدېږي.':' شرایط، زمان و هزینه پس از بررسی مدارک مشخص می‌شود.'), {service:title})} className="flex items-center gap-2 text-xs font-black text-[var(--fp-gold)]">{t("بررسی گزینه‌ها")}<ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
-                <a className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--fp-line)] px-3 py-2 text-xs font-bold text-[var(--fp-ink)]" href="#service-guide" onClick={()=>setGuideService(title)}>{language==='en'?'Conditions & details':language==='ar'?'الشروط والتفاصيل':language==='ps'?'شرایط او جزییات':'شرایط و جزئیات'}<ArrowLeft size={15} aria-hidden="true"/></a>
+                <p className="mt-2 text-sm leading-6 text-[var(--fp-muted)] sm:min-h-14">{t(desc)}</p>
+                <div className="premium-divider my-3 sm:my-5" />
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <button onClick={() => inform(title, t(desc) + (language==='en'?' Requirements, timing and costs are confirmed after review.':language==='ar'?' يتم تأكيد الشروط والمدة والتكاليف بعد المراجعة.':language==='ps'?' شرایط، وخت او لګښتونه له ارزونې وروسته تاییدېږي.':' شرایط، زمان و هزینه پس از بررسی مدارک مشخص می‌شود.'), {service:title})} className="inline-flex min-h-11 items-center gap-2 py-2 text-xs font-black text-[var(--fp-gold)]">{t("بررسی گزینه‌ها")}<ArrowLeft size={15} className="transition group-hover:-translate-x-1" /></button>
+                <a className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--fp-line)] px-3 py-2 text-xs font-bold text-[var(--fp-ink)]" href="#service-guide" onClick={()=>setGuideService(title)}>{language==='en'?'Conditions & details':language==='ar'?'الشروط والتفاصيل':language==='ps'?'شرایط او جزییات':'شرایط و جزئیات'}<ArrowLeft size={15} aria-hidden="true"/></a>
+                </div>
               </article></MagicCard></Reveal>
             ))}
           </div>
