@@ -38,6 +38,16 @@ for (const name of required) {
     failures.push(name+': approved without verifiable source, reviewer or date')
   }
 }
+// A photo of a license is evidence of a document, not confirmation of live status.
+if (data.checks?.company_license_and_services?.status==='approved'
+    && (data.documentaryReview?.issuerVerification!=='verified'
+       || !data.documentaryReview?.travelAgencyLicensePrintedEnd
+       || !data.documentaryReview?.municipalTradePermitPrintedEnd)) {
+  failures.push('company_license_and_services: issuer status and documented scope not independently verified')
+}
+if (data.documentaryReview?.personalDataCopiedIntoRepository!==false) {
+  failures.push('privacy: licensing document must remain restricted; no identifiers copied into repository')
+}
 if (data.productionAuthorization!==true || typeof data.ownerAcceptance!=='string'
     || !/^https:\/\/[^\s]+$/.test(data.ownerAcceptance)) {
   failures.push('owner_release_authorization: missing explicit written approval link')
