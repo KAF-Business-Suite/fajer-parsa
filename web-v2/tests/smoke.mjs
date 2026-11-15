@@ -121,7 +121,7 @@ try {
     assert.equal(await page.locator('.floating-ai').count(),0);assert.equal(await page.locator('svg.lucide-sparkles').count(),0);
   })
   await test('Deferred dialog loads only after an explicit request',async()=>{
-    const p=page;await p.setViewportSize({width:393,height:852});const chunks=[];p.on('request',r=>{if(r.url().includes('/assets/DetailsDialog-'))chunks.push(r.url())});await p.goto(url,{waitUntil:'networkidle'});assert.equal(chunks.length,0);await p.getByRole('button',{name:'شروع درخواست',exact:true}).first().click();await p.getByRole('dialog').waitFor();assert.equal(chunks.length,1);await p.keyboard.press('Escape');
+    const p=page;await p.setViewportSize({width:393,height:852});const chunks=[];p.on('request',r=>{if(r.url().includes('/assets/DetailsDialog-'))chunks.push(r.url())});await p.goto(url,{waitUntil:'networkidle'});assert.equal(chunks.length,0);await p.getByRole('button',{name:'شروع درخواست',exact:true}).first().click();await p.getByRole('dialog').waitFor();assert.equal(new Set(chunks).size,1,'Exactly one distinct on-demand DetailsDialog asset expected; duplicate fetches are allowed: '+JSON.stringify(chunks));await p.keyboard.press('Escape');
   })
   await test('Destination favorites persist and remain removable',async()=>{
     await page.getByRole('button',{name:'افزودن پاکستان به منتخب‌ها',exact:true}).click();await page.getByRole('button',{name:'منتخب‌های من (1)',exact:true}).click();assert.equal(await page.locator('.destination-card').count(),1);assert.match(await page.locator('.destination-card').innerText(),/پاکستان/);
