@@ -20,7 +20,22 @@ try{
  const consent=page.locator('.intake-consent input');await consent.check();await submit.click();assert.equal(payloads.length,0);await page.getByText('شماره تماس یا ایمیل معتبر بنویسید.',{exact:true}).waitFor();mark('Contact validation blocks invalid submission')
  await page.getByLabel('شماره تماس یا ایمیل',{exact:true}).fill('qa@example.invalid');await submit.click();await page.getByRole('alert').filter({hasText:'وضعیت ثبت قطعی نیست'}).waitFor();assert.equal(payloads.length,1);assert.equal(await page.getByLabel('مقصد',{exact:true}).isDisabled(),true);assert.equal(await page.getByLabel('شماره تماس یا ایمیل',{exact:true}).isDisabled(),true);mark('Outage shows uncertainty, freezes the submitted payload and makes no receipt')
  await page.getByRole('button',{name:'بررسی دوبارهٔ همین درخواست',exact:true}).click();await page.getByText('درخواست اولیه ثبت شد',{exact:true}).waitFor();assert.equal(payloads.length,2);assert.equal(payloads[0].requestId,payloads[1].requestId);assert.notEqual(payloads[0].challenge,payloads[1].challenge);assert.equal(payloads[1].variant,'ویزای درمانی');assert.equal(payloads[1].destination,'ایران');assert.equal(await page.getByText(receipt,{exact:true}).count(),1);assert.equal(await page.getByRole('button',{name:'بررسی دوبارهٔ همین درخواست',exact:true}).count(),0);mark('Retry retains request ID, refreshes challenge and shows only server receipt')
+ assert.equal(await page.locator('[data-receipt-source="server"]').count(),1,'Server confirmed receipt component only after persistence')
+ assert.equal(await page.getByText(receipt,{exact:true}).count(),1,'Full reference displayed without truncation')
+ assert.equal(await page.locator('.fp-intake-receipt output').innerText(),receipt)
+ assert.equal(await page.locator('.fp-intake-receipt-actions button').count(),2)
+ const downloadPromise=page.waitForEvent('download')
+ await page.getByRole('button',{name:'نگهداری رسید',exact:true}).click()
+ const download=await downloadPromise
+ assert.equal(download.suggestedFilename(),'fajr-parsa-receipt.txt')
+ const receiptFile=await readFile(await download.path(),'utf8')
+ assert.ok(receiptFile.includes(receipt)&&receiptFile.includes('ایران')&&receiptFile.includes('ویزا و اقامت'))
+ assert.ok(!receiptFile.includes('qa@example.invalid'),'Download must not expose contact details')
+ await mkdir('test-results',{recursive:true})
+ await page.screenshot({path:'test-results/fp09-receipt-mobile.png',fullPage:true})
+ mark('Downloadable server receipt contains exact reference, service and destination, no contact data')
+
  for(const width of [320,393,768,1440]){await page.setViewportSize({width,height:852});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)}mark('Receipt layout fits 320/393/768/1440')
- await page.keyboard.press('Escape');responseMode='malformed';await page.getByRole('button',{name:'درخواست ویزای درمانی',exact:true}).click();await page.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();await page.getByLabel('شماره تماس یا ایمیل',{exact:true}).fill('qa@example.invalid');await page.locator('.intake-consent input').check();await page.getByRole('button',{name:'ثبت درخواست اولیه',exact:true}).click();await page.getByRole('alert').filter({hasText:'وضعیت ثبت قطعی نیست'}).waitFor();assert.equal(await page.getByText('درخواست اولیه ثبت شد',{exact:true}).count(),0);mark('Malformed success is rejected without a fake receipt')
+ await page.keyboard.press('Escape');responseMode='malformed';await page.getByRole('button',{name:'درخواست ویزای درمانی',exact:true}).click();await page.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();await page.getByLabel('شماره تماس یا ایمیل',{exact:true}).fill('qa@example.invalid');await page.locator('.intake-consent input').check();await page.getByRole('button',{name:'ثبت درخواست اولیه',exact:true}).click();await page.getByRole('alert').filter({hasText:'وضعیت ثبت قطعی نیست'}).waitFor();assert.equal(await page.locator('[data-receipt-source="server"]').count(),0);assert.equal(await page.getByText('درخواست اولیه ثبت شد',{exact:true}).count(),0);mark('Malformed success is rejected without a fake receipt or download')
  assert.deepEqual(errors,[]);mark('No runtime errors')
 }finally{await mkdir('test-results',{recursive:true});await writeFile('test-results/intake-form-results.json',JSON.stringify({scope:'Local browser with intercepted API/widget; not live central intake',results,errors},null,2));console.log(JSON.stringify({results,errors}));await browser.close();await new Promise(r=>server.close(r))}
