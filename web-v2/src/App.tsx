@@ -175,6 +175,19 @@ function App({initialPath}: {initialPath?: string} = {}) {
   const overlayOpen = Boolean(selection || contactOpen || mobileOpen || megaOpen)
   const overlayHistoryMarker = useRef<string | null>(null)
   const overlayOpenedAt = useRef<string | null>(null)
+  const overlayNavigationIntent = useRef(false)
+  useEffect(() => {
+    // Native anchor clicks must never be cancelled by a modal-history cleanup.
+    const rememberNavigation = (event: MouseEvent) => {
+      if (!overlayHistoryMarker.current || !(event.target instanceof Element)) return
+      const anchor = event.target.closest<HTMLAnchorElement>('a[href]')
+      if (!anchor || anchor.target === '_blank') return
+      const href = anchor.getAttribute('href') || ''
+      if (href.startsWith('#') || (href.startsWith('/') && !href.startsWith('//'))) overlayNavigationIntent.current = true
+    }
+    document.addEventListener('click',rememberNavigation,true)
+    return () => document.removeEventListener('click',rememberNavigation,true)
+  }, [])
   useEffect(() => {
     if (overlayOpen && !overlayHistoryMarker.current) {
       const marker = 'fp-ui-' + crypto.randomUUID()
@@ -183,18 +196,16 @@ function App({initialPath}: {initialPath?: string} = {}) {
       window.history.pushState({...(previous && typeof previous === 'object' ? previous : {}), __fpOverlay: marker}, '', openedAt)
       overlayHistoryMarker.current = marker
       overlayOpenedAt.current = openedAt
+      overlayNavigationIntent.current = false
     } else if (!overlayOpen && overlayHistoryMarker.current) {
       const marker = overlayHistoryMarker.current
       const openedAt = overlayOpenedAt.current
+      const isLinkNavigation = overlayNavigationIntent.current
       overlayHistoryMarker.current = null
       overlayOpenedAt.current = null
-      // A menu link already navigated when the URL changed: never undo its destination.
-      // Native Back has already popped this marker: never go back twice.
-      // Default anchor navigation runs after the React click handler.
-      // Recheck on the next browser task so a menu link is never undone.
-      window.setTimeout(() => {
-        if (window.location.href === openedAt && window.history.state?.__fpOverlay === marker) window.history.back()
-      }, 0)
+      overlayNavigationIntent.current = false
+      // Native Back already popped the marker; local navigation takes precedence.
+      if (!isLinkNavigation && window.location.href === openedAt && window.history.state?.__fpOverlay === marker) window.history.back()
     }
   }, [overlayOpen])
   const finderTitle = language==='ps' ? t(finder.destination)+' ته سفري خدمتونه' : (language==='en' ? 'Travel services in ' : language==='ar' ? 'خدمات السفر إلى ' : 'خدمات سفر به ') + t(finder.destination)
