@@ -279,12 +279,12 @@ try {
         const dims=await page.evaluate(()=>{
           const d=document.querySelector('.fp-detail-dialog'),x=d?.querySelector('[data-slot="dialog-close"]');
           const rect=d?.getBoundingClientRect(),close=x?.getBoundingClientRect();
-          return {globalScrollWidth:document.documentElement.scrollWidth,modalScrollWidth:d?.scrollWidth,modalClientWidth:d?.clientWidth,viewport:innerWidth,modalLeft:rect?.left,modalRight:rect?.right,closeTop:close?.top,closeBottom:close?.bottom};
+          return {globalScrollWidth:document.documentElement.scrollWidth,modalScrollWidth:d?.scrollWidth,modalClientWidth:d?.clientWidth,viewport:innerWidth,viewportHeight:innerHeight,modalLeft:rect?.left,modalRight:rect?.right,closeTop:close?.top,closeBottom:close?.bottom};
         });
         assert.ok(dims.globalScrollWidth<=dims.viewport+1,'Global horizontal overflow '+lang+' '+width);
         assert.ok(dims.modalScrollWidth<=dims.modalClientWidth+1,'Dialog horizontal overflow '+lang+' '+width);
         assert.ok(dims.modalLeft>=-1&&dims.modalRight<=width+1,'Dialog outside viewport '+lang+' '+width);
-        assert.ok(dims.closeTop>=-1&&dims.closeBottom<=innerHeight+1,'X hidden after scroll '+lang+' '+width);
+        assert.ok(dims.closeTop>=-1&&dims.closeBottom<=dims.viewportHeight+1,'X hidden after scroll '+lang+' '+width);
       }
       await page.setViewportSize({width:393,height:852});
       await page.goBack();
