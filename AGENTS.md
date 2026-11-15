@@ -17,6 +17,6 @@ The global owner governance rule applies to architecture, research, provider/too
 - Never equate build/deploy with real mobile/auth/business acceptance.
 - Keep customer data, credentials and secrets out of Git and AI prompts.
 
-## Shared verified-delivery workflow — FP-09 current branch
+## Shared execution skill — Fajr priority
 
-Read the canonical [KAF verified-delivery skill](https://github.com/KAF-Business-Suite/openai-cloudflare-github-hub/blob/main/.agents/skills/kaf-verified-delivery/SKILL.md) after global governance. Continue the existing PR #24 and KAF-25/KAF-31; preserve the existing Supabase RPC and Cloudflare QA/production separation. Do not create new mini-gates or alternate data stores. Pass only with exact CI and live readback; never put broad Supabase service-role keys into shared Preview secrets or declare public intake enabled before isolated QA HTTP→DB→authorized office proof and owner approval.
+For continued development, open the [canonical KAF verified-delivery SKILL.md](https://github.com/KAF-Business-Suite/openai-cloudflare-github-hub/blob/main/.agents/skills/kaf-verified-delivery/SKILL.md), then the **existing** Fajr PR #24, KAF-25 and KAF-31, and the current runtime evidence. Continue the existing FP-09 intake/receipt/office flow; do not spawn micro-gates, duplicate databases, a new office, or production promises. The skill never overrides this repository's stricter safeguards or owner approvals.
