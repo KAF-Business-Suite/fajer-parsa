@@ -1,4 +1,4 @@
-import { ArrowLeft, ClipboardList, Clock3, FileQuestion, Info, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ClipboardList, Clock3, FileQuestion, Info } from 'lucide-react'
 import { useState } from 'react'
 import { serviceGroups } from '../content/services'
 import { serviceCatalog, serviceInquiryDestinations, serviceIsReadyForPublicOffer } from '../content/service-catalog'
@@ -9,7 +9,7 @@ import './service-guide.css'
 const wording = {
   fa: {
     eyebrow:'راهنمای شفاف خدمات',heading:'پیش از درخواست، شرایط را بشناسید',
-    intro:'این فهرست برای بررسی اولیه است. خدمات، شرایط کشور، مدارک و هزینه تنها پس از تأیید دفتر مشخص می‌شوند.',
+    intro:'خدمت را انتخاب کنید؛ جزئیات هر درخواست را دفتر تأیید می‌کند.',
     groups:'گروه خدمت',destination:'مقصد مورد نظر',choose:'ابتدا مقصد را انتخاب کنید (اختیاری)',
     status:'وضعیت فعلی',review:'نیازمند بررسی دفتر',verified:'قابل درخواست پس از تأیید',
     scope:'محدودهٔ راهنمایی',scopeText:'نوع خدمت و هدف سفر خود را مشخص کنید. امکان ارائه برای هر کشور و پاسپورت جدا بررسی می‌شود.',
@@ -18,11 +18,11 @@ const wording = {
     cancellation:'تغییر و انصراف',cancellationText:'شرایط لغو، استرداد و تعهدات برای این خدمت هنوز تأیید نشده است.',
     steps:'مراحل درخواست',stepsText:'خدمت و مقصد را انتخاب کنید، درخواست اولیه بسازید و برای تأیید مدارک و شرایط با دفتر هماهنگ شوید.',
     request:'آماده‌سازی درخواست',important:'توجه: ثبت درخواست به معنی تأیید ویزا، رزرو یا تضمین ارائهٔ خدمت نیست.',
-    noOffer:'اطلاعات برای بررسی؛ فروش یا تأیید قطعی فعال نیست.',
+    noOffer:'اطلاعات برای بررسی؛ فروش یا تأیید قطعی فعال نیست.',moreDetails:'مدارک، هزینه، انصراف و مراحل',
   },
   ps: {
     eyebrow:'د خدمتونو روښانه لارښود',heading:'له غوښتنې مخکې شرایط وپېژنئ',
-    intro:'دا نوملړ یوازې د لومړنۍ ارزونې لپاره دی. د هر هېواد شرطونه، اسناد او لګښتونه دفتر تاییدوي.',
+    intro:'خدمت وټاکئ؛ دفتر د هرې غوښتنې شرایط تاییدوي.',
     groups:'د خدمت ډول',destination:'د سفر مقصد',choose:'مقصد وټاکئ (اختیاري)',
     status:'اوسنی حالت',review:'د دفتر تایید ته اړتیا',verified:'له تایید وروسته غوښتنه کېدای شي',
     scope:'د لارښوونې حدود',scopeText:'خپل خدمت او د سفر موخه وټاکئ. د هر پاسپورټ او هېواد شرایط جلا ارزول کېږي.',
@@ -31,11 +31,11 @@ const wording = {
     cancellation:'بدلون او لغوه کول',cancellationText:'د لغوه کولو، بېرته ورکولو او ژمنو شرایط لا نه دي تایید شوي.',
     steps:'د غوښتنې پړاوونه',stepsText:'خدمت او مقصد وټاکئ، لومړنۍ غوښتنه چمتو کړئ او شرایط له دفتره تایید کړئ.',
     request:'غوښتنه چمتو کړئ',important:'یادونه: غوښتنه د ویزې، ریزرف یا خدمت تضمین نه دی.',
-    noOffer:'یوازې معلومات؛ قطعي پلور او تایید فعال نه دی.',
+    noOffer:'یوازې معلومات؛ قطعي پلور او تایید فعال نه دی.',moreDetails:'اسناد، لګښت، لغوه کول او پړاوونه',
   },
   en: {
     eyebrow:'Transparent service guide',heading:'Review the conditions before enquiring',
-    intro:'This catalog is for initial enquiries. Destination rules, documents, availability and fees require confirmation by the office.',
+    intro:'Choose a service; the office confirms the details of each enquiry.',
     groups:'Service category',destination:'Destination',choose:'Choose a destination (optional)',
     status:'Current status',review:'Office confirmation required',verified:'Enquiry approved with evidence',
     scope:'Scope of guidance',scopeText:'Choose your service and travel purpose. Conditions depend on the destination and passport.',
@@ -44,11 +44,11 @@ const wording = {
     cancellation:'Changes and cancellation',cancellationText:'Cancellation, refund and commitment terms have not been verified for this service.',
     steps:'How to enquire',stepsText:'Select a service and destination, prepare an initial enquiry, and confirm the requirements with the office.',
     request:'Prepare an enquiry',important:'Submitting an enquiry does not guarantee a visa, reservation or availability.',
-    noOffer:'Information only; no confirmed sale or approval is offered.',
+    noOffer:'Information only; no confirmed sale or approval is offered.',moreDetails:'Documents, fees, refunds & steps',
   },
   ar: {
     eyebrow:'دليل خدمات واضح',heading:'اطّلع على الشروط قبل الاستفسار',
-    intro:'هذا الدليل للاستفسارات الأولية. يجب تأكيد شروط الوجهة والوثائق والتوفر والأسعار لدى المكتب.',
+    intro:'اختر الخدمة؛ يؤكد المكتب تفاصيل كل استفسار.',
     groups:'فئة الخدمة',destination:'الوجهة',choose:'اختر وجهة (اختياري)',
     status:'الحالة الحالية',review:'تتطلب تأكيد المكتب',verified:'استفسار معتمد بالأدلة',
     scope:'نطاق الإرشاد',scopeText:'اختر نوع الخدمة وهدف السفر. تختلف الشروط بحسب الوجهة وجواز السفر.',
@@ -57,7 +57,7 @@ const wording = {
     cancellation:'التغيير والإلغاء',cancellationText:'لم يتم التحقق بعد من شروط الإلغاء والاسترداد والالتزامات.',
     steps:'خطوات الاستفسار',stepsText:'اختر الخدمة والوجهة، وجهّز الاستفسار الأولي، وأكّد المتطلبات مع المكتب.',
     request:'إعداد الاستفسار',important:'الاستفسار لا يضمن التأشيرة أو الحجز أو توفر الخدمة.',
-    noOffer:'معلومات أولية فقط؛ لا بيع أو موافقة مؤكدة.',
+    noOffer:'معلومات أولية فقط؛ لا بيع أو موافقة مؤكدة.',moreDetails:'الوثائق والرسوم والإلغاء والخطوات',
   },
 } as const
 
@@ -82,7 +82,6 @@ export function ServiceGuide({
         <h2 id="fp-guide-title">{copy.heading}</h2>
         <p>{copy.intro}</p>
       </div>
-      <span className="fp-guide-status"><ShieldCheck size={15} aria-hidden="true"/>{copy.noOffer}</span>
     </div>
     <div className="fp-guide-body">
       <div className="fp-guide-categories" role="group" aria-label={copy.groups}>
@@ -106,13 +105,18 @@ export function ServiceGuide({
             {serviceInquiryDestinations.map(name=><option key={name} value={name}>{t(name)}</option>)}
           </select>
         </label>
-        <div className="fp-guide-facts">
+        <details key={service.slug} className="fp-guide-disclosure">
+          <summary><span>{copy.moreDetails}</span><ChevronDown size={19} aria-hidden="true"/></summary>
+          <div className="fp-guide-expanded">
+            <div className="fp-guide-facts">
           <section><ClipboardList size={18} aria-hidden="true"/><div><h4>{copy.scope}</h4><p>{copy.scopeText}</p></div></section>
           <section><FileQuestion size={18} aria-hidden="true"/><div><h4>{copy.docs}</h4><p>{copy.docsText}</p></div></section>
           <section><Clock3 size={18} aria-hidden="true"/><div><h4>{copy.time}</h4><p>{copy.timeText}</p></div></section>
           <section><Info size={18} aria-hidden="true"/><div><h4>{copy.cancellation}</h4><p>{copy.cancellationText}</p></div></section>
         </div>
-        <div className="fp-guide-next"><h4>{copy.steps}</h4><p>{copy.stepsText}</p></div>
+            <div className="fp-guide-next"><h4>{copy.steps}</h4><p>{copy.stepsText}</p></div>
+          </div>
+        </details>
         <div className="fp-guide-actions">
           <button type="button" className="fp-guide-primary" onClick={()=>onRequest({service:service.title,destination})}>
             {copy.request}<ArrowLeft size={17} aria-hidden="true"/>
