@@ -27,7 +27,7 @@ function mock({denied=false,expires_in=3600,invalid=false,revoked=false}={}){
   if(u.includes('/token?grant_type=password'))return invalid?reply(400,{error:'invalid_grant'}):reply(200,{access_token:'token.synthetic.access',refresh_token:'token-synthetic-refresh',expires_in})
   if(u.includes('/token?grant_type=refresh_token'))return reply(200,{access_token:'token.synthetic.rotated',refresh_token:'token-synthetic-rotated',expires_in:3600})
   if(u===auth+'/user')return revoked?reply(401,{error:'invalid_session'}):reply(200,{id:fixture.id,role:'authenticated',is_anonymous:false})
-  if(u===auth+'/logout')return reply(204,null)
+  if(u===auth+'/logout')return new Response(null,{status:204})
   if(u.startsWith(office)){
    assert.equal(init.headers?.Origin,base)
    assert.match(init.headers?.Authorization||'',/^Bearer token\.synthetic\./)
