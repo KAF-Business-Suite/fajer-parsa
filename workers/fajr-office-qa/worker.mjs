@@ -81,8 +81,19 @@ async function restore(request,env,transport,key){
 }
 async function limitedBody(request,limit){
  if(request.headers.get('Content-Type')?.split(';')[0].trim()!=='application/json')return null;
- const body=await request.text();if(body.length>limit)return null;
- try{const x=JSON.parse(body);return x && typeof x==='object' && !Array.isArray(x)?x:null}catch{return null}
+ const length=Number(request.headers.get('Content-Length')||0);
+ if(!Number.isFinite(length)||length>limit)return null;
+ const reader=request.body?.getReader();if(!reader)return null;
+ let size=0;const chunks=[];
+ while(true){
+  const part=await reader.read();if(part.done)break;
+  size+=part.value.byteLength;
+  if(size>limit){await reader.cancel();return null}
+  chunks.push(part.value);
+ }
+ const buffer=new Uint8Array(size);let pos=0;
+ for(const chunk of chunks){buffer.set(chunk,pos);pos+=chunk.byteLength}
+ try{const x=JSON.parse(new TextDecoder().decode(buffer));return x && typeof x==='object' && !Array.isArray(x)?x:null}catch{return null}
 }
 export async function handleBff(request,env,transport=fetch){
  const path=new URL(request.url).pathname;
