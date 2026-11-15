@@ -5,7 +5,7 @@ import {resolve,extname,sep} from 'node:path'
 import {execFileSync} from 'node:child_process'
 import assert from 'node:assert/strict'
 const root='/tmp/fajr-intake-browser-build-20261030'
-execFileSync(process.execPath,['node_modules/vite/bin/vite.js','build','--outDir',root,'--emptyOutDir'],{env:{...process.env,VITE_FAJR_INTAKE_ENABLED:'true',VITE_FAJR_TURNSTILE_SITEKEY:'1x00000000000000000000AA'},stdio:'pipe'})
+execFileSync(process.execPath,['node_modules/vite/bin/vite.js','build','--outDir',root,'--emptyOutDir'],{env:{...process.env,VITE_FAJR_INTAKE_ENABLED:'true',VITE_FAJR_QA_SYNTHETIC_ONLY:'true',VITE_FAJR_TURNSTILE_SITEKEY:'1x00000000000000000000AA'},stdio:'pipe'})
 const server=createServer(async(req,res)=>{const path=resolve(root,'.'+new URL(req.url,'http://localhost').pathname.replace(/\/$/,'/index.html'));if(!path.startsWith(root+sep)){res.writeHead(403);res.end();return}try{res.writeHead(200,{'Content-Type':({'.html':'text/html','.js':'text/javascript','.css':'text/css','.woff2':'font/woff2','.webp':'image/webp'})[extname(path)]||'application/octet-stream'});res.end(await readFile(path))}catch{res.end()}})
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const url='http://127.0.0.1:'+server.address().port
 const browser=await chromium.launch({headless:true,executablePath:process.env.QA_CHROMIUM,args:['--no-sandbox','--disable-dev-shm-usage','--no-zygote','--single-process']})
