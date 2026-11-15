@@ -4,7 +4,7 @@
 import {handleIntake} from './handler.ts'
 import {supabaseSaver,turnstileVerifier} from './adapters.ts'
 
-export const qaOrigin='https://fp07-service-catalog-preview.fajr-parsa-qa.pages.dev'
+export const qaOrigin='https://fp-intake-safe-review.fajr-parsa-qa.pages.dev'
 type RateLimit={limit:(options:{key:string})=>Promise<{success:boolean}>}
 type Env={
   FAJR_INTAKE_ENABLED?:string
