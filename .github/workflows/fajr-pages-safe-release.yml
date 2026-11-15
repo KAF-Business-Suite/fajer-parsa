@@ -304,5 +304,34 @@ jobs:
             --project-name=fajr-parsa-qa \
             --branch=fp-intake-safe-review \
             --commit-hash="$GITHUB_SHA"
+          # Prove real HTTP reachability and fail-closed behavior from the CI runner.
+          # No valid Turnstile token, customer data, privileged credential or DB write is used.
+          QA_ORIGIN="https://fp-intake-safe-review.fajr-parsa-qa.pages.dev"
+          page_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp09-page.html" --write-out '%{http_code}' "$QA_ORIGIN/?lang=fa")"
+          test "$page_code" = 200
+          test -s "$RUNNER_TEMP/fp09-page.html"
+          reject_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp09-host-denied.json" --write-out '%{http_code}' \
+            --request POST --header 'Content-Type: application/json' \
+            --header 'Origin: https://fp07-service-catalog-preview.fajr-parsa-qa.pages.dev' \
+            --data '{"requestId":"d5072836-0d50-4dfa-88dc-596e9befd276","contact":"qa-ci@example.invalid","consent":true}' \
+            "$QA_ORIGIN/api/requests")"
+          test "$reject_code" = 503
+          jq -e '.error == "intake_not_enabled"' "$RUNNER_TEMP/fp09-host-denied.json"
+          reject_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp09-real-contact-denied.json" --write-out '%{http_code}' \
+            --request POST --header 'Content-Type: application/json' \
+            --header "Origin: $QA_ORIGIN" \
+            --data '{"requestId":"d5072836-0d50-4dfa-88dc-596e9befd276","contact":"example@example.com","consent":true}' \
+            "$QA_ORIGIN/api/requests")"
+          test "$reject_code" = 400
+          jq -e '.error == "qa_synthetic_contact_required"' "$RUNNER_TEMP/fp09-real-contact-denied.json"
+          # Valid structure, synthetic contact, intentionally invalid challenge:
+          # confirms real Pages -> existing Supabase Edge enforcement without saving a request.
+          reject_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp09-invalid-challenge-denied.json" --write-out '%{http_code}' \
+            --request POST --header 'Content-Type: application/json' \
+            --header "Origin: $QA_ORIGIN" \
+            --data '{"requestId":"d5072836-0d50-4dfa-88dc-596e9befd276","service":"ویزا و اقامت","destination":"امارات","variant":"QA","contact":"qa-ci@example.invalid","consent":true,"challenge":"invalid-ci-only-token","website":""}' \
+            "$QA_ORIGIN/api/requests")"
+          test "$reject_code" = 403
+          jq -e '.error == "challenge_failed"' "$RUNNER_TEMP/fp09-invalid-challenge-denied.json"
           rm -rf functions
-          echo "FP09_SYNTHETIC_QA_PAGES_DEPLOYED=PASS; NOT_PRODUCTION; NO_NEW_SECRETS"
+          echo "FP09_SYNTHETIC_QA_PAGES_DEPLOYED_AND_HTTP_DENIALS=PASS; NOT_PRODUCTION; NO_NEW_SECRETS"
