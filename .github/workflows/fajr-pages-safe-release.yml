@@ -68,6 +68,9 @@ jobs:
       - name: Install exactly the locked dependencies
         working-directory: web-v2
         run: npm ci --no-audit --no-fund
+      - name: FP-08 verify evidence schema and fail-closed release policy
+        working-directory: web-v2
+        run: node tests/fp08-release-gate.mjs
       - name: Test intake in isolation
         working-directory: web-v2
         run: npm run test:intake
@@ -137,6 +140,10 @@ jobs:
           fi
           echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
           echo "Selected release: $deploy"
+      - name: FP-08 block production until owner-approved legal and service evidence
+        if: steps.policy.outputs.deploy == 'production'
+        working-directory: web-v2
+        run: node scripts/fp08-release-gate.mjs production
       - name: Check credentials and block stale production sources
         # Manual verify invokes read-only token and exact project GET; the deploy step stays gated on deploy != none.
         if: steps.policy.outputs.deploy != 'none' || (github.event_name == 'workflow_dispatch' && inputs.target == 'verify')
