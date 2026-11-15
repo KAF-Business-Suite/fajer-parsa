@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react'
 import {submitIntake,intakeErrorMessage} from '../lib/intake-client'
 import {siteText,type SiteLanguage} from '../content/site-i18n'
+import {IntakeReceipt} from './IntakeReceipt'
 
 // Localized only within the guarded, disabled-by-default synthetic intake component.
 // The 324-key site catalog stays canonical and keeps its exact-key contract.
@@ -67,7 +68,7 @@ export function CentralRequest({service,destination,variant,onLock,language='fa'
   return <section className="central-request" aria-labelledby="central-request-title">
     <h3 id="central-request-title">{t("ثبت بررسی اولیه در دفتر")}</h3>
     <p className="draft-note">{t("آزمایشی: فقط اطلاعات ساختگی وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.")}</p>
-    {receipt?<div role="status"><strong>{t("درخواست اولیه ثبت شد")}</strong><p>{t("رسید ثبت: ")}<bdi>{receipt}</bdi></p><small>{t("این رسید تأیید ویزا یا نتیجهٔ بررسی نیست. برای پیگیری آن را نگه دارید.")}</small></div>:<>
+    {receipt?<IntakeReceipt receipt={receipt} service={service} destination={destination} language={language}/>:<>
       <label htmlFor="intake-contact">{t("شماره تماس یا ایمیل")}</label><input id="intake-contact" type="text" dir="auto" maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
       <label className="intake-consent"><input type="checkbox" checked={consent} disabled={started} onChange={event=>setConsent(event.target.checked)}/> {t("رضایت دارم اطلاعات همین درخواست برای بررسی و تماس دفتر ذخیره شود.")}</label>
       <div ref={container}/><button type="button" className="primary-action" disabled={busy||!token} onClick={send}>{busy?t('در حال ثبت…'):started?t('بررسی دوبارهٔ همین درخواست'):t('ثبت درخواست اولیه')}</button>
