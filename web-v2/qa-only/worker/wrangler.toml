@@ -1,0 +1,19 @@
+# FP-09 private QA gateway only: no public workers.dev URL, routes or paid services.
+# Deploy and bindings require separate owner approval; normal site CI never deploys this.
+name = "fajr-intake-gateway-qa"
+main = "entry.ts"
+compatibility_date = "2026-11-01"
+workers_dev = false
+
+[vars]
+FAJR_INTAKE_ENABLED = "false"
+
+# Cloudflare Workers rate-limit binding (approximate, per Cloudflare location).
+# Namespace is dedicated to this QA endpoint and must be validated before deployment.
+[[ratelimits]]
+name = "FAJR_RATE_LIMIT"
+namespace_id = "20261115"
+
+[ratelimits.simple]
+limit = 10
+period = 60
