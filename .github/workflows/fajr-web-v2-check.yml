@@ -38,6 +38,9 @@ jobs:
         run: npm run build
       - name: Install Chromium for local browser QA
         run: npx playwright install --with-deps chromium
+      - name: FP-07 prove four-language service catalog and enquiry context
+        working-directory: web-v2
+        run: node tests/service-catalog-qa.mjs
       - name: Verify website UX with local browser and synthetic data
         run: npm run test:smoke
       - name: Verify crawlable inbound HTML and local Pages routing (no deploy)
