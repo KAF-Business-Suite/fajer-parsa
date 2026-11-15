@@ -40,7 +40,7 @@ for (const name of required) {
 }
 if (data.productionAuthorization!==true || typeof data.ownerAcceptance!=='string'
     || !/^https:\/\/[^\s]+$/.test(data.ownerAcceptance)) {
-  failures.push('owner_releas​e_authorization: missing explicit written approval link')
+  failures.push('owner_release_authorization: missing explicit written approval link')
 }
 const currentStatus=failures.length===0?'READY_FOR_AUTHORIZED_RELEASE':'BLOCKED'
 console.log('FP08_READINESS='+currentStatus)
