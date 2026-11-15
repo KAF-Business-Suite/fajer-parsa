@@ -257,6 +257,58 @@ try {
     assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
     assert.equal(await page.locator('.hero-scene img').getAttribute('src'),'/media/hero-dubai.webp');
   })
+  await test('FP-INTAKE-01 mobile overlays: four languages, bounded scrolling, X and Android Back',async()=>{
+    const closeLabels={fa:'بستن',ps:'تړل',en:'Close',ar:'إغلاق'};
+    for(const lang of ['fa','ps','en','ar']){
+      await page.setViewportSize({width:393,height:852});
+      await page.goto(url+'?lang='+lang,{waitUntil:'networkidle'});
+      const startUrl=page.url();
+      assert.equal(await page.locator('html').getAttribute('dir'),lang==='en'?'ltr':'rtl');
+      await page.locator('.fp-bottom-nav .fp-bottom-primary').click();
+      const dialog=page.getByRole('dialog');await dialog.waitFor();
+      await page.waitForFunction(()=>typeof history.state?.__fpOverlay==='string');
+      assert.equal(await dialog.locator('.fp-detail-scroll').count(),1);
+      assert.equal(await dialog.getByRole('button',{name:closeLabels[lang]}).count(),1,'Localized X '+lang);
+      await dialog.locator('#draft-service').selectOption('ویزا و اقامت');
+      await dialog.locator('#draft-destination').fill('Kabul');
+      await dialog.locator('.request-draft button[type="submit"]').click();
+      await dialog.locator('.request-summary').waitFor();
+      for(const width of [320,360,393,768]){
+        await page.setViewportSize({width,height:852});
+        await dialog.locator('.fp-detail-scroll').evaluate(e=>{e.scrollTop=e.scrollHeight});
+        const dims=await page.evaluate(()=>{
+          const d=document.querySelector('.fp-detail-dialog'),x=d?.querySelector('[data-slot="dialog-close"]');
+          const rect=d?.getBoundingClientRect(),close=x?.getBoundingClientRect();
+          return {globalScrollWidth:document.documentElement.scrollWidth,modalScrollWidth:d?.scrollWidth,modalClientWidth:d?.clientWidth,viewport:innerWidth,modalLeft:rect?.left,modalRight:rect?.right,closeTop:close?.top,closeBottom:close?.bottom};
+        });
+        assert.ok(dims.globalScrollWidth<=dims.viewport+1,'Global horizontal overflow '+lang+' '+width);
+        assert.ok(dims.modalScrollWidth<=dims.modalClientWidth+1,'Dialog horizontal overflow '+lang+' '+width);
+        assert.ok(dims.modalLeft>=-1&&dims.modalRight<=width+1,'Dialog outside viewport '+lang+' '+width);
+        assert.ok(dims.closeTop>=-1&&dims.closeBottom<=innerHeight+1,'X hidden after scroll '+lang+' '+width);
+      }
+      await page.setViewportSize({width:393,height:852});
+      await page.goBack();
+      await dialog.waitFor({state:'detached'});
+      assert.equal(page.url(),startUrl,'Back must close dialog before leaving page '+lang);
+      await page.locator('.fp-bottom-nav .fp-bottom-primary').click();
+      await dialog.waitFor();
+      await dialog.getByRole('button',{name:closeLabels[lang]}).click();
+      await dialog.waitFor({state:'detached'});
+      assert.equal(page.url(),startUrl,'X must not navigate '+lang);
+    }
+    await page.goto(url+'?lang=fa',{waitUntil:'networkidle'});
+    const homeUrl=page.url();
+    await page.locator('.fp-bottom-nav button[aria-controls="fp-contact-dialog"]').click();
+    await page.getByRole('dialog').waitFor();
+    await page.waitForFunction(()=>typeof history.state?.__fpOverlay==='string');
+    await page.goBack();await page.getByRole('dialog').waitFor({state:'detached'});
+    assert.equal(page.url(),homeUrl,'Contact Back must keep same page');
+    await page.getByRole('button',{name:'منوی موبایل',exact:true}).click();
+    await page.locator('#mobile-navigation').waitFor();
+    await page.waitForFunction(()=>typeof history.state?.__fpOverlay==='string');
+    await page.goBack();await page.locator('#mobile-navigation').waitFor({state:'detached'});
+    assert.equal(page.url(),homeUrl,'Mobile-menu Back must keep same page');
+  })
   await test('No runtime errors or external asset requests',async()=>{assert.deepEqual(failures,[]);assert.deepEqual(external,[])})
 } finally {
   await writeFile(resolve(output,'results.json'),JSON.stringify({results,failures,external},null,2))
