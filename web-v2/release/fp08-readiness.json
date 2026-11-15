@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "gate": "KAF-31 / FP-08",
+  "scope": "Fajr Parsa website public release and customer-intake readiness",
+  "productionAuthorization": false,
+  "ownerAcceptance": null,
+  "checks": {
+    "company_license_and_services": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "Written verification of company license validity and exact service scope is required; existing meeting notes are not legal proof."
+    },
+    "public_business_identity_and_contacts": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "Confirm legal company name, operating address and official contact channels before website release."
+    },
+    "country_service_conditions": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "For every service claimed available, document destination restrictions, required documents and review validity. Inquiry-only categories must not be marked approved."
+    },
+    "written_price_refund_terms": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "No published fees, fixed timelines, refunds or guarantees without dated written terms."
+    },
+    "privacy_and_consent_copy": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "Owner-approved privacy/contact consent wording and retention procedures; avoid collecting unnecessary identity documents."
+    },
+    "customer_intake_live_security": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "Independent production ingress, Turnstile, RLS/RBAC, office readback, replay/quota, deletion/rollback, and S21 Back validation."
+    },
+    "approved_qa_release_evidence": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "Exact branch SHA, full CI and QA preview, owner visual acceptance, release change-control and rollback plan."
+    }
+  }
+}
