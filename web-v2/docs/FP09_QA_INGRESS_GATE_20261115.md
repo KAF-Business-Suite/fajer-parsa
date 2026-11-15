@@ -15,7 +15,7 @@
 - `server/intake/pages-entry.test.mjs`: host denial, no bindings, rate-limit denial, wrong origin/IP, synthetic Turnstile/Supabase adapter roundtrip, wrong Turnstile hostname. **All HTTP endpoints are mocks and no real token is used in these tests**.
 - `qa-only/functions/api/requests.ts`: **secret-free Pages proxy** for the existing intake QA alias; it rejects all other hosts, other methods and missing `FAJR_QA_GATEWAY` service binding, then forwards the original request to a private Worker. It remains **outside** live `web-v2/functions/`.
 - `qa-only/worker/entry.ts` + `wrangler.toml`: private, no-route, `workers_dev=false` Worker which owns Supabase server secret, Turnstile verification and Cloudflare Workers native `FAJR_RATE_LIMIT` binding; QA flag defaults `false`. The rate-limit namespace `20261115` is **pre-release candidate configuration and must be checked for uniqueness before a deploy**.
-- `qa-only/functions/api/requests.test.mjs`: proves secret-free proxy denial and forward behavior; existing server tests verify private Worker logic using synthetic mocks.
+- `tests/fp09-qa-proxy.test.mjs`: proves secret-free proxy denial and forward behavior; existing server tests verify private Worker logic using synthetic mocks.
 - CI `npm run test:intake` includes these tests, **compiles the QA Pages proxy**, and runs the private Worker build via `wrangler deploy --dry-run` **without deploying**. A passing dry-run does not prove actual HTTP ingress or secret configuration.
 
 ## Mandatory controls before a live QA-only submit
