@@ -3,8 +3,13 @@ export type IntakeReceipt={status:'received';receipt:string;replayed:boolean}
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export class IntakeFailure extends Error { status:number; constructor(status:number){super('intake_failed');this.status=status} }
 export async function submitIntake(payload:IntakePayload,fetcher:typeof fetch=fetch):Promise<IntakeReceipt>{
-  // Same-origin only; no customer data or server credential in a URL.
-  const response=await fetcher('/api/requests',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',cache:'no-store',redirect:'error',body:JSON.stringify(payload),signal:AbortSignal.timeout(12000)})
+  // Synthetic-only QA routing. Production stays same-origin and disabled by its release policy.
+  // The QA Edge endpoint has its own server-side Turnstile, Origin and contact restrictions.
+  const qaHost='fp-intake-safe-review.fajr-parsa-qa.pages.dev'
+  const isolatedQa=typeof window!=='undefined' && window.location.hostname===qaHost
+  if(isolatedQa && !payload.contact.trim().toLowerCase().endsWith('@example.invalid'))throw new IntakeFailure(400)
+  const endpoint=isolatedQa?'https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-web-intake-qa':'/api/requests'
+  const response=await fetcher(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'omit',cache:'no-store',redirect:'error',body:JSON.stringify(payload),signal:AbortSignal.timeout(12000)})
   if(response.status!==200&&response.status!==201)throw new IntakeFailure(response.status)
   const data=await response.json() as Partial<IntakeReceipt>
   if(data.status!=='received'||typeof data.receipt!=='string'||!uuid.test(data.receipt)||typeof data.replayed!=='boolean')throw new IntakeFailure(502)
