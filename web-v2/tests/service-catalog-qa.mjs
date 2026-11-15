@@ -75,6 +75,21 @@ try{
   await dialog.waitFor()
   assert.equal(await dialog.locator('#draft-service').inputValue(),'ویزا و اقامت')
   assert.equal(await dialog.locator('#draft-destination').inputValue(),lang==='en'?'UAE':lang==='ar'?'الإمارات':'امارات')
+  const expectedToday=await page.evaluate(()=>{
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Kabul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date())
+    const values=Object.fromEntries(parts.map(p=>[p.type,p.value]))
+    return values.year+'-'+values.month+'-'+values.day
+  })
+  const draftDate=dialog.locator('#draft-date')
+  assert.equal(await draftDate.getAttribute('min'),expectedToday,'Draft date follows Kabul local day')
+  await draftDate.fill('2020-01-01')
+  assert.equal(await draftDate.evaluate(el=>el.validity.rangeUnderflow),true,'A past travel date is invalid')
+  await dialog.locator('button[type="submit"]').click()
+  assert.equal(await dialog.locator('.request-summary').count(),0,'Invalid past date must not advance to review')
+  await draftDate.fill(expectedToday)
+  await dialog.locator('button[type="submit"]').click()
+  await dialog.locator('.request-summary').waitFor({state:'visible'})
+
   await page.keyboard.press('Escape')
   await dialog.waitFor({state:'detached'})
   assert.deepEqual(errors,[],'No runtime exceptions '+lang)
