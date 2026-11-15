@@ -36,6 +36,15 @@ jobs:
         run: node tests/fp08-release-gate.mjs
       - name: Run offline-safe intake server/client unit tests
         run: npm run test:intake
+      - name: FP-09 compile isolated QA-only Pages Function without deployment
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 pages functions build qa-only/functions \
+            --project-directory . \
+            --outfile "$RUNNER_TEMP/fp09-qa-only-worker.mjs"
+          test -s "$RUNNER_TEMP/fp09-qa-only-worker.mjs"
+          test ! -d functions
+          echo "FP09_QA_FUNCTION_BUILD=PASS; NO_RELEASE=ENFORCED"
       - name: Build the static site
         run: npm run build
       - name: Install Chromium for local browser QA
