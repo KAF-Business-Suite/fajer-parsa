@@ -190,7 +190,11 @@ function App({initialPath}: {initialPath?: string} = {}) {
       overlayOpenedAt.current = null
       // A menu link already navigated when the URL changed: never undo its destination.
       // Native Back has already popped this marker: never go back twice.
-      if (window.location.href === openedAt && window.history.state?.__fpOverlay === marker) window.history.back()
+      // Default anchor navigation runs after the React click handler.
+      // Recheck on the next browser task so a menu link is never undone.
+      window.setTimeout(() => {
+        if (window.location.href === openedAt && window.history.state?.__fpOverlay === marker) window.history.back()
+      }, 0)
     }
   }, [overlayOpen])
   const finderTitle = language==='ps' ? t(finder.destination)+' ته سفري خدمتونه' : (language==='en' ? 'Travel services in ' : language==='ar' ? 'خدمات السفر إلى ' : 'خدمات سفر به ') + t(finder.destination)
