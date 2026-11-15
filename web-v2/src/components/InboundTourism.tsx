@@ -1,20 +1,12 @@
 import { useEffect, useState } from 'react'
 import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Globe2, Hotel, Languages, MapPin, MessageCircle, PlaneLanding, Send, ShieldCheck, Users, CarFront, Compass, BadgeCheck } from 'lucide-react'
 import './inbound-tourism.css'
+import { todayInKabul } from '../lib/kabul-date'
 
 type Language = 'en' | 'fa' | 'ps' | 'ar'
 type Localized = Record<Language, string>
 type TravelService = 'arrival' | 'transport' | 'stay' | 'guide' | 'journey'
 const contactNumber = '93777377774'
-
-// Evaluate arrival in Afghanistan, not at an overseas visitor's local midnight.
-function todayInKabul(): string {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Kabul', year: 'numeric', month: '2-digit', day: '2-digit'
-  }).formatToParts(new Date())
-  const values = Object.fromEntries(parts.map(part => [part.type, part.value]))
-  return values.year + '-' + values.month + '-' + values.day
-}
 
 function isReachableContact(value: string): boolean {
   const trimmed = value.trim()
