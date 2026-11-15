@@ -10,7 +10,7 @@
       "source": null,
       "reviewer": null,
       "reviewedAt": null,
-      "notes": "Written verification of company license validity and exact service scope is required; existing meeting notes are not legal proof."
+      "notes": "Scanned copies of an agency tourism license and separate municipal trade permit visually reviewed; printed end dates 2027-03-22 and 2027-03-23. Verify with each issuer and obtain written confirmation of current status and exact authorized services; additional pilgrim/medical/education endorsements are not evidenced."
     },
     "public_business_identity_and_contacts": {
       "status": "blocked",
@@ -54,5 +54,16 @@
       "reviewedAt": null,
       "notes": "Exact branch SHA, full CI and QA preview, owner visual acceptance, release change-control and rollback plan."
     }
+  },
+  "documentaryReview": {
+    "reviewDate": "2026-11-15",
+    "source": "Owner-restricted Drive packet: اسناد دفتر (4 scanned pages; not embedded or published)",
+    "travelAgencyLicensePrintedEnd": "2027-03-22",
+    "municipalTradePermitPrintedEnd": "2027-03-23",
+    "issuerVerification": "pending",
+    "specializedTourismEndorsements": "not_established",
+    "personalDataCopiedIntoRepository": false,
+    "reviewDocument": "release/FP08_LICENSE_SCOPE_REVIEW_20261115.md",
+    "scope": "visual evidence only; not a government validity confirmation"
   }
 }
