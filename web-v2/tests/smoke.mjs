@@ -283,7 +283,7 @@ try {
         });
         assert.ok(dims.globalScrollWidth<=dims.viewport+1,'Global horizontal overflow '+lang+' '+width);
         assert.ok(dims.modalScrollWidth<=dims.modalClientWidth+1,'Dialog horizontal overflow '+lang+' '+width);
-        assert.ok(dims.modalLeft>=-1&&dims.modalRight<=width+1,'Dialog outside viewport '+lang+' '+width);
+        assert.ok(dims.modalLeft>=-1&&dims.modalRight<=width+1,'Dialog outside viewport '+lang+' '+width+' '+JSON.stringify(dims));
         assert.ok(dims.closeTop>=-1&&dims.closeBottom<=dims.viewportHeight+1,'X hidden after scroll '+lang+' '+width);
       }
       await page.setViewportSize({width:393,height:852});
