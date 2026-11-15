@@ -170,6 +170,23 @@ function App({initialPath}: {initialPath?: string} = {}) {
   const [finder, setFinder] = useState<FinderState>({ passport: 'افغانستان', destination: '', purpose: '' })
   const finderReady = useMemo(() => Boolean(finder.destination && finder.purpose), [finder])
   const navActive = contactOpen ? 'contact' : selection?.request ? 'request' : isCountryRoute ? 'services' : navSection
+  // One history step belongs to the visible UI layer, not the previous website.
+  // Samsung/Android browser Back first dismisses the modal or mobile navigation.
+  const overlayOpen = Boolean(selection || contactOpen || mobileOpen || megaOpen)
+  const overlayHistoryMarker = useRef<string | null>(null)
+  useEffect(() => {
+    if (overlayOpen && !overlayHistoryMarker.current) {
+      const marker = 'fp-ui-' + crypto.randomUUID()
+      const previous = window.history.state
+      window.history.pushState({...(previous && typeof previous === 'object' ? previous : {}), __fpOverlay: marker}, '', window.location.href)
+      overlayHistoryMarker.current = marker
+    } else if (!overlayOpen && overlayHistoryMarker.current) {
+      const marker = overlayHistoryMarker.current
+      overlayHistoryMarker.current = null
+      // Native Back has already popped the marker; never go back twice.
+      if (window.history.state?.__fpOverlay === marker) window.history.back()
+    }
+  }, [overlayOpen])
   const finderTitle = language==='ps' ? t(finder.destination)+' ته سفري خدمتونه' : (language==='en' ? 'Travel services in ' : language==='ar' ? 'خدمات السفر إلى ' : 'خدمات سفر به ') + t(finder.destination)
   const finderDescription = `${t('هدف سفر')}: ${t(finder.purpose)} — ${t('تابعیت')}: ${t(finder.passport)}. ${t('برای راهنمایی اولیه است؛ امکان ارائه، شرایط و مدارک هر خدمت باید با دفتر بررسی شود.')}`
 
