@@ -37,6 +37,8 @@ jobs:
         run: npm run test:intake
       - name: Verify office Auth, state and API contracts (synthetic)
         run: node --test server/office/handler.test.mjs server/office/adapters.test.mjs server/office/pages-entry.test.mjs src/office/office-gateway.test.mjs
+      - name: Validate encrypted cookie, CSRF, refresh and revoke (offline synthetic)
+        run: node --test ../workers/fajr-office-qa/session-bff.test.mjs
       - name: Typecheck server-only office boundary
         run: npx tsc --noEmit --target es2022 --lib es2022,dom --module esnext --moduleResolution bundler --allowImportingTsExtensions --strict --skipLibCheck server/office/handler.ts server/office/adapters.ts server/office/pages-entry.ts
       - name: Verify deployed Fajr office login and anonymous denial over real HTTPS
