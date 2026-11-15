@@ -56,7 +56,7 @@ try{
   const dialog=page.getByRole('dialog')
   await dialog.waitFor()
   assert.equal(await dialog.locator('#draft-service').inputValue(),'ویزا و اقامت')
-  assert.equal(await dialog.locator('#draft-destination').inputValue(),'امارات')
+  assert.equal(await dialog.locator('#draft-destination').inputValue(),lang==='en'?'UAE':lang==='ar'?'الإمارات':'امارات')
   await page.keyboard.press('Escape')
   await dialog.waitFor({state:'detached'})
   assert.deepEqual(errors,[],'No runtime exceptions '+lang)
