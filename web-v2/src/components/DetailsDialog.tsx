@@ -2,6 +2,7 @@ import { siteText, type SiteLanguage } from '../content/site-i18n'
 import {CentralRequest,centralIntakeEnabled} from './CentralRequest'
 import { serviceNames } from '../content/services'
 import { useRef, useState } from 'react'
+import { todayInKabul } from '../lib/kabul-date'
 import { ArrowLeft, Copy, Download, MessageCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
 export type RequestContext = { destination?: string; service?: string; purpose?: string; passport?: string; bundle?: string; variant?: string }
@@ -25,6 +26,7 @@ function RequestDraft({initial,language}: {initial:RequestContext;language:SiteL
   const [variant,setVariant] = useState(initial.variant || '')
   const [destination, setDestination] = useState(initial.destination || '')
   const [date, setDate] = useState('')
+  const minTravelDate = todayInKabul()
   const [travelers, setTravelers] = useState('1')
   const [saved, setSaved] = useState(false)
   const [reviewed, setReviewed] = useState(false)
@@ -62,7 +64,7 @@ function RequestDraft({initial,language}: {initial:RequestContext;language:SiteL
     {initial.bundle && <p className="draft-note">{t("بستهٔ انتخاب‌شده:")}<strong>{t(initial.bundle)}</strong></p>}
     <div className="draft-field"><label htmlFor="draft-service">{t("خدمت مورد نظر")}</label><select id="draft-service" disabled={submissionLocked} required value={service} onChange={e=>{setService(e.target.value);if(initial.service && e.target.value!==initial.service)setVariant('');changed()}}><option value="">{t("انتخاب خدمت")}</option>{serviceNames.map(x=><option key={x} value={x}>{t(x)}</option>)}</select></div>
     <div className="draft-field"><label htmlFor="draft-destination">{t("مقصد")}</label><input id="draft-destination" disabled={submissionLocked} required value={t(destination)} maxLength={80} onChange={e=>{setDestination(e.target.value);if(e.target.value!==initial.destination)setVariant('');changed()}} placeholder={t("نام کشور یا شهر")}/></div>
-    <div className="draft-row"><div className="draft-field"><label htmlFor="draft-date">{t("زمان تقریبی سفر (اختیاری)")}</label><input id="draft-date" disabled={submissionLocked} type="date" value={date} onChange={e=>{setDate(e.target.value);changed()}}/></div><div className="draft-field"><label htmlFor="draft-travelers">{t("تعداد مسافران")}</label><input id="draft-travelers" disabled={submissionLocked} type="number" min="1" max="99" required value={travelers} onChange={e=>{setTravelers(e.target.value);changed()}}/></div></div>
+    <div className="draft-row"><div className="draft-field"><label htmlFor="draft-date">{t("زمان تقریبی سفر (اختیاری)")}</label><input id="draft-date" disabled={submissionLocked} type="date" min={minTravelDate} value={date} onChange={e=>{setDate(e.target.value);changed()}}/></div><div className="draft-field"><label htmlFor="draft-travelers">{t("تعداد مسافران")}</label><input id="draft-travelers" disabled={submissionLocked} type="number" min="1" max="99" required value={travelers} onChange={e=>{setTravelers(e.target.value);changed()}}/></div></div>
     <p className="draft-note">{t("پیش از ارسال، خلاصه را مرور کنید. این فرم تصویر اسناد یا اطلاعات هویتی نمی‌خواهد و پیام را خودکار ارسال نمی‌کند.")}</p>
     <button type="submit" disabled={submissionLocked} className="primary-action">{t("مرور پیام درخواست")}<ArrowLeft size={16}/></button>
     {reviewed && <div className="request-summary" aria-live="polite"><h3>{t("خلاصه برای مشاور")}</h3><label htmlFor="request-summary-text">{t("متن آمادهٔ درخواست")}</label><textarea id="request-summary-text" ref={summaryRef} className="request-summary-text" readOnly value={summary} rows={9}/><button type="button" className="secondary-action" onClick={copySummary}><Copy size={16}/>{t("کپی خلاصهٔ درخواست")}</button><div role="status">{copyStatus}</div><small>{centralIntakeEnabled ? t('کپی متن یا باز کردن واتساپ به معنی ثبت مرکزی نیست؛ نتیجهٔ ثبت در بخش پایین نمایش داده می‌شود.') : t('می‌توانید متن را در ایمیل یا پیام‌رسان دلخواه بفرستید. این صفحه درخواست را در دفتر ثبت نمی‌کند.')}</small><a className="primary-action" href={'https://wa.me/93777377774?text='+encodeURIComponent(summary)} target="_blank" rel="noopener noreferrer"><MessageCircle size={17}/>{t("باز کردن واتساپ دفتر")}</a><small>{t("پیام تنها پس از انتخاب «ارسال» در واتساپ فرستاده می‌شود.")}</small></div>}
