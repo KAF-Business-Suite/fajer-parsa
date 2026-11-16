@@ -73,3 +73,27 @@ test('deployed Worker fails closed for unauthenticated visitors; strict BFF chec
   console.log('LIVE_OFFICE_DENIALS=PASS; PERSISTENT_BFF_SESSION=UNVERIFIED_ON_ROLLED_BACK_WORKER')
  }
 })
+
+
+test('live QA synthetic invalid-credentials roundtrip proves Worker reaches Supabase Auth',async()=>{
+ if(!strictBff){
+  console.log('LIVE_SYNTHETIC_AUTH_ROUNDTRIP=NOT_RUN: requires explicit strict QA mode');
+  return;
+ }
+ // A nonexistent account is deliberately used; a healthy Auth path returns 401.
+ // A 503 means Worker egress is still broken, regardless of local unit PASS.
+ const response=await fetch(root+'/api/session/login',{
+  method:'POST',
+  headers:{Origin:origin,'X-FP-Office-Request':'same-origin','Content-Type':'application/json'},
+  body:JSON.stringify({email:'qa-fajr-worker-connectivity@example.invalid',password:'synthetic-only-no-real-account',remember:false}),
+  signal:AbortSignal.timeout(16000),
+  redirect:'error'
+ });
+ const stage=response.headers.get('x-fp-auth-stage');
+ let payload;try{payload=await response.json()}catch{payload={error:'unparseable'}}
+ assert.equal(response.status,401,
+  'Expected explicit nonexistent-user rejection, not unavailable transport. HTTP '+response.status+' at '+(stage||'unknown-stage'));
+ assert.deepEqual(payload,{error:'login_failed'});
+ assert.equal(response.headers.get('set-cookie'),null,'A rejected synthetic sign-in must never create a staff session');
+ console.log('LIVE_SYNTHETIC_AUTH_ROUNDTRIP=PASS (Worker->config->GoTrue reachability; no genuine account)');
+});
