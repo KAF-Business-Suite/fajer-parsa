@@ -78,7 +78,8 @@ test('SQL privilege denial, stale revision and outages fail closed with no raw d
   const failed=async()=>mockResponse({code,message:'Sensitive database internal text'},400);
   const r=await handleSiteControl(req('/api/site-settings/draft'),{FAJR_SESSION_KEY:'synthetic'},services(),failed);
   assert.equal(r.status,expectedStatus);
-  assert.equal((await r.json()).error,error);
-  assert.doesNotMatch(await r.text(),/Sensitive database/);
+  const output=await r.text();
+  assert.equal(JSON.parse(output).error,error);
+  assert.doesNotMatch(output,/Sensitive database/);
  }
 });
