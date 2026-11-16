@@ -16,6 +16,8 @@ const COOKIE='__Host-fp-office-session';
 const REQUEST_HEADER='X-FP-Office-Request';
 const SEVEN_DAYS=7*24*3600;
 const err=(status,error,cookie)=>{const h=new Headers({...security,'Content-Type':'application/json; charset=utf-8'});if(cookie)h.set('Set-Cookie',cookie);return new Response(JSON.stringify({error}),{status,headers:h})};
+// Diagnose QA sign-in transport without logging or returning any account, key, token, or password.
+const authUnavailable=(stage)=>{const r=err(503,'auth_unavailable');r.headers.set('X-FP-Auth-Stage',stage);return r};
 const ok=(data,cookie,status=200)=>{const h=new Headers({...security,'Content-Type':'application/json; charset=utf-8'});if(cookie)h.set('Set-Cookie',cookie);return new Response(JSON.stringify(data),{status,headers:h})};
 const clearCookie=()=>COOKIE+'=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax';
 function to64(bytes){let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s).replaceAll('+','-').replaceAll('/','_').replace(/=+$/,'')}
@@ -106,25 +108,25 @@ export async function handleBff(request,env,transport=fetch){
   const body=await limitedBody(request,4096);
   if(!body||Object.keys(body).some(x=>!['email','password','remember'].includes(x))||typeof body.email!=='string'||typeof body.password!=='string'||typeof body.remember!=='boolean'||body.email.length>254||body.password.length>512)return err(400,'invalid_request');
   // Do not turn Auth outages, unknown 400 responses, or Office 503s into "wrong password".
-  let answer;
-  try{
-   const key=await publicKey(transport);
-   answer=await authRequest(transport,key,'/token?grant_type=password',{email:body.email,password:body.password});
-  }catch{return err(503,'auth_unavailable')}
+  let answer,key;
+  try{key=await publicKey(transport)}
+  catch{return authUnavailable('config')}
+  try{answer=await authRequest(transport,key,'/token?grant_type=password',{email:body.email,password:body.password})}
+  catch{return authUnavailable('transport')}
   if(!answer.ok){
    if(answer.status===429)return err(429,'rate_limited');
-   if(answer.status>=500)return err(503,'auth_unavailable');
+   if(answer.status>=500)return authUnavailable('upstream-'+answer.status);
    const failure=await answer.json().catch(()=>null);
    const code=String(failure?.error_code||failure?.code||failure?.error||'');
    if([400,401].includes(answer.status) && (code==='invalid_credentials' ||
        (code==='invalid_grant' && /invalid login credentials/i.test(String(failure?.error_description||'')))))
     return err(401,'login_failed');
    if(code==='email_not_confirmed')return err(403,'account_not_ready');
-   return err(503,'auth_unavailable');
+   return authUnavailable('upstream-'+answer.status);
   }
   let data;
-  try{data=await answer.json()}catch{return err(503,'auth_unavailable')}
-  if(!data?.access_token||!data?.refresh_token)return err(503,'auth_unavailable');
+  try{data=await answer.json()}catch{return authUnavailable('token-response')}
+  if(!data?.access_token||!data?.refresh_token)return authUnavailable('token-shape');
   let access;
   try{access=await officeRequest(transport,data.access_token)}catch{return err(503,'office_unavailable')}
   if(!access.ok){

@@ -109,6 +109,27 @@ test('Auth 400 with a different code is not misrepresented as bad credentials',a
  assert.equal(response.status,503);
  assert.deepEqual(await response.json(),{error:'auth_unavailable'});
 });
+
+test('diagnostic stage is generic, safe, and distinguishes failing outbound Worker calls',async()=>{
+ const scenarios=[
+  {stage:'config',fail:url=>String(url)===config},
+  {stage:'transport',fail:url=>String(url).includes('/token?grant_type=password')}
+ ];
+ for(const x of scenarios){
+  const m=mock();
+  const transport=(url,init)=>x.fail(url)?Promise.reject(new Error('synthetic test exception: no personal data')):m.transport(url,init);
+  const {response}=await login(transport);
+  assert.equal(response.status,503);
+  assert.deepEqual(await response.json(),{error:'auth_unavailable'});
+  assert.equal(response.headers.get('X-FP-Auth-Stage'),x.stage);
+  assert.doesNotMatch(JSON.stringify(Object.fromEntries(response.headers)),/synthetic test exception|password|publishable|token/);
+ }
+ const m=mock(),transport=(url,init)=>String(url).includes('/token?grant_type=password')?reply(403,{error:'upstream_rejected'}):m.transport(url,init);
+ const {response}=await login(transport);
+ assert.equal(response.status,503);
+ assert.equal(response.headers.get('X-FP-Auth-Stage'),'upstream-403');
+ assert.equal((await response.json()).error,'auth_unavailable');
+});
 test('Auth config timeout must not be reported as bad credentials',async()=>{
  const m=mock(),transport=async(url,init={})=>String(url)===config?Promise.reject(Error('synthetic connectivity')):m.transport(url,init);
  const {response,setCookie}=await login(transport);
