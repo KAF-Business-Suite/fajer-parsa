@@ -190,7 +190,7 @@ export default {async fetch(request,env){
  if(request.method==='GET'&&url.pathname==='/site-settings')return new Response(SITE_HTML,{headers:{...security,'Content-Type':'text/html; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/site-settings.css')return new Response(SITE_CSS,{headers:{...security,'Content-Type':'text/css; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/site-settings.js')return new Response(SITE_JS,{headers:{...security,'Content-Type':'text/javascript; charset=utf-8'}});
- const siteControl=await handleSiteControl(request,env,{guard,parseSession,publicKey,restore,clearCookie,err,ok,limitedBody});
+ const siteControl=await handleSiteControl(request,env,{guard,parseSession,publicKey,restore,clearCookie,err,ok,limitedBody,officeRequest});
  if(siteControl)return siteControl;
 
 
