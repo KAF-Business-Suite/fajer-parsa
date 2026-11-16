@@ -33,10 +33,16 @@ revoke all on fajr_private.site_settings_history from public, anon, authenticate
 alter table fajr_private.office_members add column if not exists can_publish_site boolean not null default false;
 -- Only an unambiguous existing sole enabled Fajr editor becomes the owner publisher.
 -- Otherwise publication stays blocked until a separately reviewed role assignment.
-update fajr_private.office_members
+update fajr_private.office_members om
 set can_publish_site=true
-where enabled=true and can_update=true
-and (select count(*) from fajr_private.office_members where enabled and can_update)=1;
+where om.enabled=true and om.can_update=true
+ and exists (select 1 from public.business_members bm
+  where bm.user_id=om.user_id and bm.status='active'
+  and bm.role='owner' and 'fajr'=any(bm.companies))
+ and (select count(*) from fajr_private.office_members om2
+  join public.business_members bm2 on bm2.user_id=om2.user_id
+  where om2.enabled and om2.can_update and bm2.status='active'
+  and bm2.role='owner' and 'fajr'=any(bm2.companies))=1;
 
 insert into fajr_private.site_settings_state(site,draft)
 values ('fajr-parsa',
@@ -132,12 +138,19 @@ begin
  if principal is null then raise exception 'unauthorized' using errcode='42501'; end if;
  select * into access_row from fajr_private.office_members
  where user_id=principal and enabled=true;
- if not found then raise exception 'forbidden' using errcode='42501'; end if;
+ if not found or not access_row.can_update or not exists (
+  select 1 from public.business_members bm where bm.user_id=principal
+   and bm.status='active' and 'fajr'=any(bm.companies)
+ ) then raise exception 'forbidden' using errcode='42501'; end if;
  if p_action not in ('read','draft','preview','publish','rollback') then
   raise exception 'invalid action' using errcode='22023'; end if;
  if p_action<>'read' and p_action<>'preview' and not access_row.can_update then
   raise exception 'editor role required' using errcode='42501'; end if;
- if p_action in ('publish','rollback') and not access_row.can_publish_site then
+ if p_action in ('publish','rollback') and
+  (not access_row.can_publish_site or not exists (
+   select 1 from public.business_members bm where bm.user_id=principal
+   and bm.status='active' and bm.role='owner' and 'fajr'=any(bm.companies)
+  )) then
   raise exception 'publisher role required' using errcode='42501'; end if;
  select * into state_row from fajr_private.site_settings_state
  where site='fajr-parsa' for update;
@@ -157,7 +170,7 @@ begin
   if not access_row.can_update or not fajr_private.site_valid_publish(state_row.draft) then
    raise exception 'draft not ready' using errcode='22023'; end if;
  elsif p_action='publish' then
-  if p_payload->>'confirmed' <> 'true' or
+  if (p_payload->>'confirmed') is distinct from 'true' or
    (p_payload->>'expected') is distinct from state_row.draft_revision::text or
    coalesce(p_payload->>'expectedPublished','') <> coalesce(state_row.published_revision::text,'') then
    raise exception 'confirmation or revision mismatch' using errcode='40001'; end if;
@@ -175,7 +188,7 @@ begin
   update fajr_private.site_settings_state set published=next_public,published_revision=rev,
    published_at=now(),published_by=principal where site='fajr-parsa';
  elsif p_action='rollback' then
-  if p_payload->>'confirmed' <> 'true' or
+  if (p_payload->>'confirmed') is distinct from 'true' or
    coalesce(p_payload->>'expectedPublished','') <> coalesce(state_row.published_revision::text,'') then
    raise exception 'confirmation or revision mismatch' using errcode='40001'; end if;
   select next_published into target from fajr_private.site_settings_history
