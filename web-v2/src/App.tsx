@@ -8,6 +8,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { MenuToggle } from './components/ui/menu-toggle'
 import { ThemeToggle } from './components/ThemeToggle'
 import { ContactChannels } from './components/ContactChannels'
+import { PublicSiteDetails } from './components/PublicSiteDetails'
 import { ScrollProgress } from './components/magicui/scroll-progress'
 import { DestinationGallery } from './components/DestinationGallery'
 import { FaqSection } from './components/FaqSection'
@@ -492,6 +493,7 @@ function App({initialPath}: {initialPath?: string} = {}) {
             </div>
           </div></Reveal>
         </section>
+        <PublicSiteDetails language={language}/>
         <FaqSection language={language}/>
         </>}
       </main>
