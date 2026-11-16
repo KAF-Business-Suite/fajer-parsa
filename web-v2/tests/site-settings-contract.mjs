@@ -20,6 +20,14 @@ for(const invalid of [
  {...valid,revision:'../../wrong'},
  {...valid,publishedAt:'not-a-date'}
 ]) assert.equal(parsePublishedSiteSettings(invalid),null,'reject unsafe or extra fields')
+const withFourLanguages={...valid,office:{address:{fa:'کابل',ps:'کابل',en:'Kabul',ar:'كابل'},hours:{fa:'9-5',ps:'9-5',en:'9-5',ar:'9-5'}},content:{notice:{fa:'اعلان',ps:'خبر',en:'Notice',ar:'إعلان'},faq:[{question:{fa:'سوال',ps:'پوښتنه',en:'Question',ar:'سؤال'},answer:{fa:'جواب',ps:'ځواب',en:'Answer',ar:'إجابة'}}]}}
+assert.deepEqual(parsePublishedSiteSettings(withFourLanguages),withFourLanguages)
+for(const invalid of [
+ {...withFourLanguages,office:{...withFourLanguages.office,serviceRole:'not allowed'}},
+ {...withFourLanguages,content:{...withFourLanguages.content,draft:true}},
+ {...withFourLanguages,content:{notice:{fa:'only Dari'},faq:[]}},
+ {...withFourLanguages,content:{...withFourLanguages.content,faq:Array(6).fill(withFourLanguages.content.faq[0])}},
+]) assert.equal(parsePublishedSiteSettings(invalid),null,'deny malformed/private content')
 assert.equal(validMapUrl('https://www.google.com/maps/place/Kabul'),true)
 assert.equal(validMapUrl('https://www.openstreetmap.org/#map=12/34.5/69.2'),true)
 assert.equal(validMapUrl('https://evil.google.com/maps'),false)
