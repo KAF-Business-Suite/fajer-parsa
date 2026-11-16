@@ -11,7 +11,7 @@ async function command(statement){const r=await exec('psql',['-XAt','-v','ON_ERR
 const owner='d5072836-0d50-4dfa-88dc-596e9befd276';
 const staff='19eb0b58-dee3-4db7-898e-f57f01c72ade';
 const other='29eb0b58-dee3-4db7-898e-f57f01c72ade';
-const as=(actor,role,statement)=>command('set role '+role+"; set request.jwt.claim.sub='"+actor+"'; "+statement).then(s=>s.split('\n').at(-1));
+const as=(actor,role,statement)=>command('set role '+role+"; set request.jwt.claim.sub='"+actor+"'; "+statement).then(s=>s.split('\n').filter(line=>line!=='SET'&&line!=='').at(-1)||'');
 const rpc=(actor,action,payload={})=>as(actor,'authenticated',"select public.fajr_site_control('"+action+"','"+JSON.stringify(payload)+"'::jsonb)").then(JSON.parse);
 const draft={contact:{whatsapp:'93700123456',email:'qa@example.invalid'},design:{fontPreset:'vazirmatn-manrope'},office:{address:{fa:'کابل',ps:'کابل',en:'Kabul',ar:'كابل'},hours:{fa:'۹ تا ۵',ps:'۹ تر ۵',en:'9 to 5',ar:'٩ إلى ٥'}},content:{notice:{fa:'پیام ساختگی',ps:'ازموينه',en:'Synthetic only',ar:'للاختبار فقط'},faq:[]}};
 let oldRevision,firstPublished;
