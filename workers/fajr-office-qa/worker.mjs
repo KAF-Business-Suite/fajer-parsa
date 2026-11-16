@@ -50,12 +50,11 @@ const guard=(request)=>{
  if(request.method==='POST' && request.headers.get('Origin')!==ORIGIN)return false;
  return true;
 };
-async function publicKey(transport){
- const r=await transport(CONFIG,{redirect:'error',cache:'no-store',signal:AbortSignal.timeout(8000)});
- if(!r.ok)throw Error('config_unavailable');
- const x=await r.json();if(typeof x.publishableKey!=='string'||!x.publishableKey.startsWith('sb_publishable_')&&!x.publishableKey.startsWith('eyJ'))throw Error('config_unavailable');
- return x.publishableKey;
-}
+// This key is PUBLIC (never service_role); the same value is already returned to browsers
+// by /fajr-office/config. Avoid a second server-side config fetch before GoTrue login.
+// Update this constant when rotating the project's publishable key.
+const PUBLIC_SUPABASE_KEY="sb_publishable_-sdU31HYIwghUwdkebgiiQ_FWTcWaAq";
+async function publicKey(_transport){return PUBLIC_SUPABASE_KEY}
 async function authRequest(transport,key,path,body,token){
  const r=await transport(AUTH+path,{method:body?'POST':'GET',headers:{apikey:key,...(body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:'Bearer '+token}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:'no-store',redirect:'error',signal:AbortSignal.timeout(8000)});
  return r;

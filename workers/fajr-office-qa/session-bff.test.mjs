@@ -112,7 +112,6 @@ test('Auth 400 with a different code is not misrepresented as bad credentials',a
 
 test('diagnostic stage is generic, safe, and distinguishes failing outbound Worker calls',async()=>{
  const scenarios=[
-  {stage:'config',fail:url=>String(url)===config},
   {stage:'transport',fail:url=>String(url).includes('/token?grant_type=password')}
  ];
  for(const x of scenarios){
@@ -130,12 +129,13 @@ test('diagnostic stage is generic, safe, and distinguishes failing outbound Work
  assert.equal(response.headers.get('X-FP-Auth-Stage'),'upstream-403');
  assert.equal((await response.json()).error,'auth_unavailable');
 });
-test('Auth config timeout must not be reported as bad credentials',async()=>{
+test('Supabase public config outage does not block private BFF sign-in',async()=>{
  const m=mock(),transport=async(url,init={})=>String(url)===config?Promise.reject(Error('synthetic connectivity')):m.transport(url,init);
  const {response,setCookie}=await login(transport);
- assert.equal(response.status,503);
- assert.deepEqual(await response.json(),{error:'auth_unavailable'});
- assert.equal(setCookie,null);
+ assert.equal(response.status,200);
+ assert.deepEqual(await response.json(),{authenticated:true});
+ assert.match(setCookie||'',/HttpOnly/);
+ assert.equal(m.calls.some(x=>x.url===config),false,'Login does not depend on upstream public config endpoint');
 });
 test('valid Auth followed by Office 503 is an Office failure, never a login failure',async()=>{
  const m=mock(),transport=async(url,init={})=>String(url).startsWith(office)?reply(503,{error:'office_unavailable'}):m.transport(url,init);
