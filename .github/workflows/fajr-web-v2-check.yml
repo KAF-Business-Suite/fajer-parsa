@@ -70,6 +70,8 @@ jobs:
         run: npm run test:smoke
       - name: Verify PR14 candidate Office in Chromium with synthetic intercepted APIs
         run: node tests/office-live-browser.mjs
+      - name: Verify Site Control QA on S21-sized and desktop Chromium, with synthetic intercepted APIs
+        run: node --test tests/site-control-browser.mjs
       - name: Verify crawlable inbound HTML and local Pages routing (no deploy)
         env:
           WRANGLER_SEND_METRICS: "false"
@@ -85,6 +87,7 @@ jobs:
             web-v2/test-results/inbound-*.png
             web-v2/test-results/results.json
             web-v2/test-results/inbound-seo-results.json
+            web-v2/test-results/fajr-site-settings-*.png
             web-v2/test-results/inbound-response.html
             web-v2/test-results/inbound-pages.log
           if-no-files-found: error
