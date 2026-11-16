@@ -1,11 +1,29 @@
 import assert from 'node:assert/strict'
 import {chromium} from 'playwright'
+import officeCandidate from '../../workers/fajr-office-qa/worker.mjs'
 const base='https://fajr-office-qa.khoojafahim.workers.dev/'
 const config='https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-office/config'
+// Local candidate UI is exercised without hitting the rolled-back staff Worker or real staff APIs.
+async function installCandidate(context){
+ const target='https://fajr-office-qa.khoojafahim.workers.dev/'
+ await context.route('https://krzxajtrhvupyywovdzy.supabase.co/**',route=>route.abort('blockedbyclient'))
+ await context.route(config,route=>route.fulfill({
+  status:200,contentType:'application/json',
+  headers:{'Access-Control-Allow-Origin':'*','Cache-Control':'no-store'},
+  body:JSON.stringify({publishableKey:'sb_publishable_synthetic_ci_key_only'})
+ }))
+ await context.route(target+'**',async route=>{
+  const req=route.request(),url=new URL(req.url())
+  if(req.method()!=='GET'||!['/','/app.css','/app.js'].includes(url.pathname))return route.abort('blockedbyclient')
+  const response=await officeCandidate.fetch(new Request(req.url(),{method:'GET'}),{})
+  return route.fulfill({status:response.status,headers:Object.fromEntries(response.headers.entries()),body:await response.text()})
+ })
+}
 const browser=await chromium.launch({headless:true})
 try{
  for(const width of [390,1280]){
   const context=await browser.newContext({viewport:{width,height:840},locale:'fa-AF',reducedMotion:'reduce'})
+  await installCandidate(context)
   const page=await context.newPage(),errors=[]
   page.on('pageerror',error=>errors.push(error.message))
   await page.goto(base,{waitUntil:'domcontentloaded',timeout:20000})
@@ -27,6 +45,7 @@ try{
  }
  // All auth/office mutations intercepted. The server receives ZERO genuine login credentials.
  const context=await browser.newContext({viewport:{width:390,height:844},locale:'fa-AF'})
+ await installCandidate(context)
  const page=await context.newPage()
  const one='00000000-0000-4000-8000-000000000011'
  const cookie='__Host-fp-office-session=synthetic-intercept-cookie; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800'
@@ -86,6 +105,7 @@ try{
  await context.close()
 
  const deniedContext=await browser.newContext({viewport:{width:390,height:844}})
+ await installCandidate(deniedContext)
  const denied=await deniedContext.newPage()
  await denied.route('**/api/session/login',route=>route.fulfill({status:403,contentType:'application/json',body:JSON.stringify({error:'access_denied'})}))
  await denied.goto(base,{waitUntil:'domcontentloaded'})
@@ -99,6 +119,7 @@ try{
 
  // Self-service recovery: no genuine account email or password reset is sent.
  const recoveryContext=await browser.newContext({viewport:{width:390,height:844}})
+ await installCandidate(recoveryContext)
  const recoveryPage=await recoveryContext.newPage()
  let emailRequests=0,changed=0
  await recoveryPage.route('**/auth/v1/recover?**',async route=>{
@@ -140,7 +161,7 @@ try{
 
  console.log('PASS: synthetic full office login -> list -> confirm -> audited API request -> refresh -> logout, and visible access denial')
 
- console.log('PASS: public office loads at 390/1280, browser CORS config works, invalid login intercepted, private workspace stays closed')
+ console.log('PASS: candidate Office loads at 390/1280 using synthetic config; no deployed BFF acceptance inferred')
 
  console.log('PASS: secure-cookie synthetic login, reload persistence, list/update, denied access, logout, recovery')
 }finally{await browser.close()}

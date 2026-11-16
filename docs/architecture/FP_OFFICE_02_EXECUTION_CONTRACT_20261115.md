@@ -4,6 +4,13 @@ Date: 2026-11-15 (Kabul)
 Owner of execution: Linear KAF-35; parent platform contract: KAF Business Suite Master Product Lock v2.2
 Status: DECISION RECORDED — NOT production approval, NOT master architecture replacement
 
+## CURRENT — 2026-11-16 | Candidate browser versus rolled-back runtime
+
+- Current live Cloudflare staff Worker remains rollback `17eaf4ed-5372-4f7d-b168-14719aa4ecb3` (not candidate BFF `b43ff397-f1ae-47b7-9609-32d8ac7f4886`). `FAJR_SESSION_KEY` binding exists but cannot prove active BFF behavior.
+- The candidate Chromium suite serves the **actual branch Worker HTML, CSS and browser JS** through local Playwright routing and intercepts synthetic config/session, office, recovery and logout endpoints. It cannot send real account credentials, messages or database writes. Passing this test proves the candidate UI only.
+- The live Worker test in normal CI probes public HTTPS anonymous denials and deliberately reports persistent BFF session acceptance **UNVERIFIED**. A separate manual `workflow_dispatch.office_bff_required=true` strict mode is reserved for inspection of the actual QA Worker after an authorized deployment; it requires cookie-protected same-origin BFF routes and no browser-side password-grant tokens.
+- No deploy, merge or customer Production is authorized by a candidate-only PASS. KAF-35 still needs actual live strict acceptance and owner S21 login/refresh/reopen/logout, whereas public site go/no-go remains KAF-31.
+
 ## 1. درخواست مالک، بازنویسی دقیق برای اجرا
 
 > دفتر فجرپارسا باید از یک فهرست سادهٔ درخواست به محیط کاری منظم، سریع، قابل‌اعتماد و پریمیوم تبدیل شود؛ با ظاهر و رفتار هماهنگ با سیستم KAF و رنگ/برند مستقل فجرپارسا. کارمند در گوشی یا لپ‌تاپ قابل‌اعتماد پس از هر بازکردن سایت دوباره مجبور به ورود با ایمیل و کد نباشد؛ در عین حال دسترسی ایمن و نقش سازمانی محفوظ باشد. ورود ایمیل باقی بماند؛ Google در اولویت و GitHub برای کارمندان مجاز اضافه شود، ولی فقط بعد از تأیید تنظیمات و اتصال همان هویت؛ روش‌های دیگر مانند لینک ورود، passkey، Microsoft یا WordPress در صورت نیاز و قابلیت صحیح بررسی شوند، نه همگی فوری. دعوت تیم توسط مدیر و نقش‌های محدود باشد. شماره‌های طولانی UUID برای کاربر به کدهای کوتاه، معتبر، لوکس و قابل‌جست‌وجو تبدیل شوند، بدون تخریب شناسهٔ اصلی. تمام جریان‌های درخواست، پیگیری، دادهٔ KAF و صادرات Excel/Sheets زیر یک قرارداد واحد، با چهار زبان دری/پشتو/انگلیسی/عربی و آزمون واقعی گوشی کار کنند. به‌جای تکرار اصلاحات جزئی، ریشهٔ خطا و پذیرش واقعی هر مرحله با شواهد معلوم باشد.

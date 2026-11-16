@@ -10,6 +10,12 @@ on:
       - '.github/workflows/fajr-web-v2-check.yml'
       - '.github/workflows/testdriver.yml'
   workflow_dispatch:
+    inputs:
+      office_bff_required:
+        description: 'Strict live BFF acceptance ONLY after inspected isolated QA rollout'
+        type: boolean
+        required: false
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -41,15 +47,17 @@ jobs:
         run: node --test ../workers/fajr-office-qa/session-bff.test.mjs
       - name: Typecheck server-only office boundary
         run: npx tsc --noEmit --target es2022 --lib es2022,dom --module esnext --moduleResolution bundler --allowImportingTsExtensions --strict --skipLibCheck server/office/handler.ts server/office/adapters.ts server/office/pages-entry.ts
-      - name: Verify deployed Fajr office login and anonymous denial over real HTTPS
+      - name: Verify live Worker anonymous denials; strict BFF check only on explicit QA release acceptance
         run: node --test tests/office-live-negative.mjs
+        env:
+          FAJR_OFFICE_LIVE_BFF_REQUIRED: "${{ inputs.office_bff_required && 'true' || 'false' }}"
       - name: Build the static site
         run: npm run build
       - name: Install Chromium for local browser QA
         run: npx playwright install --with-deps chromium
       - name: Verify website UX with local browser and synthetic data
         run: npm run test:smoke
-      - name: Check real Fajr office login in Chromium without sending credentials
+      - name: Verify PR14 candidate Office in Chromium with synthetic intercepted APIs
         run: node tests/office-live-browser.mjs
       - name: Verify optional intake form with intercepted API and synthetic challenge
         run: npm run test:intake-form
