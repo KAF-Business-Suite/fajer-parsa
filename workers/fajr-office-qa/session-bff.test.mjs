@@ -124,6 +124,15 @@ test('server logout revokes and clears private cookie without exposing tokens',a
  assert.match(result.headers.get('Set-Cookie'),/Max-Age=0; HttpOnly; Secure/)
  assert.ok(m.calls.some(x=>x.url===auth+'/logout'))
 })
+test('missing and invalid cookies return 401 without contacting config, Auth or office',async()=>{
+ for(const req of [request('/api/session'),request('/api/office?offset=0'),request('/api/session',{cookie:'__Host-fp-office-session=bogus-cookie'})]){
+  const m=mock()
+  const r=await handleBff(req,env,m.transport)
+  assert.equal(r.status,401)
+  assert.equal(m.calls.length,0,'No network call for an absent or malformed cookie')
+  assert.match(r.headers.get('Cache-Control')||'',/no-store/)
+ }
+})
 test('missing encryption key fails closed and never reaches Auth',async()=>{
  const m=mock()
  const result=await handleBff(request('/api/session'),{},m.transport)

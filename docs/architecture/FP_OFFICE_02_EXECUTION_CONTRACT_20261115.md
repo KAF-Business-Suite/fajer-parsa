@@ -4,6 +4,12 @@ Date: 2026-11-15 (Kabul)
 Owner of execution: Linear KAF-35; parent platform contract: KAF Business Suite Master Product Lock v2.2
 Status: DECISION RECORDED — NOT production approval, NOT master architecture replacement
 
+## CURRENT — 2026-11-16 | Strict QA rollback and BFF 401 fix
+
+- Reviewed/temporarily deployed existing Cloudflare QA Worker version `b43ff397` (not customer Production); strict live GitHub CI `43799546488` failed because anonymous `/api/session` returned HTTP **503 instead of 401**. The old Worker `17eaf4ed` was immediately restored at 100% (Cloudflare deployment `be5482b9-1f24-4053-9372-6eee4a20fcff`). This was a **genuine runtime FAIL**, not a code-unit PASS.
+- Corrected local BFF handling to parse/check the existing encrypted cookie *before* requesting remote Supabase config/keys. Missing or malformed cookies now get HTTP 401 without network dependency; invalid keys still fail closed. New regression test verifies 401 and **zero** calls to configuration/Auth/Office for missing/invalid sessions.
+- Re-run merged-branch CI; do NOT claim live acceptance from code-only tests. A new versioned Worker QA upload and strict live test are required before device sign-in; none of this enables customer Production.
+
 ## CURRENT — 2026-11-16 | Source reconciliation without bulk merge
 
 - Existing PR #14 was reconciled with current `main` by building the reviewed office-only tree on top of `main`, preserving both histories. It now has **0 behind main** and GitHub reports **mergeable=true**, but is still Draft/unmerged. Source candidate commit: `bc644ad964719152dfd4b85b938aefab2fa85ca6`.

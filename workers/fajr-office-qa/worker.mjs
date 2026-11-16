@@ -61,8 +61,8 @@ async function authRequest(transport,key,path,body,token){
 async function officeRequest(transport,access,method='GET',offset='0',body){
  return transport(API+(method==='GET'?'?offset='+offset:''),{method,headers:{Origin:ORIGIN,Authorization:'Bearer '+access,Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:'no-store',redirect:'error',signal:AbortSignal.timeout(8000)})
 }
-async function restore(request,env,transport,key){
- let value=await parseSession(request,env), rotated=false;
+async function restore(request,env,transport,key,verifiedSession){
+ let value=verifiedSession||await parseSession(request,env), rotated=false;
  if(!value)return {error:401};
  if(value.exp<=Math.floor(Date.now()/1000)+60){
   const response=await authRequest(transport,key,'/token?grant_type=refresh_token',{refresh_token:value.refresh});
@@ -131,7 +131,11 @@ export async function handleBff(request,env,transport=fetch){
  if(path==='/api/session'&&method!=='GET')return err(405,'method_not_allowed');
  if(path==='/api/office'&&!['GET','POST'].includes(method))return err(405,'method_not_allowed');
  try{
-  const key=await publicKey(transport),session=await restore(request,env,transport,key);
+  // Verify session locally BEFORE outbound public-key lookup: unauthenticated callers
+  // must receive 401 even if Supabase config/Auth is temporarily unavailable.
+  const verifiedSession=await parseSession(request,env);
+  if(!verifiedSession)return err(401,'sign_in_required',clearCookie());
+  const key=await publicKey(transport),session=await restore(request,env,transport,key,verifiedSession);
   if(session.error)return err(session.error,session.error===401?'sign_in_required':'office_unavailable',session.error===401?clearCookie():null);
   if(path==='/api/session'){
    const office=await officeRequest(transport,session.value.access);
