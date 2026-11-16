@@ -15,7 +15,8 @@ const services=(opts={})=>({
  clearCookie:()=> '__Host-fp-office-session=; Max-Age=0',
  err:(status,error)=>Response.json({error},{status}),
  ok:payload=>mockResponse(payload),
- limitedBody:async req=>req.json()
+ limitedBody:async req=>req.json(),
+ officeRequest:async()=>mockResponse([],opts.quotaStatus||200)
 });
 function req(path,method='GET',body,header=true,originValue=origin){
  return new Request(origin+path,{method,headers:{...(header?{'X-FP-Office-Request':'same-origin'}:{}),...(method==='POST'?{Origin:originValue,'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
@@ -81,5 +82,15 @@ test('SQL privilege denial, stale revision and outages fail closed with no raw d
   const output=await r.text();
   assert.equal(JSON.parse(output).error,error);
   assert.doesNotMatch(output,/Sensitive database/);
+ }
+});
+
+test('existing Office quota and membership must pass before any settings write',async()=>{
+ for(const [status,code] of [[429,'rate_limited'],[403,'access_denied'],[503,'site_settings_unavailable']]){
+  const before=ops.length;
+  const r=await handleSiteControl(req('/api/site-settings/draft','POST',{expected:'synthetic',draft:data.draft}),{FAJR_SESSION_KEY:'synthetic'},services({quotaStatus:status}),transport);
+  assert.equal(r.status,status);
+  assert.equal((await r.json()).error,code);
+  assert.equal(ops.length,before,'No settings SQL write after Office rejects quota or membership');
  }
 });
