@@ -301,7 +301,12 @@ jobs:
           test -s dist/index.html
           mkdir -p functions/api
           cp qa-only/functions/api/requests.ts functions/api/requests.ts
-          test "$(find functions -type f | wc -l)" -eq 1
+          test -f qa-only/functions/api/site-settings/public.js
+          mkdir -p functions/api/site-settings
+          cp qa-only/functions/api/site-settings/public.js functions/api/site-settings/public.js
+          test "$(find functions -type f | wc -l)" -eq 2
+          test ! -e functions/api/site-settings/draft.js
+          test ! -e functions/api/site-settings/publish.js
           npx --yes wrangler@4 pages functions build functions --project-directory . --outfile "$RUNNER_TEMP/fp09-qa-only-bundle.mjs"
           test -s "$RUNNER_TEMP/fp09-qa-only-bundle.mjs"
           npx --yes wrangler@4 pages deploy dist \
