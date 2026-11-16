@@ -71,6 +71,9 @@ jobs:
       - name: FP-08 verify evidence schema and fail-closed release policy
         working-directory: web-v2
         run: node tests/fp08-release-gate.mjs
+      - name: Verify public-only site settings schema (no service secrets)
+        working-directory: web-v2
+        run: npm run test:site-settings
       - name: Test intake in isolation
         working-directory: web-v2
         run: npm run test:intake
