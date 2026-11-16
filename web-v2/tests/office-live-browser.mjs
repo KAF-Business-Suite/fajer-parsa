@@ -70,7 +70,7 @@ try{
   await langPage.locator('#office-lang').selectOption('en')
   assert.equal(await langPage.locator('html').getAttribute('dir'),'ltr')
   await langPage.reload({waitUntil:'domcontentloaded'})
-  assert.equal(await langPage.locator('#office-lang').inputValue(),language==='en'?'en':'en')
+  assert.equal(await langPage.locator('#office-lang').inputValue(),'en')
   assert.deepEqual(langErrors,[])
   await langContext.close()
  }
