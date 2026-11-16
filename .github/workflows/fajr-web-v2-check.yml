@@ -60,6 +60,8 @@ jobs:
         run: node --test tests/office-live-negative.mjs
         env:
           FAJR_OFFICE_LIVE_BFF_REQUIRED: "${{ inputs.office_bff_required && 'true' || 'false' }}"
+      - name: Prove live QA Site Control is available and anonymous writes are denied
+        run: node --test tests/site-control-live-negative.mjs
       - name: Build the static site
         run: npm run build
       - name: Install Chromium for local browser QA
