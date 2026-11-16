@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {mkdir} from 'node:fs/promises'
 import {chromium} from 'playwright'
-import {SITE_JS} from '../../../workers/fajr-office-qa/site-settings-ui.mjs'
+import {SITE_JS} from '../../workers/fajr-office-qa/site-settings-ui.mjs'
 
 const origin='https://fajr-office-qa.khoojafahim.workers.dev'
 const address={fa:'کابل',ps:'کابل',en:'Kabul',ar:'كابل'}
