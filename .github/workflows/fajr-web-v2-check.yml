@@ -41,8 +41,11 @@ jobs:
       - name: FP-09 compile isolated QA-only Pages Function without deployment
         run: |
           set -euo pipefail
-          test "$(find qa-only/functions -type f | wc -l)" -eq 1
+          test "$(find qa-only/functions -type f | wc -l)" -eq 2
           test -f qa-only/functions/api/requests.ts
+          test -f qa-only/functions/api/site-settings/public.js
+          test ! -e qa-only/functions/api/site-settings/draft.js
+          test ! -e qa-only/functions/api/site-settings/publish.js
           npx --yes wrangler@4 pages functions build qa-only/functions \
             --project-directory . \
             --outfile "$RUNNER_TEMP/fp09-qa-only-worker.mjs"
