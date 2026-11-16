@@ -33,6 +33,19 @@ export async function handleSiteControl(request,env,services,transport=fetch){
     return services.err(400,'invalid_request');
    if(JSON.stringify(payload).length>14000)return services.err(413,'too_large');
   }
+  // Reuse the existing atomic Office quota and active-member authorization for every write.
+  // No second rate-limit store or customer data is returned to the settings screen.
+  if(action!=='read'){
+   if(typeof services.officeRequest!=='function')return services.err(503,'site_settings_unavailable');
+   const quota=await services.officeRequest(transport,session.value.access);
+   await quota.body?.cancel().catch(()=>{});
+   if(!quota.ok){
+    if(quota.status===401)return services.err(401,'sign_in_required',services.clearCookie());
+    if(quota.status===403)return services.err(403,'access_denied');
+    if(quota.status===429)return services.err(429,'rate_limited');
+    return services.err(503,'site_settings_unavailable');
+   }
+  }
   const response=await transport(ENDPOINT,{
    method:'POST',headers:{apikey:key,Authorization:'Bearer '+session.value.access,
     'Content-Type':'application/json',Accept:'application/json'},
