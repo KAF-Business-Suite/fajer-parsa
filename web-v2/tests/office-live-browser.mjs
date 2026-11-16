@@ -38,8 +38,27 @@ try{
   await page.locator('#password').fill('synthetic-do-not-send')
   await page.locator('#login-button').click()
   await page.locator('#login-alert').waitFor()
-  await page.waitForFunction(()=>document.querySelector('#login-alert')?.textContent?.includes('ایمیل یا رمز صحیح نیست'))
+  await page.waitForFunction(()=>document.querySelector('#login-alert')?.textContent?.includes('سرویس هویت ایمیل یا رمز ورود را تأیید نکرد'))
   assert.equal(await page.locator('#office-view').isVisible(),false)
+
+  // Auth/Office outages must never be shown as wrong passwords; no real account is used.
+  for(const [status,error,visibleCode] of [
+   [503,'auth_unavailable','FP-AUTH'],
+   [503,'office_unavailable','FP-OFFICE'],
+   [503,'session_unavailable','FP-SESSION'],
+   [403,'access_denied','مجوز']
+  ]){
+   await page.unroute('**/api/session/login')
+   await page.route('**/api/session/login',route=>route.fulfill({status,contentType:'application/json',body:JSON.stringify({error})}))
+   await page.locator('#password').fill('synthetic-do-not-send')
+   await page.locator('#login-button').click()
+   await page.waitForFunction(substring=>document.querySelector('#login-alert')?.textContent?.includes(substring),visibleCode)
+   const visible=await page.locator('#login-alert').textContent()
+   assert.doesNotMatch(visible,/رمز صحیح نیست|ایمیل یا رمز صحیح نیست/,error+' must not blame the password')
+   assert.equal(await page.locator('#office-view').isVisible(),false)
+  }
+  console.log('PASS: Auth outage, Office outage, session outage and authorization are distinct from invalid credentials');
+
   assert.deepEqual(errors,[])
   await context.close()
  }

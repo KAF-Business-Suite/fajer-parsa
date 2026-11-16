@@ -24,7 +24,7 @@ function mock({denied=false,expires_in=3600,invalid=false,revoked=false}={}){
   const u=String(url),method=init.method||'GET'
   calls.push({url:u,method,authorization:init.headers?.Authorization,origin:init.headers?.Origin,body:init.body?JSON.parse(init.body):null})
   if(u===config)return reply(200,{publishableKey:'sb_publishable_synthetic_key_2026'})
-  if(u.includes('/token?grant_type=password'))return invalid?reply(400,{error:'invalid_grant'}):reply(200,{access_token:'token.synthetic.access',refresh_token:'token-synthetic-refresh',expires_in})
+  if(u.includes('/token?grant_type=password'))return invalid?reply(400,{error_code:'invalid_credentials'}):reply(200,{access_token:'token.synthetic.access',refresh_token:'token-synthetic-refresh',expires_in})
   if(u.includes('/token?grant_type=refresh_token'))return reply(200,{access_token:'token.synthetic.rotated',refresh_token:'token-synthetic-rotated',expires_in:3600})
   if(u===auth+'/user')return revoked?reply(401,{error:'invalid_session'}):reply(200,{id:fixture.id,role:'authenticated',is_anonymous:false})
   if(u===auth+'/logout')return new Response(null,{status:204})
@@ -95,6 +95,42 @@ test('invalid password denied and no cookie minted',async()=>{
  assert.equal((await result.response.json()).error,'login_failed')
  assert.equal(result.setCookie,null)
 })
+
+test('an Auth 503 is never returned as a wrong-password response',async()=>{
+ const m=mock(),transport=async(url,init={})=>String(url).includes('/token?grant_type=password')?reply(503,{error:'temporarily_unavailable'}):m.transport(url,init);
+ const {response,setCookie}=await login(transport);
+ assert.equal(response.status,503);
+ assert.deepEqual(await response.json(),{error:'auth_unavailable'});
+ assert.equal(setCookie,null);
+});
+test('Auth 400 with a different code is not misrepresented as bad credentials',async()=>{
+ const m=mock(),transport=async(url,init={})=>String(url).includes('/token?grant_type=password')?reply(400,{error_code:'captcha_failed'}):m.transport(url,init);
+ const {response}=await login(transport);
+ assert.equal(response.status,503);
+ assert.deepEqual(await response.json(),{error:'auth_unavailable'});
+});
+test('Auth config timeout must not be reported as bad credentials',async()=>{
+ const m=mock(),transport=async(url,init={})=>String(url)===config?Promise.reject(Error('synthetic connectivity')):m.transport(url,init);
+ const {response,setCookie}=await login(transport);
+ assert.equal(response.status,503);
+ assert.deepEqual(await response.json(),{error:'auth_unavailable'});
+ assert.equal(setCookie,null);
+});
+test('valid Auth followed by Office 503 is an Office failure, never a login failure',async()=>{
+ const m=mock(),transport=async(url,init={})=>String(url).startsWith(office)?reply(503,{error:'office_unavailable'}):m.transport(url,init);
+ const {response,setCookie}=await login(transport);
+ assert.equal(response.status,503);
+ assert.deepEqual(await response.json(),{error:'office_unavailable'});
+ assert.equal(setCookie,null);
+ assert.equal(m.calls.some(x=>x.url.includes('/token?grant_type=password')),true,'Auth succeeded before Office failed');
+});
+test('Auth rate limit is reported without hinting wrong password',async()=>{
+ const m=mock(),transport=async(url,init={})=>String(url).includes('/token?grant_type=password')?reply(429,{error_code:'over_request_rate_limit'}):m.transport(url,init);
+ const {response}=await login(transport);
+ assert.equal(response.status,429);
+ assert.deepEqual(await response.json(),{error:'rate_limited'});
+});
+
 test('revoked user fails restore, server clears cookie',async()=>{
  const good=mock(),{cookie}=await login(good.transport)
  const m=mock({revoked:true})
