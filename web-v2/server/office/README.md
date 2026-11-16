@@ -1,4 +1,16 @@
-# Office access — prepared, disabled, not deployed
+# Office access — canonical staff-only source and historical preparation notes
+
+## Current verified status — 16 November 2026
+
+- **Database:** Existing Supabase project already has `fajr_private.office_members`, `office_audit`, `office_quota` and `public.fajr_web_requests`, all with RLS enabled. Permission-aware `fajr_office_list`, `fajr_office_change`, `fajr_office_take_slot` RPCs exist and direct `anon`/`authenticated` execution is denied. **Do not blindly apply the historical proposal** or create duplicate tables.
+- **Edge:** Both pre-existing `fajr-office` (v3) and `fajr-office-api` (v1) are ACTIVE in the connected Supabase project. Their exact deployed bodies have not been proved identical to this Git branch, so do not redeploy or delete either. Confirm callers before deduplication.
+- **Source:** PR #14 includes the only active staff Office implementation. It was manually reconciled with current GitHub `main` without carrying unrelated generated `_docs` copies; `main` itself is unchanged. Normal QA checks are synthetic and do not submit login credentials or write operational data.
+- **Cloudflare:** `fajr-office-qa` still has rollback version `17eaf4ed` (100%); newer BFF upload `b43ff397` is **not active**. Worker-level secret binding by itself is no proof that BFF cookie session is deployed. Only strict live version-specific checks plus authorized on-device login/restore/logout can complete KAF-35.
+- **No automatic promotion:** Public customer site Production is separately controlled by KAF-31, and no current KAF-35 checkpoint authorizes release.
+
+---
+
+## Historical implementation notes (pre-live QA evidence)
 
 `handler.ts` is a server-only request boundary with dependency-injected Auth and database access. It is not an active endpoint. No staff UI or sign-in provider has been connected.
 

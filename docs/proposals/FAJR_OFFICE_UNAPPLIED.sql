@@ -1,4 +1,4 @@
--- PROPOSED ONLY. Not applied. Explicit office membership AND active KAF Fajr company membership are both required.\n-- Revoking business_members access disables office RPCs even if an office_members row remains.
+-- HISTORICAL REFERENCE ONLY. On 2026-11-16 equivalent Office tables/RPC names were observed already present in the connected Supabase project. DO NOT REAPPLY as a migration or assume exact matching DDL; independently diff live definitions and plan a reviewed migration if needed. Explicit office membership AND active KAF Fajr company membership are both required.\n-- Revoking business_members access disables office RPCs even if an office_members row remains.
 begin;
 create schema if not exists fajr_private;
 revoke all on schema fajr_private from public,anon,authenticated;

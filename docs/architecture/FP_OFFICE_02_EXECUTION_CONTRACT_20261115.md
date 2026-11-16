@@ -4,6 +4,13 @@ Date: 2026-11-15 (Kabul)
 Owner of execution: Linear KAF-35; parent platform contract: KAF Business Suite Master Product Lock v2.2
 Status: DECISION RECORDED — NOT production approval, NOT master architecture replacement
 
+## CURRENT — 2026-11-16 | Source reconciliation without bulk merge
+
+- Existing PR #14 was reconciled with current `main` by building the reviewed office-only tree on top of `main`, preserving both histories. It now has **0 behind main** and GitHub reports **mergeable=true**, but is still Draft/unmerged. Source candidate commit: `bc644ad964719152dfd4b85b938aefab2fa85ca6`.
+- Shared main-site SEO/browser checks and artifact upload remain in the combined Workflow, alongside Office BFF/HTTP/Chromium and disposable PostgreSQL tests. Old auto-generated `_docs` files are not part of the new PR diff.
+- Live database already contains the named Fajr Office tables/RPCs with RLS/denied direct RPC grants; both `fajr-office` and `fajr-office-api` edge functions are ACTIVE. The old `FAJR_OFFICE_UNAPPLIED.sql` is a **historical proposal**, not an installation instruction. No DDL or Edge deployment was issued.
+- No customer Production, staff Worker rollout, real-user sign-in, credentials, billing or SMS/email changes were made.
+
 ## CURRENT — 2026-11-16 | Candidate browser versus rolled-back runtime
 
 - Current live Cloudflare staff Worker remains rollback `17eaf4ed-5372-4f7d-b168-14719aa4ecb3` (not candidate BFF `b43ff397-f1ae-47b7-9609-32d8ac7f4886`). `FAJR_SESSION_KEY` binding exists but cannot prove active BFF behavior.
