@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CheckCircle2, ClipboardCopy, Download, Mail, MessageCircle } from 'lucide-react'
-import { officeEmail, officeWhatsApp } from '../lib/office-contact'
+import { useOfficeContact } from '../lib/office-contact'
 import type { SiteLanguage } from '../content/site-i18n'
 import './intake-receipt.css'
 
@@ -23,6 +23,7 @@ export function IntakeReceipt({ receipt, service, destination, language }: {
   receipt: string; service: string; destination: string; language: SiteLanguage
 }) {
   const [copyStatus,setCopyStatus]=useState('')
+  const {email:officeEmail,whatsapp:officeWhatsApp}=useOfficeContact()
   const t=labels[language]
   async function copy(){
     try { await navigator.clipboard.writeText(receipt);setCopyStatus(t.copied) }
