@@ -319,6 +319,24 @@ jobs:
           page_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp09-page.html" --write-out '%{http_code}' "$QA_ORIGIN/?lang=fa")"
           test "$page_code" = 200
           test -s "$RUNNER_TEMP/fp09-page.html"
+          # FP-SITE-CONTROL: public GET must return only approved fields, or a clean
+          # not-yet-published 404. It must never expose drafts or personal data.
+          settings_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp-site-public.json" --write-out '%{http_code}' "$QA_ORIGIN/api/site-settings/public")"
+          if [[ "$settings_code" == 404 ]]; then
+            jq -e '.error == "not_published"' "$RUNNER_TEMP/fp-site-public.json"
+            echo "FP_SITE_PUBLIC_QA_NOT_PUBLISHED=PASS"
+          elif [[ "$settings_code" == 200 ]]; then
+            jq -e '.version == 1 and .site == "fajr-parsa" and (.revision | type=="string") and
+              (.contact.whatsapp | type=="string") and (.contact.email | type=="string") and
+              (.design.fontPreset | type=="string") and
+              ((keys - ["version","site","revision","publishedAt","contact","design","office","content"]) | length==0) and
+              ((.contact | keys) - ["whatsapp","email","phone","mapUrl"] | length==0) and
+              ((.design | keys) - ["fontPreset"] | length==0)' "$RUNNER_TEMP/fp-site-public.json"
+            echo "FP_SITE_PUBLIC_QA_SANITIZED_READBACK=PASS"
+          else
+            echo "::error::FP-SITE-CONTROL public read returned HTTP $settings_code instead of a valid published snapshot or not-published 404"
+            exit 1
+          fi
           reject_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp09-host-denied.json" --write-out '%{http_code}' \
             --request POST --header 'Content-Type: application/json' \
             --header 'Origin: https://fp07-service-catalog-preview.fajr-parsa-qa.pages.dev' \
