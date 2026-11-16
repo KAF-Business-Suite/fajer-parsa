@@ -43,6 +43,39 @@ try{
   assert.deepEqual(errors,[])
   await context.close()
  }
+
+ // Real BFF office must be readable in all four languages without exposing staff records.
+ for(const [language,title,direction] of [
+  ['fa','دفتر مدیریت درخواست‌ها','rtl'],
+  ['ps','د فجر پارسا د غوښتنو دفتر','rtl'],
+  ['en','Fajr Parsa request office','ltr'],
+  ['ar','مكتب طلبات فجر بارسا','rtl']
+ ]){
+  const langContext=await browser.newContext({viewport:{width:393,height:852},locale:'fa-AF'})
+  await installCandidate(langContext)
+  const langPage=await langContext.newPage(),langErrors=[]
+  langPage.on('pageerror',err=>langErrors.push(err.message))
+  await langPage.goto(base+'?lang='+language,{waitUntil:'domcontentloaded'})
+  await langPage.locator('#office-lang').waitFor()
+  assert.equal(await langPage.locator('#office-lang').inputValue(),language)
+  assert.equal(await langPage.locator('html').getAttribute('dir'),direction)
+  assert.equal(await langPage.locator('.intro h1').textContent(),title)
+  assert.equal(await langPage.locator('#office-view').isVisible(),false,'language never grants staff rights')
+  for(const width of [320,360,393,768]){
+   await langPage.setViewportSize({width,height:852})
+   const limits=await langPage.evaluate(()=>({document:document.documentElement.scrollWidth,body:document.body.scrollWidth,viewport:innerWidth}))
+   assert.ok(limits.document<=limits.viewport+1&&limits.body<=limits.viewport+1,'office overflow '+language+' '+width+': '+JSON.stringify(limits))
+  }
+  // Changing the language is a local UI preference; no authentication side effects.
+  await langPage.locator('#office-lang').selectOption('en')
+  assert.equal(await langPage.locator('html').getAttribute('dir'),'ltr')
+  await langPage.reload({waitUntil:'domcontentloaded'})
+  assert.equal(await langPage.locator('#office-lang').inputValue(),language==='en'?'en':'en')
+  assert.deepEqual(langErrors,[])
+  await langContext.close()
+ }
+ console.log('PASS: real BFF Office language switch fa-AF/ps-AF/en/ar and 320/360/393/768 horizontal-fit; no sign-in attempts')
+
  // All auth/office mutations intercepted. The server receives ZERO genuine login credentials.
  const context=await browser.newContext({viewport:{width:390,height:844},locale:'fa-AF'})
  await installCandidate(context)
