@@ -1,7 +1,7 @@
-import { Mail, MessageCircle, ShieldCheck } from 'lucide-react'
+import { Mail, MapPin, MessageCircle, Phone, ShieldCheck } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog'
 import { siteText, type SiteLanguage } from '../content/site-i18n'
-import { officeEmail, officeWhatsApp } from '../lib/office-contact'
+import { useOfficeContact } from '../lib/office-contact'
 
 /** FP-CONTACT-02: Show usable, verified channels only. Never imply a draft was sent. */
 const copy:Record<SiteLanguage,{intro:string,email:string,emailNote:string,whatsappNote:string,privacy:string,subject:string}>={
@@ -15,6 +15,7 @@ export function ContactChannels({ language, open, onOpenChange }: {
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
+  const {email:officeEmail,whatsapp:officeWhatsApp,phone:officePhone,mapUrl:officeMapUrl}=useOfficeContact()
   const t=(value:string)=>siteText(value,language)
   const c=copy[language]
   return <Dialog open={open} onOpenChange={onOpenChange}>
@@ -39,6 +40,8 @@ export function ContactChannels({ language, open, onOpenChange }: {
             <small><b dir="ltr">{officeEmail}</b> — {c.emailNote}</small>
           </span>
         </a>
+        {officePhone && <a className="fp-channel fp-channel-active" href={'tel:'+officePhone}><span className="fp-channel-icon"><Phone size={21} aria-hidden="true"/></span><span className="fp-channel-copy"><strong>{language==='fa'?'تماس تلفنی':language==='ps'?'تلیفوني اړیکه':language==='ar'?'اتصال هاتفي':'Call the office'}</strong><small dir="ltr">{officePhone}</small></span></a>}
+        {officeMapUrl && <a className="fp-channel fp-channel-active" href={officeMapUrl} target="_blank" rel="noopener noreferrer"><span className="fp-channel-icon"><MapPin size={21} aria-hidden="true"/></span><span className="fp-channel-copy"><strong>{language==='fa'?'موقعیت دفتر':language==='ps'?'د دفتر ځای':language==='ar'?'موقع المكتب':'Office location'}</strong><small>{language==='fa'?'بازکردن نقشه':language==='ps'?'نقشه پرانیستل':language==='ar'?'فتح الخريطة':'Open map'}</small></span></a>}
       </div>
       <p className="fp-contact-privacy"><ShieldCheck size={17} aria-hidden="true"/>{c.privacy}</p>
     </DialogContent>
