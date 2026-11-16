@@ -13,7 +13,10 @@ const server = createServer(async (req,res) => {
   if (!path.startsWith(root + sep)) { res.writeHead(403); res.end(); return }
   if (req.url === '/favicon.ico') { res.writeHead(204); res.end(); return }
   try { const bytes = await readFile(path); res.writeHead(200, { 'content-type': mime[extname(path)] || 'application/octet-stream' }); res.end(bytes) }
-  catch { res.writeHead(404);res.end('Not found') }
+  catch {
+    try { const bytes=await readFile(path+'.html');res.writeHead(200,{'content-type':mime['.html']});res.end(bytes) }
+    catch {res.writeHead(404);res.end('Not found')}
+  }
 })
 await new Promise(r => server.listen(0, '127.0.0.1', r))
 const url = `http://127.0.0.1:${server.address().port}/`
@@ -114,7 +117,7 @@ try {
     await page.getByRole('button',{name:'بسته سفر کاری',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByLabel('خدمت مورد نظر',{exact:true}).inputValue(),'دعوتنامه و تجارت');await dialog.getByRole('button',{name:'مرور پیام درخواست',exact:true}).click();assert.match(await dialog.getByLabel('متن آمادهٔ درخواست',{exact:true}).inputValue(),/بسته: بسته سفر کاری/);await page.keyboard.press('Escape');
   })
   await test('Contact flow offers contact rather than new-order form',async()=>{
-    await page.getByRole('button',{name:'پیگیری پرونده',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).count(),0);assert.equal(await dialog.getByRole('link',{name:'تماس با دفتر در واتساپ',exact:true}).getAttribute('href'),'https://wa.me/93777377774');await page.keyboard.press('Escape');
+    await page.getByRole('button',{name:'پیگیری پرونده',exact:true}).click();const dialog=page.getByRole('dialog');assert.equal(await dialog.getByRole('button',{name:'آماده‌سازی درخواست',exact:true}).count(),0);const followUp=new URL(await dialog.getByRole('link',{name:'تماس با دفتر در واتساپ',exact:true}).getAttribute('href'));assert.equal(followUp.origin,'https://wa.me');assert.equal(followUp.pathname,'/93777377774');assert.match(followUp.searchParams.get('text')||'',/پیگیری/);await page.keyboard.press('Escape');
     assert.equal(await page.locator('.floating-ai').count(),0);assert.equal(await page.locator('svg.lucide-sparkles').count(),0);
   })
   await test('Deferred dialog loads only after an explicit request',async()=>{
@@ -181,6 +184,78 @@ try {
     for(const theme of ['light','dark']) {await page.evaluate(theme=>document.documentElement.dataset.theme=theme,theme);for(const width of [320,393,768,1440]) {await page.setViewportSize({width,height:852});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Country page overflow '+theme+' '+width)}}
     await page.setViewportSize({width:393,height:852});await page.getByRole('heading',{name:'خدمات سفر به ایران',exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:resolve(output,'iran-country-phone.png')});await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:resolve(output,'iran-country-desktop.png')});
     await page.goto(url+'#/country/xx');await page.getByRole('heading',{name:'این مقصد پیدا نشد',exact:true}).waitFor();await page.getByRole('link',{name:'بازگشت به کشورها',exact:true}).click();await page.locator('.country-card-grid').waitFor();assert.equal(await page.title(),'فجر پارسا | سفر، ویزا و تجارت');
+  })
+  await test('Inbound tourism route offers three languages, safe enquiry and mobile layout',async()=>{
+    await page.setViewportSize({width:393,height:852});
+    await page.goto(url,{waitUntil:'networkidle'});
+    await page.evaluate(()=>{window.scrollTo(0,1800);window.location.hash='/inbound'});
+    await page.locator('.inbound h1').waitFor();
+    await page.waitForFunction(()=>window.scrollY < 8);
+    assert.equal(await page.evaluate(()=>window.scrollY < 8),true,'Inbound route should start at top after navigating from mid-home');
+    assert.match(await page.locator('.inbound h1').innerText(),/Discover Afghanistan/);
+    assert.equal(await page.locator('html').getAttribute('dir'),'ltr');
+    assert.equal(await page.title(),'Afghanistan Inbound Tourism | Fajr Parsa');
+    assert.match(await page.locator('.floating-header nav').first().textContent(),/Services/);
+    assert.equal(await page.getByRole('button',{name:'Mobile menu',exact:true}).isVisible(),true);
+    await page.screenshot({path:resolve(output,'inbound-en-phone.png'),fullPage:true});
+    await page.locator('.fp-lang-trigger').click();await page.locator('.fp-lang-panel').getByRole('button',{name:'دری',exact:true}).click();
+    assert.match(await page.locator('.inbound h1').innerText(),/افغانستان/);
+    assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+    assert.match(await page.locator('.floating-header nav').first().textContent(),/روش کار/);
+    assert.equal(await page.getByRole('button',{name:'منوی موبایل',exact:true}).isVisible(),true);
+    await page.screenshot({path:resolve(output,'inbound-fa-phone.png'),fullPage:true});
+    await page.locator('.fp-lang-trigger').click();await page.locator('.fp-lang-panel').getByRole('button',{name:'العربية',exact:true}).click();
+    assert.match(await page.locator('.inbound h1').innerText(),/أفغانستان/);
+    assert.match(await page.locator('.floating-header nav').first().textContent(),/طريقة العمل/);
+    assert.equal(await page.getByRole('button',{name:'قائمة الهاتف',exact:true}).isVisible(),true);
+    await page.screenshot({path:resolve(output,'inbound-ar-phone.png'),fullPage:true});
+    await page.locator('.fp-lang-trigger').click();await page.locator('.fp-lang-panel').getByRole('button',{name:'English',exact:true}).click();
+    await page.setViewportSize({width:1440,height:1000});
+    await page.screenshot({path:resolve(output,'inbound-en-desktop.png'),fullPage:true});
+    await page.setViewportSize({width:393,height:852});
+    await page.evaluate(()=>{window.open=(target)=>{window.__inboundUrl=target;return null}});
+    const submit=page.locator('.inbound-form').getByRole('button',{name:/Continue to WhatsApp/});
+    await submit.click();
+    assert.equal(await page.getByRole('alert').isVisible(),true);
+    await page.getByRole('textbox',{name:'Your name',exact:true}).fill('Sample Visitor');
+    await page.getByRole('textbox',{name:'Email or contact number',exact:true}).fill('not-a-valid-contact');
+    const arrivalInput=page.locator('.inbound-form input[type="date"]');
+    const countInput=page.locator('.inbound-form input[type="number"]');
+    const futureArrival=await page.evaluate(()=>{
+      const date=new Date();date.setFullYear(date.getFullYear()+1);return date.toISOString().slice(0,10)
+    });
+    await arrivalInput.fill(futureArrival);
+    await countInput.fill('2');
+    await page.locator('.inbound-consent input').check();
+    await submit.click();
+    assert.equal(await page.getByRole('alert').isVisible(),true,'Invalid contact must block WhatsApp');
+    assert.equal(await page.evaluate(()=>window.__inboundUrl??null),null);
+    assert.equal(await page.getByRole('textbox',{name:'Email or contact number',exact:true}).getAttribute('aria-invalid'),'true');
+    await page.getByRole('textbox',{name:'Email or contact number',exact:true}).fill('visitor@example.invalid');
+    await arrivalInput.fill('2000-01-01');
+    await submit.click();
+    assert.equal(await page.getByRole('alert').isVisible(),true,'Past Afghanistan arrival must block WhatsApp');
+    assert.equal(await page.evaluate(()=>window.__inboundUrl??null),null);
+    await arrivalInput.fill(futureArrival);
+    await countInput.fill('2.5');
+    await submit.click();
+    assert.equal(await page.getByRole('alert').isVisible(),true,'Fractional traveller count must block WhatsApp');
+    assert.equal(await page.evaluate(()=>window.__inboundUrl??null),null);
+    await countInput.fill('2');
+    await submit.click();
+    const outbound=await page.evaluate(()=>window.__inboundUrl);
+    const link=new URL(outbound);
+    assert.equal(link.hostname,'wa.me');assert.equal(link.pathname,'/93777377774');
+    assert.match(link.searchParams.get('text'),/Sample Visitor/);
+    assert.match(link.searchParams.get('text'),new RegExp(futureArrival));
+    assert.match(link.searchParams.get('text'),/Travellers: 2/);
+    for(const width of [320,360,393,768,1440]) {
+      await page.setViewportSize({width,height:852});
+      assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Inbound overflow '+width);
+    }
+    await page.goto(url,{waitUntil:'networkidle'});
+    assert.equal(await page.locator('html').getAttribute('dir'),'rtl');
+    assert.equal(await page.locator('.hero-scene img').getAttribute('src'),'/media/hero-dubai.webp');
   })
   await test('No runtime errors or external asset requests',async()=>{assert.deepEqual(failures,[]);assert.deepEqual(external,[])})
 } finally {

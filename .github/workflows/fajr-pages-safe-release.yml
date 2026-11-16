@@ -13,11 +13,12 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: 'Deployment target; preview never replaces production'
+        description: 'Verify checks Cloudflare credentials READ-ONLY, with no Pages deployment'
         type: choice
         required: true
-        default: preview
+        default: verify
         options:
+          - verify
           - preview
           - production
       confirmation:
@@ -45,6 +46,25 @@ jobs:
           node-version-file: web-v2/.nvmrc
           cache: npm
           cache-dependency-path: web-v2/package-lock.json
+      - name: R1 credential presence check (never prints values)
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        env:
+          ACCOUNT_ID_PRESENT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+          API_TOKEN_PRESENT: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+        run: |
+          set -euo pipefail
+          for secret in ACCOUNT_ID API_TOKEN; do
+            name=ACCOUNT_ID_PRESENT
+            if [[ "$secret" == API_TOKEN ]]; then name=API_TOKEN_PRESENT; fi
+            if [[ "${!name}" == true ]]; then
+              echo "FAJR_R1_${secret}=PRESENT"
+            else
+              echo "FAJR_R1_${secret}=MISSING_OR_UNAVAILABLE"
+              echo "::warning::R1 ${secret} unavailable in this PR context; no deployment attempted."
+            fi
+          done
+          echo "FAJR_R1_NO_DEPLOY=ENFORCED"
       - name: Install exactly the locked dependencies
         working-directory: web-v2
         run: npm ci --no-audit --no-fund
@@ -60,6 +80,11 @@ jobs:
       - name: Verify production UI with local Chromium
         working-directory: web-v2
         run: npm run test:smoke
+      - name: Verify crawlable inbound HTML and local Pages routing (no deploy)
+        working-directory: web-v2
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: npm run test:seo
       - name: Verify optional synthetic intake without live submission
         working-directory: web-v2
         run: npm run test:intake-form
@@ -95,7 +120,10 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/main && "$AUTO_DEPLOY" == enabled && "$RELEASE_ARMED" == verified-after-first-manual-release ]]; then
             deploy=production
           elif [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
-            if [[ "$TARGET" == preview ]]; then
+            if [[ "$TARGET" == verify ]]; then
+              echo "FP08_AUTH_ONLY_NO_DEPLOY=ENFORCED"
+              deploy=none
+            elif [[ "$TARGET" == preview ]]; then
               deploy=preview
             elif [[ "$TARGET" == production && "$GITHUB_REF" == refs/heads/main && "$CONFIRMATION" == DEPLOY-FAJR-PRODUCTION ]]; then
               deploy=production
@@ -107,7 +135,8 @@ jobs:
           echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
           echo "Selected release: $deploy"
       - name: Check credentials and block stale production sources
-        if: steps.policy.outputs.deploy != 'none'
+        # Manual verify invokes read-only token and exact project GET; the deploy step stays gated on deploy != none.
+        if: steps.policy.outputs.deploy != 'none' || (github.event_name == 'workflow_dispatch' && inputs.target == 'verify')
         id: guard
         shell: bash
         env:
@@ -120,6 +149,43 @@ jobs:
             echo "::error::Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN as GitHub Actions secrets."
             exit 1
           fi
+          # FP-08: fail closed before any upload if stored credentials are malformed.
+          # Do not log token values. All checks below are Cloudflare read-only GETs.
+          if [[ ! "$CLOUDFLARE_ACCOUNT_ID" =~ ^[0-9a-f]{32}$ ]]; then
+            echo "::error::CLOUDFLARE_ACCOUNT_ID must be a 32-character hexadecimal ID. Correct the GitHub Secret privately."
+            exit 1
+          fi
+          case "$CLOUDFLARE_API_TOKEN" in
+            *[[:space:]]*|Bearer*|bearer*|*\"*|*\'*)
+              echo "::error::CLOUDFLARE_API_TOKEN format is invalid. Store the raw token only: no Bearer prefix, quotes, or whitespace."
+              exit 1
+              ;;
+          esac
+          verification_file="$RUNNER_TEMP/fajr-cloudflare-token-verify.json"
+          if ! curl --fail --silent --show-error --max-time 20 \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -o "$verification_file" \
+            "https://api.cloudflare.com/client/v4/user/tokens/verify"; then
+            echo "::error::Cloudflare rejected the API token. Check validity and format privately; no deploy attempted."
+            exit 1
+          fi
+          if [[ "$(jq -r '.success == true and .result.status == "active"' "$verification_file")" != true ]]; then
+            echo "::error::Cloudflare API token is not verified active. No deploy attempted."
+            exit 1
+          fi
+          project_file="$RUNNER_TEMP/fajr-cloudflare-project-check.json"
+          if ! curl --fail --silent --show-error --max-time 20 \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -o "$project_file" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/fajr-parsa-qa"; then
+            echo "::error::Cloudflare token cannot read existing fajr-parsa-qa project. Check Pages permission/account scope privately."
+            exit 1
+          fi
+          if [[ "$(jq -r '.success == true and .result.name == "fajr-parsa-qa"' "$project_file")" != true ]]; then
+            echo "::error::Cloudflare did not confirm existing target Pages project. No deploy attempted."
+            exit 1
+          fi
+          echo "FP08_CLOUDFLARE_AUTH_READONLY_PASS (no credential values logged)"
           if [[ "$RELEASE_TARGET" == production ]]; then
             baseline=94891bba02354fef36a6af292de9435872568c02
             if ! git merge-base --is-ancestor "$baseline" "$GITHUB_SHA"; then

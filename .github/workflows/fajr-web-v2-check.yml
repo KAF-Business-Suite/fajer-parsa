@@ -6,6 +6,9 @@ on:
       - release/fajr-production-20261030
     paths:
       - 'web-v2/**'
+      - 'workers/fajr-office-qa/**'
+      - 'supabase/functions/fajr-office/**'
+      - 'supabase/functions/fajr-office-api/**'
       - 'docs/proposals/FAJR_OFFICE_UNAPPLIED.sql'
       - '.github/workflows/fajr-web-v2-check.yml'
       - '.github/workflows/testdriver.yml'
@@ -59,8 +62,25 @@ jobs:
         run: npm run test:smoke
       - name: Verify PR14 candidate Office in Chromium with synthetic intercepted APIs
         run: node tests/office-live-browser.mjs
+      - name: Verify crawlable inbound HTML and local Pages routing (no deploy)
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: npm run test:seo
       - name: Verify optional intake form with intercepted API and synthetic challenge
         run: npm run test:intake-form
+      - name: Save synthetic inbound visual QA for owner review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fajr-pr17-inbound-visual-qa
+          path: |
+            web-v2/test-results/inbound-*.png
+            web-v2/test-results/results.json
+            web-v2/test-results/inbound-seo-results.json
+            web-v2/test-results/inbound-response.html
+            web-v2/test-results/inbound-pages.log
+          if-no-files-found: error
+          retention-days: 3
 
   office-postgres:
     runs-on: ubuntu-latest
