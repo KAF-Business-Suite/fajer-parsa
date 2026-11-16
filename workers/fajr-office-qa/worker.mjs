@@ -50,17 +50,21 @@ const guard=(request)=>{
  if(request.method==='POST' && request.headers.get('Origin')!==ORIGIN)return false;
  return true;
 };
-// This key is PUBLIC (never service_role); the same value is already returned to browsers
-// by /fajr-office/config. Avoid a second server-side config fetch before GoTrue login.
-// Update this constant when rotating the project's publishable key.
-const PUBLIC_SUPABASE_KEY="sb_publishable_-sdU31HYIwghUwdkebgiiQ_FWTcWaAq";
-async function publicKey(_transport){return PUBLIC_SUPABASE_KEY}
+// Existing browser-safe Supabase public config, NOT a service key.
+// Cloudflare Workers rejects Request.redirect mode "error"; use "manual" and reject 3xx.
+async function publicKey(transport){
+ const response=await transport(CONFIG,{redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(8000)});
+ if(!response.ok)throw Error('config_unavailable');
+ const data=await response.json();
+ if(typeof data.publishableKey!=='string'||!data.publishableKey.startsWith('sb_publishable_')&&!data.publishableKey.startsWith('eyJ'))throw Error('config_unavailable');
+ return data.publishableKey;
+}
 async function authRequest(transport,key,path,body,token){
- const r=await transport(AUTH+path,{method:body?'POST':'GET',headers:{apikey:key,...(body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:'Bearer '+token}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:'no-store',redirect:'error',signal:AbortSignal.timeout(8000)});
+ const r=await transport(AUTH+path,{method:body?'POST':'GET',headers:{apikey:key,...(body?{'Content-Type':'application/json'}:{}),...(token?{Authorization:'Bearer '+token}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(8000)});
  return r;
 }
 async function officeRequest(transport,access,method='GET',offset='0',body){
- return transport(API+(method==='GET'?'?offset='+offset:''),{method,headers:{Origin:ORIGIN,Authorization:'Bearer '+access,Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:'no-store',redirect:'error',signal:AbortSignal.timeout(8000)})
+ return transport(API+(method==='GET'?'?offset='+offset:''),{method,headers:{Origin:ORIGIN,Authorization:'Bearer '+access,Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(8000)})
 }
 async function restore(request,env,transport,key,verifiedSession){
  let value=verifiedSession||await parseSession(request,env), rotated=false;
@@ -144,7 +148,7 @@ export async function handleBff(request,env,transport=fetch){
    const value=await parseSession(request,env);
    if(value){
     const key=await publicKey(transport);
-    const revoke=await transport(AUTH+'/logout',{method:'POST',headers:{apikey:key,Authorization:'Bearer '+value.access},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(8000)});
+    const revoke=await transport(AUTH+'/logout',{method:'POST',headers:{apikey:key,Authorization:'Bearer '+value.access},cache:'no-store',redirect:'manual',signal:AbortSignal.timeout(8000)});
     if(!revoke.ok&&revoke.status!==401)return err(503,'logout_unavailable');
    }
    return ok({signedOut:true},clearCookie());

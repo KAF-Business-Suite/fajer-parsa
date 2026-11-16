@@ -96,6 +96,30 @@ test('invalid password denied and no cookie minted',async()=>{
  assert.equal(result.setCookie,null)
 })
 
+
+test('Cloudflare Worker outbound Auth and Office calls all use supported manual redirect mode',async()=>{
+ const m=mock(),seen=[];
+ const transport=(url,init={})=>{
+  if([config,auth+'/token?grant_type=password',office].some(target=>String(url).startsWith(target))){
+   assert.equal(init.redirect,'manual','Worker subrequests cannot use unsupported error mode');
+   seen.push(String(url));
+  }
+  return m.transport(url,init);
+ };
+ const {response}=await login(transport,true);
+ assert.equal(response.status,200);
+ assert.ok(seen.some(x=>x===config));
+ assert.ok(seen.some(x=>x.includes('/token?grant_type=password')));
+ assert.ok(seen.some(x=>x.startsWith(office)));
+});
+test('manual redirect does not follow public config to an untrusted host',async()=>{
+ const m=mock(),transport=(url,init)=>String(url)===config?new Response(null,{status:302,headers:{Location:'https://untrusted.invalid'}}):m.transport(url,init);
+ const {response,setCookie}=await login(transport);
+ assert.equal(response.status,503);
+ assert.equal(response.headers.get('X-FP-Auth-Stage'),'config');
+ assert.equal(setCookie,null);
+});
+
 test('an Auth 503 is never returned as a wrong-password response',async()=>{
  const m=mock(),transport=async(url,init={})=>String(url).includes('/token?grant_type=password')?reply(503,{error:'temporarily_unavailable'}):m.transport(url,init);
  const {response,setCookie}=await login(transport);
@@ -112,6 +136,7 @@ test('Auth 400 with a different code is not misrepresented as bad credentials',a
 
 test('diagnostic stage is generic, safe, and distinguishes failing outbound Worker calls',async()=>{
  const scenarios=[
+  {stage:'config',fail:url=>String(url)===config},
   {stage:'transport',fail:url=>String(url).includes('/token?grant_type=password')}
  ];
  for(const x of scenarios){
@@ -129,13 +154,13 @@ test('diagnostic stage is generic, safe, and distinguishes failing outbound Work
  assert.equal(response.headers.get('X-FP-Auth-Stage'),'upstream-403');
  assert.equal((await response.json()).error,'auth_unavailable');
 });
-test('Supabase public config outage does not block private BFF sign-in',async()=>{
+test('public config outage is classified as transport failure, never bad credentials',async()=>{
  const m=mock(),transport=async(url,init={})=>String(url)===config?Promise.reject(Error('synthetic connectivity')):m.transport(url,init);
  const {response,setCookie}=await login(transport);
- assert.equal(response.status,200);
- assert.deepEqual(await response.json(),{authenticated:true});
- assert.match(setCookie||'',/HttpOnly/);
- assert.equal(m.calls.some(x=>x.url===config),false,'Login does not depend on upstream public config endpoint');
+ assert.equal(response.status,503);
+ assert.deepEqual(await response.json(),{error:'auth_unavailable'});
+ assert.equal(response.headers.get('X-FP-Auth-Stage'),'config');
+ assert.equal(setCookie,null);
 });
 test('valid Auth followed by Office 503 is an Office failure, never a login failure',async()=>{
  const m=mock(),transport=async(url,init={})=>String(url).startsWith(office)?reply(503,{error:'office_unavailable'}):m.transport(url,init);
