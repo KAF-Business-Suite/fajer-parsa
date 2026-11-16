@@ -1,27 +1,27 @@
-# FP-SITE-CONTROL-01 | Fajr Parsa self-service website management
+# FP-SITE-CONTROL-01 | کنترل وب‌سایت فجرپارسا — قرارداد موجود
 
-**Canonical PR:** #24, with release gate KAF-31, content/service gate KAF-25, owner UI in existing Fajr Office PR #14/KAF-35. Do not create a second website, database, project, role system or issue.
+## CURRENT | 16 Nov 2026 — QA implementation, Production locked
 
-## What exists in code (16 Nov 2026)
-- Public contact and server-issued receipt use the same safe runtime settings client.
-- Reader requests `GET /api/site-settings/public` from the **same origin**. It accepts only a validated versioned public snapshot; if unavailable, it keeps the existing working contact values.
-- The contract allows only approved WhatsApp, office email, optional phone, optional HTTPS map link and an enumerated font preset. No arbitrary CSS, scripts, client secrets, user data, draft text, internal roles or migration logic is accepted.
-- Contract test runs in both independent GitHub CI and fail-closed Pages release checks.
-- **Not live yet:** the read API, private owner editor, draft/publish/rollback store and authorized publishing workflow. No one should say self-service edits currently persist or publish.
+**One project and existing gates:** public site in Draft PR #24 / KAF-25; authorized Office in Draft PR #14 / KAF-35; release authority KAF-31. No separate CMS, second database, tenant, site or paid subscription.
 
-## Final owner experience — one mobile-first Website Settings screen
-Place this in the **existing Fajr Office** behind its HTTP-only secure session and current KAF/Fajr membership. Keep four languages (Dari, Pashto, English, Arabic).
+### Confirmed source and QA state
+- Existing PostgreSQL Supabase project contains additive migration `fajr_site_control_versioned_private_publication` (recorded as version `20261116072408`). The source file lives in PR #14 at `supabase/migrations/20261116_001_fajr_site_control.sql`; it creates Fajr-only private draft/publication and audit records and an explicit publisher role. `anon` has **no write access**, and both private tables have no user-level table grants. Only a single verified active Fajr owner/editor was eligible for publishing.
+- The existing Office Worker QA at `https://fajr-office-qa.khoojafahim.workers.dev/site-settings` serves a mobile-first four-language editor (fa/ps/en/ar); uses the current encrypted HttpOnly login session, same-origin/Origin guards and no service-role key in browser. Staff APIs: `GET /api/site-settings/draft`, `POST /api/site-settings/draft`, `POST /api/site-settings/preview`, `POST /api/site-settings/publish`, `POST /api/site-settings/rollback`. Source: `workers/fajr-office-qa/{worker.mjs,site-settings-api.mjs,site-settings-ui.mjs}` in PR #14. Writes must also pass the existing Office authorization and atomic quota check.
+- The existing Pages QA alias `https://fp-intake-safe-review.fajr-parsa-qa.pages.dev/` has a **read-only** same-origin public `GET /api/site-settings/public` function. It reads only a published snapshot via a public Supabase key and returns 404 until publication. No client write, draft, staff data, private key or raw table is exposed; production Pages remains static-only. Source: `web-v2/qa-only/functions/api/site-settings/public.js` in PR #24.
+- The public React client validates the published allowlisted snapshot and falls back to existing contact values when unavailable. On published settings, it can render official office address/hours, notice and FAQs in each of four languages. Editing the source code is not necessary for those approved fields. Font preset metadata is stored/validated but an alternate Estedad/Inter font package is **not installed yet**; do not claim that it changes all website typography.
+- Independent GitHub source and isolated PostgreSQL CI prove schema, roles, versioning, audit, rollback, CSRF and synthetic browser interactions. Newest exact PR head, CI and Cloudflare deployment must be re-checked before any acceptance claim.
 
-Sections: 1) Contacts and channels: official phones, WhatsApp, email; 2) Office and map: verified office addresses, safe map URL, opening times; 3) Brand and appearance: existing official logo, approved type/font/theme presets, no arbitrary CSS; 4) Content: translations, notices, FAQs and service visibility subject to independent legal/source review; 5) Preview/Publish: diff by field, all languages/mobile preview, one explicit confirmation, audit/revision, rollback.
+### Owner experience
+One Website Settings screen: contacts and WhatsApp; verified address, map and hours; two allowlisted font choices; four-language notices and up to five FAQs; save draft → readback → four-language preview → explicit confirm QA publish → QA public readback → audit → rollback.
 
-**Editing contract:** `GET/PATCH /api/site-settings/draft` and `POST /api/site-settings/preview`, `POST /api/site-settings/publish` and `POST /api/site-settings/rollback` on the same origin behind owner/editor role checks and CSRF. No anonymous write; no service-role token in browsers; no live customer data in draft. Publishes must use expected revision (optimistic lock), explicit owner confirmation, immutable previous version and server audit. Only the published **public-only** shape may be returned from `GET /api/site-settings/public`.
+### Boundaries and outstanding acceptance
+- Current published state is `null`; no business contact or claim has been published through the new API. This is correct while positive authorized owner sign-in and verified content have not passed.
+- **Owner S21 positive login/reload/logout, authenticated real edit/readback, QA publication/public GET, human visual acceptance and recovery still need validation.** Synthetic CI does not prove those.
+- KAF-31 Production `productionAuthorization=false` and seven legal, contact, security and release checks remain BLOCKED. No PR merge, customer production deploy, real intake, DNS, payments or messages until independent approval. Existing customer-visible Pages SHA `9ded561eae7394f38eb633d3ec890be51df3f830` preserved.
+- Corporate mailbox and custom domain not verified; never advertise invented `info@` or `contact@` addresses.
+- Existing `public.app_settings` and `branding_profiles` store private per-owner settings; never repurpose as public Fajr publication tables.
 
-## Storage decision
-Use the existing Supabase project with new Fajr-only private publication/audit records and explicit allowlisted public projection after **reviewed, gated** migration. The existing `public.app_settings` and `public.branding_profiles` tables are per-owner user data, not a safe global publication store. Do not repurpose them without tenant authorization. No schema changed in this step. The final permission model must follow existing `fajr_private.office_members` and KAF business membership isolation; no bypass or blanket `anon` grant.
-
-## Publishing criteria
-PASS only after real authorized manager edit → draft readback → four-language preview → explicit confirm → public snapshot readback on QA → audit history → rollback → user-level mobile verification; independent negative tests for non-member, wrong tenant, forged CSRF, stale revision, unsafe map URL, private fields. Still under existing KAF-25/KAF-31 until business claims/legal and security gate is cleared.
-
-No verified dedicated corporate domain or corporate mailboxes are currently connected to the inspected Cloudflare account (zone inventory empty). Domain and email work is in existing KAF-33; a free incoming forwarder is not an outbound SMTP mailbox. Until DNS and legitimate sender exist, never advertise `info@` or `contact@` as operating addresses.
-
-No new secret, database, domain, deployment or paid plan was created by this code change.
+### Fail-closed tests and references
+- [PR #14 Office](https://github.com/KAF-Business-Suite/fajer-parsa/pull/14), [PR #24 Public](https://github.com/KAF-Business-Suite/fajer-parsa/pull/24), [KAF-25](https://linear.app/rpcfpta/issue/KAF-25), [KAF-31](https://linear.app/rpcfpta/issue/KAF-31).
+- Security advisory on deliberately private RLS tables and intentionally authenticated `SECURITY DEFINER` RPC must be reviewed against owner/membership checks; no broad role grants.
+- Public Pages QA fallback must continue working if the versioned API is unavailable. Production remains fail closed.
