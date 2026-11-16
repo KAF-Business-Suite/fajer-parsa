@@ -34,6 +34,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: FP-08 verify evidence schema and fail-closed release policy
         run: node tests/fp08-release-gate.mjs
+      - name: FP-SITE-CONTROL validate public settings contract (offline)
+        run: npm run test:site-settings
       - name: Run offline-safe intake server/client unit tests
         run: npm run test:intake
       - name: FP-09 compile isolated QA-only Pages Function without deployment
