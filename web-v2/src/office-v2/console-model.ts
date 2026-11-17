@@ -5,7 +5,7 @@
  */
 export type AdminLanguage='fa'|'en';
 export type AdminGroup='command'|'operations'|'content'|'communications'|'commerce'|'platform';
-export type FeatureMode='dashboard'|'workspace'|'records'|'website'|'media'|'publishing'|'connectors'|'builder'|'permissions'|'developer'|'reports';
+export type FeatureMode='dashboard'|'workspace'|'records'|'website'|'media'|'publishing'|'connectors'|'builder'|'permissions'|'developer'|'reports'|'resources';
 export type Role='owner'|'manager'|'finance'|'designer'|'developer'|'communications';
 export type Translated={fa:string;en:string};
 export type Feature={
@@ -24,6 +24,7 @@ const make=(id:string,group:AdminGroup,mode:FeatureMode,fa:string,en:string,role
  ({id,group,mode,role,icon,planned:true,label:{fa,en},description:{fa:descFa,en:descEn}});
 export const features:Feature[]=[
  make('overview','command','dashboard','نمای عمومی','Overview','owner','layout-dashboard','تمام بخش‌ها و کارهای مهم در یک مرکز','A single view of operations and priorities'),
+ make('resources','command','resources','منابع و وب‌سایت‌ها','Sites & resources','owner','layers','افزودن و مدیریت چند سایت، اپ، اسناد و اتصالات','Manage multiple websites, apps, documents and connections'),
  make('workspaces','command','workspace','فضاهای کاری','Workspaces','owner','layers','مدیریت فضاهای شرکت و بخش‌ها','Organize company spaces and departments'),
  make('approvals','command','publishing','تأییدیه‌ها','Approvals','manager','shield-check','تأیید تغییرات و درخواست‌های حساس','Review and approve sensitive changes'),
  make('tasks','command','records','وظایف و پیگیری','Tasks & follow-ups','manager','list-todo','وظایف، مسئولان و پیگیری‌ها','Tasks, owners and follow-ups'),
