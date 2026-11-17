@@ -25,6 +25,10 @@ import {Input} from './oss/input'
 import {adminLanguages,byId,features,groups,publicLanguages,totalFeatures} from './console-model'
 import type {AdminLanguage,AdminGroup,Feature,FeatureMode} from './console-model'
 import './enterprise.css'
+import {ResourceCenter,ThemeLab,defaultStyle} from './ResourceCenter'
+import type {PreviewStyle} from './ResourceCenter'
+import {previewSeed} from './resource-registry'
+import type {PreviewResource} from './resource-registry'
 
 const icons:Record<string,LucideIcon>={
  'layout-dashboard':LayoutDashboard,'layers':Layers,'shield-check':ShieldCheck,'list-todo':ListTodo,
@@ -151,6 +155,8 @@ const buildingBlocks:{fa:string;en:string;icon:string}[]=[
 
 export default function EnterpriseConsole(){
  const [lang,setLang]=useState<AdminLanguage>('fa')
+ const [resources,setResources]=useState<PreviewResource[]>(()=>previewSeed.map(x=>({...x})))
+ const [appearance,setAppearance]=useState<PreviewStyle>(defaultStyle)
  const [featureId,setFeatureId]=useState(()=>{
    const hash=decodeURIComponent(location.hash.replace(/^#\/?/,''))
    return features.some(x=>x.id===hash)?hash:'overview'
@@ -202,9 +208,10 @@ export default function EnterpriseConsole(){
   </>
  }
  function featureHeader(){
+  if(featureId==='resources'||featureId==='designsystem')return null
   return <div className="fpx-content-head"><div><div className="fpx-overline">{tx.workspace} / {groups.find(g=>g.id===current.group)?.name[lang]}</div><h1>{featureId==='overview'?tx.heading:label}</h1><p>{featureId==='overview'?tx.subtitle:current.description[lang]}</p></div><div className="fpx-content-actions"><span className="fpx-state-pill"><span/>{tx.pending}</span><button type="button" onClick={()=>setModal(current.mode==='publishing'||current.mode==='website'?'publish':'create')}><Plus size={16}/>{current.mode==='website'||current.mode==='publishing'?tx.review:tx.add}</button></div></div>
  }
- return <div className={'fpx-root '+(collapsed?'is-collapsed':'')} dir={dir}>
+ return <div className={'fpx-root '+(collapsed?'is-collapsed':'')} dir={dir} data-theme={appearance.mode} data-tone={appearance.accent} data-density={appearance.density} data-corners={appearance.corners} data-font={appearance.font}>
   <aside className="fpx-sidebar">{sidebar()}</aside>
   <div className="fpx-frame">
    <header className="fpx-header"><button type="button" className="fpx-icon-button fpx-menu-mobile" onClick={()=>setMobileMenu(true)} aria-label={tx.menu}><Menu size={22}/></button>
@@ -219,13 +226,13 @@ export default function EnterpriseConsole(){
    <main className="fpx-main">
     <div className="fpx-warning"><span className="fpx-warning-label"><Eye size={15}/>{tx.mode}</span><span>{tx.demoOnly}</span><span className="fpx-warning-lock"><LockKeyhole size={14}/>{tx.production}</span></div>
     {featureHeader()}
-    {isCustom?<CustomModule name={label} lang={lang} tx={tx} onAdd={()=>setModal('create')}/>:current.mode==='dashboard'?<OverviewPage tx={tx} lang={lang} onGo={go}/>:current.mode==='website'?<WebsitePage tx={tx} lang={lang} publicLang={publicLang} setPublicLang={setPublicLang} onReview={()=>setModal('publish')} current={current}/>:current.mode==='builder'||current.mode==='workspace'?<BuilderPage tx={tx} lang={lang} current={current} onAdd={()=>setModal('create')} onGo={go}/>:current.mode==='connectors'?<ConnectorsPage tx={tx}/>:current.mode==='permissions'?<RolesPage tx={tx} lang={lang}/>:current.mode==='developer'?<DevPage tx={tx} current={current}/>:current.mode==='publishing'?<PublishingPage tx={tx} current={current} onReview={()=>setModal('publish')}/>:current.mode==='reports'?<ReportPage tx={tx} current={current}/>:current.mode==='media'?<MediaPage tx={tx} onReview={()=>setModal('create')}/>:<RecordsPage tx={tx} lang={lang} current={current} query={rowQuery} setQuery={setRowQuery} onAdd={()=>setModal('create')}/>}
-    <footer className="fpx-footer"><span>{tx.builtBy} · MIT</span><span>Fajr Parsa · QA Admin Preview V3</span></footer>
+    {featureId==='resources'?<ResourceCenter lang={lang} resources={resources} onResources={setResources} onToast={toast}/>:featureId==='designsystem'?<ThemeLab lang={lang} value={appearance} onChange={setAppearance}/>:isCustom?<CustomModule name={label} lang={lang} tx={tx} onAdd={()=>setModal('create')}/>:current.mode==='dashboard'?<OverviewPage tx={tx} lang={lang} onGo={go}/>:current.mode==='website'?<WebsitePage tx={tx} lang={lang} publicLang={publicLang} setPublicLang={setPublicLang} onReview={()=>setModal('publish')} current={current}/>:current.mode==='builder'||current.mode==='workspace'?<BuilderPage tx={tx} lang={lang} current={current} onAdd={()=>setModal('create')} onGo={go}/>:current.mode==='connectors'?<ConnectorsPage tx={tx}/>:current.mode==='permissions'?<RolesPage tx={tx} lang={lang}/>:current.mode==='developer'?<DevPage tx={tx} current={current}/>:current.mode==='publishing'?<PublishingPage tx={tx} current={current} onReview={()=>setModal('publish')}/>:current.mode==='reports'?<ReportPage tx={tx} current={current}/>:current.mode==='media'?<MediaPage tx={tx} onReview={()=>setModal('create')}/>:<RecordsPage tx={tx} lang={lang} current={current} query={rowQuery} setQuery={setRowQuery} onAdd={()=>setModal('create')}/>}
+    <footer className="fpx-footer"><span>{tx.builtBy} · MIT</span><span>Fajr Parsa · QA Admin Preview V4</span></footer>
    </main>
   </div>
   <nav className="fpx-mobile-tabs" aria-label={tx.menu}>{[
     {id:'overview',name:tx.overview,icon:LayoutDashboard},
-    {id:'requests',name:tx.work,icon:Inbox},
+    {id:'resources',name:lang==='fa'?'منابع':'Resources',icon:Layers},
     {id:'website',name:tx.website,icon:Globe2},
     {id:'appbuilder',name:tx.console,icon:Blocks},
     {id:'more',name:tx.more,icon:MoreHorizontal}
@@ -254,7 +261,7 @@ function OverviewPage({tx,lang,onGo}:{tx:Tx;lang:AdminLanguage;onGo:(id:string)=
    ['requests',tx.requests,'inbox'],['customers',tx.members,'users'],
    ['website',tx.content,'globe'],['integrations',tx.integrations,'plug']
  ].map(([id,name,icon])=><Stat key={id} title={name} tx={tx} icon={icon}/>)}</div>
- <div className="fpx-two"><Card className="fpx-panel"><CardHeader><div className="fpx-panel-head"><div><CardTitle>{tx.quick}</CardTitle><CardDescription>{tx.onlyDesign}</CardDescription></div><Layers size={20}/></div></CardHeader><CardContent><div className="fpx-shortcuts">{['website','requests','customers','inbox','finance','appbuilder'].map(id=><button key={id} type="button" onClick={()=>onGo(id)}><Icon name={byId(id).icon}/><span>{byId(id).label[lang]}</span><ArrowUpRight size={15}/></button>)}</div></CardContent></Card>
+ <div className="fpx-two"><Card className="fpx-panel"><CardHeader><div className="fpx-panel-head"><div><CardTitle>{tx.quick}</CardTitle><CardDescription>{tx.onlyDesign}</CardDescription></div><Layers size={20}/></div></CardHeader><CardContent><div className="fpx-shortcuts">{['resources','website','requests','customers','inbox','appbuilder'].map(id=><button key={id} type="button" onClick={()=>onGo(id)}><Icon name={byId(id).icon}/><span>{byId(id).label[lang]}</span><ArrowUpRight size={15}/></button>)}</div></CardContent></Card>
  <Card className="fpx-panel"><CardHeader><CardTitle>{tx.activity}</CardTitle><CardDescription>{tx.none}</CardDescription></CardHeader><CardContent><div className="fpx-empty"><ClockIcon/><strong>{tx.noLive}</strong><span>{tx.demoOnly}</span></div></CardContent></Card></div>
  <Card className="fpx-panel"><CardHeader><CardTitle>{tx.all} · {totalFeatures}</CardTitle><CardDescription>{tx.ownerSetting}</CardDescription></CardHeader><CardContent><div className="fpx-category-grid">{groups.map(g=><button key={g.id} type="button" onClick={()=>onGo(features.find(f=>f.group===g.id)!.id)}><Icon name={g.icon} size={21}/><span>{g.name[lang]}</span><strong>{features.filter(f=>f.group===g.id).length}</strong></button>)}</div></CardContent></Card>
  </div>
