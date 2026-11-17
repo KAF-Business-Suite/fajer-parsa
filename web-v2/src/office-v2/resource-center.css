@@ -83,3 +83,11 @@
 .fpx-theme-swatch.ocean{background:#277cab}.fpx-theme-swatch.champagne{background:#b98e5e}
 @media(max-width:800px){.fpx-resource-root{gap:11px}.fpx-resource-summary{flex-direction:column;align-items:stretch}.fpx-resource-summary>.fpx-resource-primary{width:100%}.fpx-resource-panel{padding:10px}.fpx-resource-list{gap:7px}.fpx-resource-entry{padding:10px;gap:9px}.fpx-resource-icon{height:39px;width:39px}.fpx-resource-toolbar{align-items:stretch;flex-wrap:wrap;gap:8px}.fpx-resource-toolbar>label:first-child{flex-basis:100%}.fpx-resource-stats{grid-template-columns:1fr 1.2fr;gap:7px}.fpx-resource-stats>div{padding:10px}.fpx-theme-sections{grid-template-columns:1fr}.fpx-resource-detail-card [data-slot=card-header]{padding:15px 13px 7px}.fpx-resource-detail-card [data-slot=card-content]{padding:0 13px 15px}}
 @media(max-width:380px){.fpx-resource-meta{grid-template-columns:1fr}.fpx-resource-end span{max-width:100px;text-overflow:ellipsis;overflow:hidden}.fpx-resource-typegrid{grid-template-columns:repeat(2,1fr)}.fpx-resource-two{grid-template-columns:1fr}}
+
+/* Keep the S21 touch/checkbox row above horizontally scrollable tab hit areas.
+   Native sticky header and keyboard scroll must not cover interactive controls. */
+.fpx-resource-segments{position:relative;z-index:0}
+.fpx-resource-toolbar{position:relative;isolation:isolate;z-index:2;background:inherit;border-radius:10px;min-height:51px}
+.fpx-resource-check{position:relative;z-index:3;min-height:42px;cursor:pointer}
+.fpx-resource-check input{position:relative;z-index:4;pointer-events:auto;cursor:pointer;flex:0 0 16px}
+.fpx-resource-root :is(button,input,select,label){scroll-margin-top:86px;scroll-margin-bottom:86px}
