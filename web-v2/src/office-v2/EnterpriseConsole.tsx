@@ -58,7 +58,7 @@ const phrases={
   template:'انتخاب قالب آماده',previewAdd:'اضافه‌کردن به نمونه',moduleName:'نام نمونهٔ بخش',
   added:'بخش فقط در این پیش‌نمایش اضافه شد.',security:'امنیت و مجوز',sandbox:'محیط آزمایشی',
   connected:'اتصال تأیید نشده',roleControls:'نقش‌های مدیریتی',audit:'تاریخچه و ممیزی',
-  activity:'فعالیت‌ها و گزارش‌ها',apps:'برنامه‌ها و افزونه‌ها',
+  activity:'فعالیت‌ها و گزارش‌ها',apps:'برنامه‌ها و افزونه‌ها',notifications:'اعلان‌ها',
   sitePreview:'نمایش بصری سایت در چهار زبان',publicLanguage:'زبان سایت عمومی',
   noApproved:'هیچ دادهٔ تأییدشدهٔ واقعی در این نسخه قرار ندارد.',
   publishingModal:'مرور پیش از نشر',pubModalBody:'این پنجره نمونهٔ روند نشر است. هیچ نسخه‌ای به سایت عمومی ارسال نمی‌شود.',
@@ -96,7 +96,7 @@ const phrases={
   template:'Choose a ready template',previewAdd:'Add to preview',moduleName:'Example module name',
   added:'Module added only in this design preview.',security:'Security & permissions',sandbox:'QA design environment',
   connected:'Connection not verified',roleControls:'Administration roles',audit:'Audit history',
-  activity:'Activity & reporting',apps:'Apps & plugins',
+  activity:'Activity & reporting',apps:'Apps & plugins',notifications:'Notifications',
   sitePreview:'Visual site preview in four languages',publicLanguage:'Public website language',
   noApproved:'No verified production data is shown in this preview.',
   publishingModal:'Review before publishing',pubModalBody:'This is a sample publishing workflow. Nothing is sent to the public website.',
@@ -117,7 +117,7 @@ const phrases={
   builtBy:'Built from open-source Refine / shadcn/ui building blocks',
  }
 } as const
-type Texts=typeof phrases['fa']
+type Texts={ [K in keyof typeof phrases['fa']]: string }
 function Icon({name,size=18}:{name:string;size?:number}){const Element=icons[name]||Blocks;return <Element size={size} strokeWidth={1.9}/>}
 const dummyRows=[
  {id:'QA-DEMO-001',label:{fa:'درخواست نمونهٔ خدمات',en:'Example service request'},status:{fa:'پیش‌نویس',en:'Draft'}},
