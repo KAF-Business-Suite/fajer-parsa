@@ -26,7 +26,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
       run:
@@ -94,7 +94,7 @@ jobs:
           retention-days: 3
 
   office-postgres:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     services:
       postgres:
@@ -125,7 +125,7 @@ jobs:
           OFFICE_TEST_DATABASE_URL: postgresql://postgres:synthetic-ci-only@127.0.0.1:5432/fajr_office_test
 
   site-control-postgres:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     services:
       postgres:
