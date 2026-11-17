@@ -152,7 +152,7 @@ const buildingBlocks:{fa:string;en:string;icon:string}[]=[
 export default function EnterpriseConsole(){
  const [lang,setLang]=useState<AdminLanguage>('fa')
  const [featureId,setFeatureId]=useState(()=>{
-   const hash=location.hash.replace(/^#\/?/,'')
+   const hash=decodeURIComponent(location.hash.replace(/^#\/?/,''))
    return features.some(x=>x.id===hash)?hash:'overview'
  })
  const [collapsed,setCollapsed]=useState(false)
@@ -175,13 +175,13 @@ export default function EnterpriseConsole(){
  const label=isCustom?(custom.find(x=>'demo-'+x===featureId)||tx.moduleName):current.label[lang]
  const filtered=useMemo(()=>features.filter(f=>(f.label[lang]+f.description[lang]).toLowerCase().includes(query.toLowerCase())),[query,lang])
  useEffect(()=>{
-  const change=()=>{const hash=location.hash.replace(/^#\/?/,'');setFeatureId(features.some(x=>x.id===hash)||hash.startsWith('demo-')?hash:'overview')}
+  const change=()=>{const hash=decodeURIComponent(location.hash.replace(/^#\/?/,''));setFeatureId(features.some(x=>x.id===hash)||hash.startsWith('demo-')?hash:'overview')}
   const keys=(event:KeyboardEvent)=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();searchRef.current?.focus()}if(event.key==='Escape')setMobileMenu(false)}
   window.addEventListener('hashchange',change);window.addEventListener('keydown',keys)
   return()=>{window.removeEventListener('hashchange',change);window.removeEventListener('keydown',keys)}
  },[])
  useEffect(()=>{document.documentElement.lang=lang;document.documentElement.dir=dir;document.title=label+' | Fajr Parsa Console Preview'},[lang,dir,label])
- function go(id:string){location.hash='/'+id;setFeatureId(id);setMobileMenu(false);setRowQuery('');setCurrentTab('overview');window.scrollTo({top:0,behavior:'instant'})}
+ function go(id:string){location.hash='/'+encodeURIComponent(id);setFeatureId(id);setMobileMenu(false);setRowQuery('');setCurrentTab('overview');window.scrollTo({top:0,behavior:'instant'})}
  function toggleGroup(id:AdminGroup){setExpanded(x=>x.includes(id)?x.filter(y=>y!==id):[...x,id])}
  function toast(m:string){setNotice(m)}
  function sidebar(){
