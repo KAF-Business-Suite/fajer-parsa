@@ -117,3 +117,21 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=tab]:focus-v
  .fpx-mobile-tabs button{position:relative;z-index:1;pointer-events:auto!important;min-height:45px}
  .fpx-main{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
 }
+
+/* Mobile viewport invariant: prevent any intrinsic child width from invoking
+   Chromium mobile shrink-to-fit (360 CSS px becoming ~412, breaking hit targets).
+   Keep horizontal scroll only inside intentional local tab strips/tables. */
+@media(max-width:800px){
+ html,body,#root{min-width:0!important;max-width:100%!important;overflow-x:clip}
+ .fpx-root,.fpx-frame,.fpx-main,.fpx-resource-root,.fpx-resource-panel,
+ .fpx-resource-stats,.fpx-resource-entry,.fpx-resource-toolbar,
+ .fpx-resource-label,.fpx-content-head,.fpx-header{min-width:0!important;max-width:100%;box-sizing:border-box}
+ .fpx-root{width:100%;overflow-x:clip}
+ .fpx-resource-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .fpx-resource-stats>div{min-width:0;flex-wrap:wrap;align-content:center}
+ .fpx-resource-stats strong,.fpx-resource-stats span{white-space:normal;min-width:0;overflow-wrap:anywhere}
+ .fpx-resource-segments{min-width:0;max-width:100%;overflow-x:auto}
+ .fpx-header>.fpx-breadcrumb{min-width:0;flex:1}
+ .fpx-header>.fpx-header-actions{min-width:0;flex:0 0 auto}
+ .fpx-mobile-tabs{width:100%;max-width:100%;min-width:0;grid-template-columns:repeat(5,minmax(0,1fr));overflow:hidden}
+}
