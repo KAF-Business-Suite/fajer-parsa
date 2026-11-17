@@ -1,6 +1,6 @@
 # Fajr Admin Console | Mobile-first, Multi-resource, OSS-first — Owner Design Decision & Research
 
-Status: **RESEARCH & OWNER DESIGN SELECTION ONLY — NO UI PATCH AUTHORIZED YET**
+Status: **G0 owner-delegated design choice RECORDED; G1 SYNTHETIC MOBILE QA IMPLEMENTED; PHYSICAL OWNER ACCEPTANCE PENDING**
 Date: 2026-11-18 (Asia/Kabul)
 Gate: [KAF-35](https://linear.app/rpcfpta/issue/KAF-35) / existing [PR #14](https://github.com/KAF-Business-Suite/fajer-parsa/pull/14)
 Global owner lock: [Global Governance v1.3 §14](https://github.com/KAF-Business-Suite/openai-cloudflare-github-hub/blob/main/docs/GLOBAL_PROJECT_AI_GOVERNANCE.md)
@@ -67,3 +67,21 @@ G4: WordPress/Vercel/application/document/communication connectors in domain-spe
 - Previous Fajr QA site with 45 navigation labels: existing visual demo, **NOT** universal multi-site connection functionality.
 - True multi-site resource registry, dynamic provider ownership check, detach/reconnect, persistent theme UI, 45 live workflows and complete mobile-first acceptance: **NOT IMPLEMENTED**, intentionally held for owner visual design review.
 - No modifications to website/app/production, customer records, Supabase, Cloudflare Workers settings, domains, payments, secrets or provider integrations from this research-only gate.
+
+
+## Execution checkpoint — 2026-11-18 | KAF-35 / existing PR #14
+
+**Owner delegated OSS console selection and execution.** Selected MIT Shadcn Admin React/Vite as the existing source-based baseline, free compatible MIT ReUI style ideas only (no paid PRO blocks), and Tabler as an information architecture reference. The original shadcn-admin Card/Table/Input source and MIT license already exist in the local oss folder. No new Next.js, Clerk billing, CRM, CMS, database or authentication. Refine Core remains a possible gated resource/data provider, **not installed**.
+
+**G1 in existing Office branch work/fajr-office-main-aligned-20261031:**
+- Preserved all 45 existing admin module IDs, **added resources module → 46 unique navigation entries**, none removed.
+- resource-registry.ts: provider-agnostic, security-conservative **design-only in-memory** contract and three explicitly synthetic seed entries. Add validates HTTPS, blocks local/private/IP hosts, grants bookmark **view-public ONLY**. Detach/reconnect only changes UI association status. No upstream web/API delete and no provider ownership claim. New entries reset on reload (not durable).
+- ResourceCenter.tsx / resource-center.css: mobile-first resources tabs, search, simulated website/app/docs linkage, provider rights checklist, safe preview-only add/detach/restore, and panel settings (light/dark/system, accent, font, density, rounded corners).
+- EnterpriseConsole.tsx / enterprise.css: integrates resources into the mobile five-tab navigation and theme preview, preserves fa/en staff and fa/ps/en/ar public website language independence. Corrects actual 360 CSS px shrink-to-fit issue and bottom navigation tap reliability after browser Back.
+- CI includes resource-registry.test.mjs (URL validation, bookmark rights, non-destructive detach/restore) and resource-center.mobile.mjs (360/393 Chromium synthetic mobile, real pointer actions, Back, theme, no outbound network). Previous Office/Postgres and desktop/website smoke tests remain mandatory.
+
+**Evidence:** UI source HEAD d9a09e9787ed3859b1513f7a5670811f0f7e84a3; [GitHub CI #44168704494](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/44168704494) **COMPLETED SUCCESS**, with build, office-postgres, site-control-postgres, mobile browser 360/393, existing website/Office and desktop smoke all PASS. Deployed on existing Cloudflare Pages QA project fajr-parsa-qa, isolated preview branch fp-admin-v2-review, deployment ca98383d-0d8b-441f-801e-654dce701fdc **success**, stable alias https://fp-admin-v2-review.fajr-parsa-qa.pages.dev/office-preview.html#/resources . This is a synthetic Chromium test, not a physical Samsung S21 owner acceptance.
+
+**Production unchanged:** Cloudflare Pages production SHA 9ded561eae7394f38eb633d3ec890be51df3f830. G2 actual permission-scoped provider connection, durable Supabase resource registry, active staff auth, customer data, messages/payments, server-side credentials, merge and public publishing NOT IMPLEMENTED. KAF-31 production release remains gated.
+
+**Single next action:** Owner reviews the complete new mobile resource flow and design as a whole. Once visually accepted, design the G2 read-only Cloudflare provider adapter and durable audit in the existing secure Office Worker/Supabase, with no unilateral production change.
