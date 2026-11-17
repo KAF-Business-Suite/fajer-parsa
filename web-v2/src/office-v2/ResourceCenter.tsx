@@ -176,10 +176,10 @@ type ThemeProps={lang:L;value:PreviewStyle;onChange:(v:PreviewStyle)=>void}
 const themes={
  fa:{title:'ظاهر و شخصی‌سازی',sub:'تنظیمات نمونهٔ پنل، بدون تغییر داده‌ها یا سایت عمومی.',
   mode:'حالت نمایش',light:'روشن',dark:'تاریک',system:'سیستم',accent:'رنگ اصلی',jade:'یشمی',ocean:'آبی',champagne:'شامپاینی',density:'تراکم اطلاعات',comfortable:'راحت',compact:'فشرده',
-  corner:'گوشه‌ها',rounded:'گرد',extra:'گردتر',font:'فونت',vazirmatn:'وزیرمتن',manrope:'منروپ',sample:'تغییرات در همین پیش‌نمایش دیده می‌شوند.',note:'در نسخهٔ واقعی پس از تأیید، تنظیمات به پروفایل مالک منتقل می‌شوند.'},
+  corners:'گوشه‌ها',rounded:'گرد',extra:'گردتر',font:'فونت',vazirmatn:'وزیرمتن',manrope:'منروپ',sample:'تغییرات در همین پیش‌نمایش دیده می‌شوند.',note:'در نسخهٔ واقعی پس از تأیید، تنظیمات به پروفایل مالک منتقل می‌شوند.'},
  en:{title:'Appearance & personalization',sub:'Preview console settings without touching any business data or public website.',
   mode:'Appearance',light:'Light',dark:'Dark',system:'System',accent:'Accent color',jade:'Jade',ocean:'Ocean',champagne:'Champagne',density:'Information density',comfortable:'Comfortable',compact:'Compact',
-  corner:'Corners',rounded:'Rounded',extra:'Extra rounded',font:'Typography',vazirmatn:'Vazirmatn',manrope:'Manrope',sample:'Changes apply to this demo only.',note:'Approved preferences can later be saved to the authorized owner profile.'}
+  corners:'Corners',rounded:'Rounded',extra:'Extra rounded',font:'Typography',vazirmatn:'Vazirmatn',manrope:'Manrope',sample:'Changes apply to this demo only.',note:'Approved preferences can later be saved to the authorized owner profile.'}
 } as const
 export function ThemeLab({lang,value,onChange}:ThemeProps){
  const tx=themes[lang]
