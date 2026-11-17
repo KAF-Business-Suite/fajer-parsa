@@ -57,7 +57,18 @@ test('S21: mobile resources, non-destructive detach/relink, appearance, native B
    await page.getByRole('heading',{name:'منابع و سایت‌های من'}).waitFor()
    await page.locator('.fpx-lang-switch select').selectOption('en')
    await page.getByRole('heading',{name:'My sites & resources'}).waitFor()
-   await page.locator('.fpx-mobile-tabs button').nth(4).click()
+   const navHit=await page.locator('.fpx-mobile-tabs button').nth(4).evaluate(el=>{
+      const rect=el.getBoundingClientRect(),nav=el.parentElement.getBoundingClientRect()
+      const midX=rect.x+rect.width/2,midY=rect.y+rect.height/2
+      const target=document.elementFromPoint(midX,midY)
+      return {rect:{x:rect.x,y:rect.y,w:rect.width,h:rect.height},nav:{x:nav.x,y:nav.y,w:nav.width,h:nav.height},
+        hit:target?.className||target?.tagName,tag:target?.tagName,
+        innerWidth,innerHeight,docWidth:document.documentElement.scrollWidth,scrollY,
+        computedNav:{z:getComputedStyle(el.parentElement).zIndex,position:getComputedStyle(el.parentElement).position},
+        computedButton:{z:getComputedStyle(el).zIndex,position:getComputedStyle(el).position}}
+   })
+   console.log('FP_S21_BOTTOM_NAV_HIT',JSON.stringify(navHit))
+   await page.locator('.fpx-mobile-tabs button').nth(4).click({timeout:7000})
    await page.getByRole('dialog').getByText('Platform administration').waitFor()
    await page.getByRole('dialog').getByRole('button',{name:'Design system'}).click()
    await page.getByRole('heading',{name:'Appearance & personalization'}).waitFor()
