@@ -1,5 +1,5 @@
 # FP-ADMIN-V2 | Unified Fajr Office — OWNER-LOCKED architecture / living design
-Status: **DESIGN PROTOTYPE STARTED (NOT DEPLOYED, NOT ACCEPTED)**
+Status: **ENTERPRISE DESIGN PROTOTYPE IN QA — OWNER VISUAL ACCEPTANCE PENDING**
 Date: 2026-11-17 (Asia/Kabul)
 Owner gate: [KAF-35](https://linear.app/rpcfpta/issue/KAF-35)
 Existing execution PR: [#14](https://github.com/KAF-Business-Suite/fajer-parsa/pull/14)
@@ -69,3 +69,27 @@ Four languages with direction fa/ps/ar RTL and en LTR; avoid mixing numbers or t
 - Live Office integration, published website, CRM/payment/messaging: **NOT IMPLEMENTED**.
 - Owner design acceptance: **NOT YET ACCEPTED**.
 - Production customer deployment: **BLOCKED** until KAF-31.
+
+
+## CURRENT OWNER SCOPE — 17 Nov 2026, supersedes the earlier 10-module / 4-admin-language snapshot above
+
+**Staff Admin Console languages are ONLY Dari (`fa`, RTL) and English (`en`, LTR) for initial speed.** Additional admin languages can be added later without breaking the IA. **The public website and its content editor retain four independent site languages: Dari, Pashto, English and Arabic.** Public language selection is inside Website Studio, not the global staff admin locale.
+
+**Canonical integrated IA now contains 45 typed module IDs in 6 global categories** (`web-v2/src/office-v2/console-model.ts`):
+
+| Group | Examples |
+|---|---|
+| Command center | Overview, Workspaces, Approvals, Tasks, Calendar, Notifications |
+| Operations | Requests, Customers, Cases, Services, Destinations, Bookings, Documents, Company |
+| Website & content | Website Studio, Pages, Media, News, Offers, Banners, Forms, 4 Website Languages, SEO, Publishing |
+| Communications & marketing | Inbox, WhatsApp, Email, Social, Campaigns, Templates, Automations |
+| Finance & intelligence | Finance, Invoices, Payments, Analytics, Reports |
+| Platform administration | Module/Page Builder, Design System, Integrations, Developer Console, Deployments, Roles, Security, Backups, Settings |
+
+**Current entrypoint:** `web-v2/src/office-v2/main.tsx` mounts `EnterpriseConsole.tsx` using `console-model.ts` and `enterprise.css`. Previous `OfficeApp.tsx` / `registry.ts` are retained as design history only, not the active visual candidate. Responsive sidebar, compact header, Ctrl+K search, five mobile tabs and full-module drawer, synthetic table and permission/integration/developer views, sample-only module builder, and visual public site preview have been implemented. No real Office/data writes or live business messages are possible in this design.
+
+**Actual imported licensed OSS:** `web-v2/src/office-v2/oss/card.tsx`, `table.tsx`, `input.tsx`, `utils.ts` are adapted (import path only) upstream MIT components from https://github.com/satnaing/shadcn-admin , with the full original license in `oss/LICENSE.shadcn-admin`. Its Clerk demo auth is not imported. Existing Radix, React, Tailwind, Lucide, fonts are reused. **Refine Core v5 is a selected framework for subsequent versioned resource/auth/data providers, but is NOT INSTALLED yet, pending visual design acceptance, exact version/peer-dependency and lockfile checks.** This is a source-based interactive prototype, not yet the complete operational admin application.
+
+**Build & QA:** isolated `npm run build:office-demo` produces `dist-office-preview`; `npm run build` for the public site remains separate. Playwright targets 393px and 1280px, FA/EN admin navigation, independent FA/PS/EN/AR site preview, no horizontal overflow, safe design-only modal, in-memory module creation, no external network requests and screenshot review. CI result and exact deployment must be independently confirmed for the final PR head, not inferred from earlier tests.
+
+**Next gate:** Owner visual review of the complete source-based interface, then pin and integrate Refine-compatible resource and authorization adapters with existing Cloudflare Worker and Supabase while preserving HttpOnly cookies, RLS, audit and KAF-31 production release locks. New modules and workspaces remain expandable and replaceable under the global owner-approved OSS-first design rule.
