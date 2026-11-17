@@ -85,6 +85,30 @@ jobs:
         run: npm run test:seo
       - name: Verify optional intake form with intercepted API and synthetic challenge
         run: npm run test:intake-form
+      - name: Deploy Fajr Admin V2 fictional design to existing isolated QA Pages branch
+        # No customer/Production, database, secrets in browser or new Pages project.
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'work/fajr-office-main-aligned-20261031'
+        working-directory: web-v2
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          set -euo pipefail
+          test -s dist-office-preview/office-preview.html
+          test -d dist-office-preview/assets
+          test ! -e dist-office-preview/_worker.js
+          test ! -d dist-office-preview/functions
+          if [[ -z "${CLOUDFLARE_ACCOUNT_ID}" || -z "${CLOUDFLARE_API_TOKEN}" ]]; then
+            echo "FP_ADMIN_V2_DEPLOY=SKIPPED_MISSING_QA_CREDENTIALS"
+            exit 0
+          fi
+          npx --yes wrangler@4 pages deploy dist-office-preview \
+            --project-name=fajr-parsa-qa \
+            --branch=fp-admin-v2-review \
+            --commit-hash="$GITHUB_SHA"
+          echo "FP_ADMIN_V2_QA_PREVIEW_DEPLOYED (not Production)"
       - name: Save synthetic inbound visual QA for owner review
         if: always()
         uses: actions/upload-artifact@v4
