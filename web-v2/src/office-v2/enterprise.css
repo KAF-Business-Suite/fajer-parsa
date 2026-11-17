@@ -108,3 +108,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=tab]:focus-v
 .fpx-root[data-theme=dark] .fpx-empty,.fpx-root[data-theme=dark] .fpx-table-toolbar label{background:#223948;border-color:#385463}
 .fpx-root[data-theme=dark] .fpx-breadcrumb span,.fpx-root[data-theme=dark] .fpx-resource-domain{color:#a0b6c2}
 .fpx-root[data-theme=dark] .fpx-public{background:#fff;color:#15334c}
+
+/* S21 navigation acceptance: ensure bottom controls always win hit testing
+   above the noninteractive page footer during history scroll restoration. */
+.fpx-footer{pointer-events:none}
+@media(max-width:800px){
+ .fpx-mobile-tabs{position:fixed!important;inset-inline:0!important;bottom:0!important;z-index:100!important;isolation:isolate;pointer-events:auto!important}
+ .fpx-mobile-tabs button{position:relative;z-index:1;pointer-events:auto!important;min-height:45px}
+ .fpx-main{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+}
