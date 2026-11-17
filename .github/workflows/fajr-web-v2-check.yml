@@ -65,12 +65,16 @@ jobs:
         run: node --test tests/site-control-live-negative.mjs
       - name: Build the static site
         run: npm run build
+      - name: Build isolated Fajr Admin V2 design preview (does not alter public dist)
+        run: npm run build:office-demo
       - name: Install Chromium for local browser QA
         run: npx playwright install chromium
         # Ubuntu 24.04 GitHub runner provides shared Chromium libraries; avoid
         # apt package sets removed from the new Ubuntu 26.04 runner image.
       - name: Verify website UX with local browser and synthetic data
         run: npm run test:smoke
+      - name: Verify complete Admin V2 design shell at 393px and desktop (fictional only)
+        run: node --test tests/office-v2-preview.mjs
       - name: Verify PR14 candidate Office in Chromium with synthetic intercepted APIs
         run: node tests/office-live-browser.mjs
       - name: Verify Site Control QA on S21-sized and desktop Chromium, with synthetic intercepted APIs
@@ -91,6 +95,7 @@ jobs:
             web-v2/test-results/results.json
             web-v2/test-results/inbound-seo-results.json
             web-v2/test-results/fajr-site-settings-*.png
+            web-v2/test-results/fp-admin-v2-*.png
             web-v2/test-results/inbound-response.html
             web-v2/test-results/inbound-pages.log
           if-no-files-found: error
