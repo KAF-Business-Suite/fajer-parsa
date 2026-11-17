@@ -52,6 +52,7 @@ jobs:
         run: |
           node --test ../workers/fajr-office-qa/site-settings-api.test.mjs
           node --test tests/site-control-normalization.test.mjs
+          node --test tests/resource-registry.test.mjs
           node --check ../workers/fajr-office-qa/site-settings-api.mjs
           node --check ../workers/fajr-office-qa/site-settings-ui.mjs
           node --check ../workers/fajr-office-qa/worker.mjs
@@ -75,6 +76,8 @@ jobs:
         run: npm run test:smoke
       - name: Verify complete Admin V2 design shell at 393px and desktop (fictional only)
         run: node --test tests/office-v2-preview.mjs
+      - name: Verify Samsung S21 mobile multi-site preview with safe link/detach/reconnect and appearance
+        run: node --test tests/resource-center.mobile.mjs
       - name: Verify PR14 candidate Office in Chromium with synthetic intercepted APIs
         run: node tests/office-live-browser.mjs
       - name: Verify Site Control QA on S21-sized and desktop Chromium, with synthetic intercepted APIs
