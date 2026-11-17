@@ -93,3 +93,17 @@ Four languages with direction fa/ps/ar RTL and en LTR; avoid mixing numbers or t
 **Build & QA:** isolated `npm run build:office-demo` produces `dist-office-preview`; `npm run build` for the public site remains separate. Playwright targets 393px and 1280px, FA/EN admin navigation, independent FA/PS/EN/AR site preview, no horizontal overflow, safe design-only modal, in-memory module creation, no external network requests and screenshot review. CI result and exact deployment must be independently confirmed for the final PR head, not inferred from earlier tests.
 
 **Next gate:** Owner visual review of the complete source-based interface, then pin and integrate Refine-compatible resource and authorization adapters with existing Cloudflare Worker and Supabase while preserving HttpOnly cookies, RLS, audit and KAF-31 production release locks. New modules and workspaces remain expandable and replaceable under the global owner-approved OSS-first design rule.
+
+## 2026-11-18 — owner mobile-first multisite console clarification (supersedes narrower design sequencing)
+
+**Authoritative latest brief:** [FP_ADMIN_MOBILE_MULTISITE_DESIGN_DECISION.md](FP_ADMIN_MOBILE_MULTISITE_DESIGN_DECISION.md), adopted under [Global Governance v1.3 §14](https://github.com/KAF-Business-Suite/openai-cloudflare-github-hub/blob/main/docs/GLOBAL_PROJECT_AI_GOVERNANCE.md).
+
+**CRITICAL design hold**: Owner wants **real existing OSS admin/console previews shown and compared BEFORE any further redesign or integration**. Do not interpret the previous QA 45-module shell as final accepted design, and do not silently rebuild it. The existing preview remains a review baseline; no capabilities are to be removed, hidden permanently or deactivated for a styling choice.
+
+**Global resource model**: Console can register and later securely connect/detach multiple independent sites/apps/documents/integrations/workspaces across personal or business areas. Fajr Parsa is first resource, not hardcoded unique website. **Detach from console is never upstream site/app/domain/repository deletion**. External editing requires provider-side permission verification, scoped BFF access and action-specific security gate; URL alone gives read-only bookmark capability at most.
+
+**Priority**: modern, premium, rounded, calm and ergonomically efficient admin appearance; token-driven owner theme/font/density settings later; *complete first mobile Samsung S21 QA & visual owner acceptance*, responsive desktop safety smoke only until mobile PASS. Staff admin languages fa/en, public site fa/ps/en/ar independently. Keep 45 existing navigable modules and add future sections through an extensible registry; advanced functions may remain clearly inactive until their domain comes due.
+
+**Ready-made candidate baseline**: current React/Vite compatible MIT shadcn-admin, free MIT ReUI component reference (PRO excluded); Tabler MIT (Bootstrap) and Kiranism MIT (Next/Clerk) as comparative complete demo screens, not unreviewed live imports. Existing Supabase/Cloudflare auth & public-site release gate untouched. Further visual implementation **not authorized until owner chooses a full demo design direction**.
+
+**Current scope**: repository documentation/research/agent instruction lock only; no UI source edits, no QA re-deploy, no live connector, no database/Production/secret mutation. Track single existing KAF-35 gate; KAF-31 remains BLOCKED.
