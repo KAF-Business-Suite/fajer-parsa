@@ -34,7 +34,7 @@ test('S21: mobile resources, non-destructive detach/relink, appearance, native B
    await dialog.getByRole('alert').filter({hasText:'HTTPS'}).waitFor()
    await dialog.locator('input[name="resourceUrl"]').fill('https://example.com/mobile')
    await dialog.getByRole('button',{name:'افزودن به کنسول'}).click()
-   await page.getByRole('heading',{name:'Second QA Site'}).waitFor()
+   await page.locator('.fpx-resource-detail-head [data-slot="card-title"]').filter({hasText:'Second QA Site'}).waitFor()
    await page.getByText('مالکیت و اختیار ویرایش هنوز تأیید نشده است.',{exact:false}).waitFor()
    assert.equal(await page.getByText('تا تأیید مجوز غیرفعال').count(),5)
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-resource-detail.png',fullPage:true})
