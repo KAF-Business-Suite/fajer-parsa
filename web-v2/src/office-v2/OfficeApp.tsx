@@ -126,7 +126,7 @@ export default function OfficeApp(){
             <button type="button" className="fp-button fp-button-primary" onClick={()=>module==='website'?setOpenReview(true):flash(p.notLive)}><ArrowUpRight size={17}/>{module==='website'?p.recheck:c.start}</button>
           </div>
         </div>
-        {module==='overview'&&<Overview c={c} p={p} go={switchTo}/>}
+        {module==='overview'&&<Overview c={c} p={p} lang={lang} go={switchTo}/>}
         {module==='website'&&<Website c={c} p={p} lang={lang} tab={siteTab} setTab={setSiteTab} onReview={()=>setOpenReview(true)}/>}
         {module==='settings'&&<SettingsPreview c={c} p={p} lang={lang} go={switchTo}/>}
         {module!=='overview'&&module!=='website'&&module!=='settings'&&<ModulePreview c={c} p={p} module={module} lang={lang} go={switchTo}/>}
@@ -136,7 +136,7 @@ export default function OfficeApp(){
     <nav className="fp-bottom-nav" aria-label={c.menu}>
       {(['overview','requests','customers','website','settings'] as const).map(id=>{
         const Icon=iconFor[id]
-        return <button key={id} type="button" className={'fp-tab '+(id===module?'active':'')} onClick={()=>switchTo(id)} aria-current={id===module?'page':undefined}>
+        return <button key={id} type="button" className={'fp-tab '+((id===module||id==='settings'&&!(['overview','requests','customers','website'] as string[]).includes(module))?'active':'')} onClick={()=>id==='settings'?setDrawer(true):switchTo(id)} aria-current={(id===module||id==='settings'&&!(['overview','requests','customers','website'] as string[]).includes(module))?'page':undefined}>
           <Icon size={20}/><span>{id==='settings'?c.menu:id==='overview'?c.home:labelFor(id,lang)}</span>
         </button>
       })}
@@ -170,7 +170,7 @@ export default function OfficeApp(){
 type C=Record<string,string>
 function StatCard({icon:Icon,title,desc}:{icon:LucideIcon;title:string;desc:string}){return <article className="fp-stat"><div className="fp-stat-head"><span>{title}</span><span className="fp-stat-icon"><Icon size={18}/></span></div><strong>—</strong><small>{desc}</small></article>}
 
-function Overview({c,p,go}:{c:C;p:typeof pageCopy['fa'];go:(v:ModuleId)=>void}){
+function Overview({c,p,lang,go}:{c:C;p:typeof pageCopy['fa'];lang:Lang;go:(v:ModuleId)=>void}){
  return <div className="fp-stacked">
    <div className="fp-stats">
     <StatCard icon={Inbox} title={c.inbox} desc={p.notLive}/>
@@ -186,7 +186,7 @@ function Overview({c,p,go}:{c:C;p:typeof pageCopy['fa'];go:(v:ModuleId)=>void}){
      <section className="fp-panel">
        <header className="fp-panel-header"><div><span className="fp-eyebrow">QUICK ACCESS</span><h2>{c.quick}</h2></div></header>
        <div className="fp-quick-grid">
-        {(['requests','customers','website','reports'] as const).map(id=>{const Icon=iconFor[id];return <button key={id} type="button" onClick={()=>go(id)}><span className="fp-quick-icon"><Icon size={20}/></span><strong>{labelFor(id,'fa')==='X'?id:labelFor(id,document.documentElement.lang as Lang||'fa')}</strong><ArrowUpRight size={16}/></button>})}
+        {(['requests','customers','website','reports'] as const).map(id=>{const Icon=iconFor[id];return <button key={id} type="button" onClick={()=>go(id)}><span className="fp-quick-icon"><Icon size={20}/></span><strong>{labelFor(id,lang)}</strong><ArrowUpRight size={16}/></button>})}
        </div>
        <div className="fp-mini-note"><ShieldCheck size={18}/><span>{c.deployLocked}</span></div>
      </section>
@@ -224,7 +224,7 @@ function Website({c,p,lang,tab,setTab,onReview}:{c:C;p:typeof pageCopy['fa'];lan
 }
 
 function SettingsPreview({c,p,lang}:{c:C;p:typeof pageCopy['fa'];lang:Lang;go:(x:ModuleId)=>void}){
- const cells=[['owner',c.owner,'approve','✓'],['staff',lang==='en'?'Staff':c.workspace,'view','✓'],['finance',c.finance||'Finance','limited','—']] as const
+ const cells=[['owner',c.owner,'approve','✓'],['staff',lang==='en'?'Staff':c.workspace,'view','✓'],['finance',labelFor('finance',lang),'limited','—']] as const
  return <div className="fp-two-cols">
   <section className="fp-panel"><header className="fp-panel-header"><div><span className="fp-eyebrow">ACCESS CONTROL</span><h2>{c.permission}</h2></div><ShieldCheck size={23}/></header>
   <div className="fp-role-table">{cells.map(([id,name,level,approved])=><div className="fp-role-row" key={id}><span className="fp-avatar-sm">{id.slice(0,2).toUpperCase()}</span><div><strong>{name}</strong><small>{level}</small></div><span>{approved}</span></div>)}</div>
