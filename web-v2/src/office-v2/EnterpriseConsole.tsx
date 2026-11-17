@@ -157,6 +157,8 @@ export default function EnterpriseConsole(){
  const [lang,setLang]=useState<AdminLanguage>('fa')
  const [resources,setResources]=useState<PreviewResource[]>(()=>previewSeed.map(x=>({...x})))
  const [appearance,setAppearance]=useState<PreviewStyle>(defaultStyle)
+ const [systemDark,setSystemDark]=useState(()=>window.matchMedia?.('(prefers-color-scheme: dark)').matches??false)
+ useEffect(()=>{const q=window.matchMedia('(prefers-color-scheme: dark)');const change=()=>setSystemDark(q.matches);q.addEventListener('change',change);return()=>q.removeEventListener('change',change)},[])
  const [featureId,setFeatureId]=useState(()=>{
    const hash=decodeURIComponent(location.hash.replace(/^#\/?/,''))
    return features.some(x=>x.id===hash)?hash:'overview'
@@ -211,7 +213,7 @@ export default function EnterpriseConsole(){
   if(featureId==='resources'||featureId==='designsystem')return null
   return <div className="fpx-content-head"><div><div className="fpx-overline">{tx.workspace} / {groups.find(g=>g.id===current.group)?.name[lang]}</div><h1>{featureId==='overview'?tx.heading:label}</h1><p>{featureId==='overview'?tx.subtitle:current.description[lang]}</p></div><div className="fpx-content-actions"><span className="fpx-state-pill"><span/>{tx.pending}</span><button type="button" onClick={()=>setModal(current.mode==='publishing'||current.mode==='website'?'publish':'create')}><Plus size={16}/>{current.mode==='website'||current.mode==='publishing'?tx.review:tx.add}</button></div></div>
  }
- return <div className={'fpx-root '+(collapsed?'is-collapsed':'')} dir={dir} data-theme={appearance.mode} data-tone={appearance.accent} data-density={appearance.density} data-corners={appearance.corners} data-font={appearance.font}>
+ return <div className={'fpx-root '+(collapsed?'is-collapsed':'')} dir={dir} data-theme={appearance.mode==='system'?(systemDark?'dark':'light'):appearance.mode} data-tone={appearance.accent} data-density={appearance.density} data-corners={appearance.corners} data-font={appearance.font}>
   <aside className="fpx-sidebar">{sidebar()}</aside>
   <div className="fpx-frame">
    <header className="fpx-header"><button type="button" className="fpx-icon-button fpx-menu-mobile" onClick={()=>setMobileMenu(true)} aria-label={tx.menu}><Menu size={22}/></button>
