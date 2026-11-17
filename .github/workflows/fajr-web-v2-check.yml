@@ -51,6 +51,7 @@ jobs:
       - name: Test owner website settings API and check UI/module syntax
         run: |
           node --test ../workers/fajr-office-qa/site-settings-api.test.mjs
+          node --test tests/site-control-normalization.test.mjs
           node --check ../workers/fajr-office-qa/site-settings-api.mjs
           node --check ../workers/fajr-office-qa/site-settings-ui.mjs
           node --check ../workers/fajr-office-qa/worker.mjs
@@ -65,7 +66,9 @@ jobs:
       - name: Build the static site
         run: npm run build
       - name: Install Chromium for local browser QA
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
+        # Ubuntu 24.04 GitHub runner provides shared Chromium libraries; avoid
+        # apt package sets removed from the new Ubuntu 26.04 runner image.
       - name: Verify website UX with local browser and synthetic data
         run: npm run test:smoke
       - name: Verify PR14 candidate Office in Chromium with synthetic intercepted APIs
