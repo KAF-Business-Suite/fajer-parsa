@@ -2,8 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import '@fontsource-variable/vazirmatn'
 import '@fontsource-variable/manrope'
-import OfficeApp from './OfficeApp'
+import EnterpriseConsole from './EnterpriseConsole'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
- <React.StrictMode><OfficeApp/></React.StrictMode>,
+ <React.StrictMode><EnterpriseConsole/></React.StrictMode>,
 )
