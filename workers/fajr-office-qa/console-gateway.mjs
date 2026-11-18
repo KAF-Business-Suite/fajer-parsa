@@ -57,7 +57,12 @@ export async function handlePrivateConsole(request,env,services,transport=fetch)
  const isSourceCheck=url.pathname===QA_SOURCE_CHECK;
  if(!isPage&&!isAsset&&!isSourceCheck)return null;
  if(request.method!=='GET')return fail(405,services.security,'method');
- if(url.search)return fail(400,services.security,'query');
+ // Browsers, installed apps and chat link wrappers can append benign tracking
+ // parameters to /console. Ignore them: no parameter is ever forwarded to Auth,
+ // used for a redirect, or sent to the immutable Pages origin. Access is ALWAYS
+ // rechecked with the encrypted HttpOnly cookie and live owner role.
+ // Keep the strict query ban on the /assets proxy and QA source probe.
+ if(url.search&&!isPage)return fail(400,services.security,'query');
  if(isSourceCheck){
   const h=headersFor(services.security,'application/json; charset=utf-8');
   try{
