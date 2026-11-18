@@ -58,6 +58,7 @@ jobs:
           node --check ../workers/fajr-office-qa/resource-provider-api.mjs
           node --check ../workers/fajr-office-qa/site-settings-ui.mjs
           node --check ../workers/fajr-office-qa/worker.mjs
+          node --check ../workers/fajr-office-qa/resources-ui.mjs
       - name: Typecheck server-only office boundary
         run: npx tsc --noEmit --target es2022 --lib es2022,dom --module esnext --moduleResolution bundler --allowImportingTsExtensions --strict --skipLibCheck server/office/handler.ts server/office/adapters.ts server/office/pages-entry.ts
       - name: Verify live Worker anonymous denials; strict BFF check only on explicit QA release acceptance
@@ -80,6 +81,8 @@ jobs:
         run: node --test tests/office-v2-preview.mjs
       - name: Verify Samsung S21 mobile multi-site preview with safe link/detach/reconnect and appearance
         run: node --test tests/resource-center.mobile.mjs
+      - name: Verify private connected-resources interface at S21 widths without real customer data
+        run: node --test tests/private-resources.mobile.mjs
       - name: Verify PR14 candidate Office in Chromium with synthetic intercepted APIs
         run: node tests/office-live-browser.mjs
       - name: Verify Site Control QA on S21-sized and desktop Chromium, with synthetic intercepted APIs
