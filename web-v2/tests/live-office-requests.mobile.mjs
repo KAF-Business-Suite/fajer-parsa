@@ -52,6 +52,19 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
    mode='owner'
    await page.getByRole('button',{name:'تازه‌سازی'}).click()
    await page.getByText('QA Synthetic Service').waitFor()
+   // FP-TYPE-01: the exact Arabic + Latin variable font must load locally in QA.
+   await page.evaluate(()=>document.fonts.ready)
+   const fontAudit=await page.evaluate(()=>{
+    const family=getComputedStyle(document.querySelector('.fpx-root')).fontFamily
+    const titleFamily=getComputedStyle(document.querySelector('.fpx-live-office-top h2')).fontFamily
+    const buttonFamily=getComputedStyle(document.querySelector('.fpx-mobile-tabs button.active')).fontFamily
+    return {family,titleFamily,buttonFamily,arabic:document.fonts.check('600 16px "Estedad Variable"','درخواست‌ها'),latin:document.fonts.check('600 16px "Estedad Variable"','Fajr Parsa')}
+   })
+   assert.ok(fontAudit.family.includes('Estedad Variable'),JSON.stringify(fontAudit))
+   assert.ok(fontAudit.titleFamily.includes('Estedad Variable'),JSON.stringify(fontAudit))
+   assert.ok(fontAudit.buttonFamily.includes('Estedad Variable'),JSON.stringify(fontAudit))
+   assert.equal(fontAudit.arabic,true,JSON.stringify(fontAudit))
+   assert.equal(fontAudit.latin,true,JSON.stringify(fontAudit))
    assert.match(await page.locator('.fpx-live-office-count').innerText(),/1/)
    assert.equal(await page.locator('html').getAttribute('dir'),'rtl')
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true,'No mobile horizontal overflow')
