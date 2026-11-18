@@ -1,5 +1,6 @@
 import {handleSiteControl} from './site-settings-api.mjs';
 import {handleFajrPagesRead} from './resource-provider-api.mjs';
+import {handleKafCasesRead} from './kaf-cases-api.mjs';
 import {SITE_HTML,SITE_CSS,SITE_JS} from './site-settings-ui.mjs';
 import {RESOURCE_HTML,RESOURCE_CSS,RESOURCE_JS} from './resources-ui.mjs';
 import {handlePrivateConsole} from './console-gateway.mjs';
@@ -238,6 +239,8 @@ export default {async fetch(request,env){
  if(siteControl)return siteControl;
  const providerRead=await handleFajrPagesRead(request,env,{guard,parseSession,publicKey,restore,clearCookie,err,ok});
  if(providerRead)return providerRead;
+ const casesRead=await handleKafCasesRead(request,env,{guard,parseSession,publicKey,restore,clearCookie,err,ok});
+ if(casesRead)return casesRead;
 
 
  // All staff data now passes through the encrypted-cookie BFF; no JWT reaches browser code.
