@@ -51,9 +51,11 @@ jobs:
       - name: Test owner website settings API and check UI/module syntax
         run: |
           node --test ../workers/fajr-office-qa/site-settings-api.test.mjs
+          node --test ../workers/fajr-office-qa/resource-provider-api.test.mjs
           node --test tests/site-control-normalization.test.mjs
           node --test tests/resource-registry.test.mjs
           node --check ../workers/fajr-office-qa/site-settings-api.mjs
+          node --check ../workers/fajr-office-qa/resource-provider-api.mjs
           node --check ../workers/fajr-office-qa/site-settings-ui.mjs
           node --check ../workers/fajr-office-qa/worker.mjs
       - name: Typecheck server-only office boundary
