@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react'
-import {CheckCircle2,Clock3,ExternalLink,Fingerprint,KeyRound,LockKeyhole,
+import {CheckCircle2,Clock3,Fingerprint,KeyRound,LockKeyhole,
  RefreshCw,ShieldCheck,ShieldAlert,LogOut,Mail,Link2,Smartphone} from 'lucide-react'
 import type {AdminLanguage} from './console-model'
 import {readSecurityOverview} from './security-overview'
@@ -108,7 +108,7 @@ export function SecurityCenter({lang,privateOffice}:{lang:AdminLanguage;privateO
   <div className="fpx-security-subheading"><h2>{tx.methods}</h2></div>
   <div className="fpx-security-methods">
    <article><KeyRound size={21}/><div><strong>{tx.emailPassword}</strong><small>{tx.passwordReady}</small></div></article>
-   {providers.map(([id,name])=><article key={id}><Link2 size={21}/><div><strong>{name}</strong><small>{data?.linkedProviders.includes(id as SecurityOverview['linkedProviders'][number])?tx.linked:tx.notLinked}</small></div></article>)}
+   {providers.map(([id,name])=><article key={id}><Link2 size={21}/><div><strong>{name}</strong><small>{!data?tx.unknown:data.linkedProviders.includes(id as SecurityOverview['linkedProviders'][number])?tx.linked:tx.notLinked}</small></div></article>)}
   </div>
   <div className="fpx-security-subheading"><h2>{tx.options}</h2></div>
   <div className="fpx-security-methods">
