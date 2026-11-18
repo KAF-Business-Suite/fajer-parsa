@@ -164,3 +164,109 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=tab]:focus-v
 .fpx-root[data-theme=dark] .fpx-live-office{background:#1e3545;border-color:#365267}
 .fpx-root[data-theme=dark] .fpx-live-office-top h2,.fpx-root[data-theme=dark] .fpx-live-office-row strong,.fpx-root[data-theme=dark] .fpx-live-office-fields p{color:#eaf2f7}
 .fpx-root[data-theme=dark] .fpx-live-office-item,.fpx-root[data-theme=dark] .fpx-live-office-message{background:#264254;border-color:#365267;color:#d1e1e9}
+
+
+/* FP-ADMIN M-04 | compact premium mobile console — existing S21 shell only.
+   Touch targets remain at least 44 CSS px; bottom nav remains five routes.
+   Visual selection follows the ACTUAL hash (Requests is a real first-class tab).
+   Keep the existing QA/private API, storage, auth and production boundaries. */
+@media(max-width:800px){
+ .fpx-header{height:56px;min-height:56px;padding-inline:12px;gap:7px}
+ .fpx-breadcrumb strong{font-size:14px;font-weight:800}
+ .fpx-header .fpx-menu-mobile{width:44px;min-width:44px;height:44px;border-radius:12px}
+ .fpx-header .fpx-lang-switch{height:36px;padding:5px 8px;border-radius:11px}
+ .fpx-header .fpx-avatar{height:34px;width:34px}
+ .fpx-main{padding:12px 12px calc(85px + env(safe-area-inset-bottom))}
+ .fpx-content-head{margin-bottom:13px;gap:8px}
+ .fpx-content-head h1{font-size:21px;line-height:1.35}
+ .fpx-warning{margin-bottom:13px;border-radius:15px}
+ .fpx-root[data-office=private] .fpx-warning{
+   display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;row-gap:3px;
+   margin-bottom:9px;padding:8px 11px;align-items:center;line-height:1.4
+ }
+ .fpx-root[data-office=private] .fpx-warning-label{font-size:11px;gap:5px}
+ .fpx-root[data-office=private] .fpx-warning-copy{grid-column:1 / -1;font-size:10px;color:#82745d;line-height:1.45}
+ .fpx-root[data-office=private] .fpx-warning-lock{grid-column:2;grid-row:1;margin:0;font-size:10px;justify-self:end;white-space:nowrap;gap:3px}
+ .fpx-root[data-office=private] .fpx-private-shortcuts{
+   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+   margin:0 0 12px;gap:7px;min-width:0
+ }
+ .fpx-root[data-office=private] .fpx-private-shortcuts a,
+ .fpx-root[data-office=private] .fpx-private-shortcuts button{
+   min-width:0;min-height:48px;box-sizing:border-box;padding:5px 3px;
+   border-radius:12px;display:flex;flex-direction:column;align-items:center;
+   justify-content:center;gap:2px;line-height:1.15;text-align:center;
+   font-size:10.5px;font-weight:750;color:#285c68;
+   background:#fff;box-shadow:0 2px 8px #1b40500a
+ }
+ .fpx-root[data-office=private] .fpx-private-shortcuts svg{flex:0 0 auto;color:var(--fpx-selected,#167c76)}
+ .fpx-root[data-office=private] .fpx-private-shortcuts span{
+   display:block;max-width:100%;overflow-wrap:break-word;white-space:normal
+ }
+ .fpx-live-office{padding:14px;border-radius:17px}
+ .fpx-live-office-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:9px}
+ .fpx-live-office-top>div{min-width:0}
+ .fpx-live-office-mark{font-size:10px;gap:4px}
+ .fpx-live-office-top h2{font-size:18px;line-height:1.4;margin:5px 0 3px}
+ .fpx-live-office-top p{font-size:11px;line-height:1.6}
+ .fpx-live-office-top button{
+   min-width:44px;min-height:44px;padding:0 10px;border-radius:13px;
+   font-size:0;gap:0;align-self:start;justify-content:center
+ }
+ .fpx-live-office-top button svg{width:19px;height:19px}
+ .fpx-live-office-count{margin:13px 0 9px;font-size:11.5px}
+ .fpx-live-office-message{padding:13px;margin-top:12px;font-size:12px}
+ .fpx-live-office-items{gap:8px}
+ .fpx-live-office-item{padding:12px;border-radius:12px}
+ .fpx-live-office-fields{margin:10px 0}
+ .fpx-footer{margin-top:14px}
+ .fpx-mobile-tabs{
+   height:calc(60px + env(safe-area-inset-bottom))!important;
+   box-sizing:border-box;padding:3px 6px calc(2px + env(safe-area-inset-bottom));
+   background:#fff;border-top:1px solid #e4e9ec;box-shadow:0 -3px 16px #193e4a0b;
+   gap:2px
+ }
+ .fpx-mobile-tabs button{
+   min-height:48px;height:54px;min-width:0;padding:2px 0;gap:1px;
+   border-radius:10px;background:transparent!important;color:#718896;
+   font-size:10px;line-height:1.2;transition:color .18s ease
+ }
+ .fpx-mobile-tabs .fpx-nav-visual{
+   width:min(48px,95%);min-width:0;height:27px;border-radius:999px;
+   display:grid;place-items:center;overflow:visible;background:transparent;
+   transform:translateY(0) scale(1);
+   transition:background .18s ease,transform .18s ease,color .18s ease
+ }
+ .fpx-mobile-tabs .fpx-nav-label{
+   display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+   white-space:nowrap;font-size:10px;font-weight:650
+ }
+ .fpx-mobile-tabs button.active{background:transparent!important;color:var(--fpx-selected,#197e73)!important}
+ .fpx-mobile-tabs button.active .fpx-nav-visual{
+   color:var(--fpx-selected,#197e73);background:var(--fpx-selected-bg,#e6f5f0);
+   transform:translateY(-1px) scale(1.04)
+ }
+ .fpx-mobile-tabs button.active .fpx-nav-label{font-weight:850;color:var(--fpx-selected,#197e73)}
+ .fpx-drawer-list button.active{
+   background:var(--fpx-selected-bg,#e6f5f0);color:var(--fpx-selected,#197e73);
+   font-weight:850;border-inline-start:3px solid var(--fpx-selected,#197e73)
+ }
+ .fpx-drawer-list button{min-height:44px}
+ .fpx-root[data-theme=dark] .fpx-private-shortcuts a,
+ .fpx-root[data-theme=dark] .fpx-private-shortcuts button{
+   background:#244651;border-color:#40606b;color:#daebf0
+ }
+ .fpx-root[data-theme=dark] .fpx-live-office-top p,
+ .fpx-root[data-theme=dark] .fpx-warning-copy{color:#b5c6ce}
+ .fpx-root[data-theme=dark] .fpx-mobile-tabs{background:#172b39;border-color:#304757}
+ .fpx-root[data-theme=dark] .fpx-mobile-tabs button{color:#b3c5d0}
+ .fpx-root[data-theme=dark] .fpx-mobile-tabs button.active .fpx-nav-visual{background:#275c59;color:#d3f4e8}
+}
+@media(max-width:340px){
+ .fpx-root[data-office=private] .fpx-private-shortcuts{gap:4px}
+ .fpx-root[data-office=private] .fpx-private-shortcuts a,
+ .fpx-root[data-office=private] .fpx-private-shortcuts button{font-size:9.5px}
+}
+@media(prefers-reduced-motion:reduce){
+ .fpx-mobile-tabs button,.fpx-mobile-tabs .fpx-nav-visual{transition:none!important;transform:none!important}
+}
