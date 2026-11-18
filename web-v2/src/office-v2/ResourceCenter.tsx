@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useState} from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
-import {Globe2,AppWindow,Files,Plug2,Plus,Search,ArrowLeft,ArrowRight,ShieldCheck,ShieldAlert,Unplug,RefreshCw,LockKeyhole,CheckCircle2,ExternalLink,ChevronLeft,ChevronRight,Layers3,SlidersHorizontal,X,Trash2,FileText,Image,Settings2,History,Activity,Palette,Sun,Moon,Monitor,Check,LayoutGrid} from 'lucide-react'
+import {Globe2,AppWindow,Files,Plug2,Plus,Search,ArrowLeft,ArrowRight,ShieldCheck,ShieldAlert,Unplug,RefreshCw,LockKeyhole,CheckCircle2,ExternalLink,ChevronLeft,ChevronRight,Layers3,SlidersHorizontal,X,Trash2,FileText,Image,Settings2,History,Activity,Palette,Sun,Moon,Check,LayoutGrid} from 'lucide-react'
 import {Card,CardContent,CardHeader,CardTitle} from './oss/card'
 import {Input} from './oss/input'
 import {addBookmark,detachFromConsole,relinkInConsole,previewSeed} from './resource-registry'
@@ -15,7 +15,7 @@ type ResourceProps={
  onToast:(text:string)=>void;
 }
 export type PreviewStyle={mode:'light'|'dark'|'system';accent:'jade'|'ocean'|'champagne';density:'comfortable'|'compact';corners:'rounded'|'extra';font:'estedad'}
-export const defaultStyle:PreviewStyle={mode:'light',accent:'jade',density:'comfortable',corners:'rounded',font:'estedad'}
+export const defaultStyle:PreviewStyle={mode:'light',accent:'champagne',density:'comfortable',corners:'rounded',font:'estedad'}
 const copy={
  fa:{
   title:'منابع و سایت‌های من',sub:'تمام سایت‌ها، اپلیکیشن‌ها و منابع زیر یک کنسول؛ بدون انتقال مالکیت.',
@@ -194,15 +194,15 @@ type ThemeProps={lang:L;value:PreviewStyle;onChange:(v:PreviewStyle)=>void}
 const themes={
  fa:{title:'ظاهر و شخصی‌سازی',sub:'تنظیمات نمونهٔ پنل، بدون تغییر داده‌ها یا سایت عمومی.',
   mode:'حالت نمایش',light:'روشن',dark:'تاریک',system:'سیستم',accent:'رنگ اصلی',jade:'یشمی',ocean:'آبی',champagne:'شامپاینی',density:'تراکم اطلاعات',comfortable:'راحت',compact:'فشرده',
-  corners:'گوشه‌ها',rounded:'گرد',extra:'گردتر',font:'فونت رسمی',estedad:'استعداد',sample:'تغییرات در همین پیش‌نمایش دیده می‌شوند.',note:'در نسخهٔ واقعی پس از تأیید، تنظیمات به پروفایل مالک منتقل می‌شوند.'},
+  corners:'گوشه‌ها',rounded:'گرد',extra:'گردتر',font:'فونت رسمی',estedad:'استعداد',sample:'یک هویت شرکتی؛ دو حالت روشن و تاریک.',note:'این ترجیحات ظاهری فقط در همین مرورگر ذخیره می‌شوند؛ با حساب مالک همگام نشده‌اند.'},
  en:{title:'Appearance & personalization',sub:'Preview console settings without touching any business data or public website.',
   mode:'Appearance',light:'Light',dark:'Dark',system:'System',accent:'Accent color',jade:'Jade',ocean:'Ocean',champagne:'Champagne',density:'Information density',comfortable:'Comfortable',compact:'Compact',
-  corners:'Corners',rounded:'Rounded',extra:'Extra rounded',font:'Official typography',estedad:'Estedad',sample:'Changes apply to this demo only.',note:'Approved preferences can later be saved to the authorized owner profile.'}
+  corners:'Corners',rounded:'Rounded',extra:'Extra rounded',font:'Official typography',estedad:'Estedad',sample:'One corporate identity with Light and Dark.',note:'Appearance preferences stay in this browser only; they are not synced to the owner profile.'}
 } as const
 export function ThemeLab({lang,value,onChange}:ThemeProps){
  const tx=themes[lang]
  const groups:{key:keyof PreviewStyle;items:string[]}[]=[
-  {key:'mode',items:['light','dark','system']},{key:'accent',items:['jade','ocean','champagne']},
+  {key:'mode',items:['light','dark']},
   {key:'density',items:['comfortable','compact']},{key:'corners',items:['rounded','extra']},
   // FP-TYPE-01: one approved brand font; no switching to inconsistent UI families.
  ]
@@ -211,7 +211,7 @@ export function ThemeLab({lang,value,onChange}:ThemeProps){
   <div className="fpx-theme-sections">{groups.map(group=><Card key={group.key} className="fpx-theme-card">
    <CardHeader><CardTitle>{tx[group.key]}</CardTitle></CardHeader>
    <CardContent><div className="fpx-theme-options">{group.items.map(item=><button key={item} type="button" className={value[group.key]===item?'active':''} onClick={()=>onChange({...value,[group.key]:item})}>
-    {group.key==='mode'?(item==='light'?<Sun size={16}/>:item==='dark'?<Moon size={16}/>:<Monitor size={16}/>):group.key==='accent'?<span className={'fpx-theme-swatch '+item}/>:<SlidersHorizontal size={16}/>}
+    {group.key==='mode'?(item==='light'?<Sun size={16}/>:<Moon size={16}/>):<SlidersHorizontal size={16}/>}
     {tx[item as keyof typeof tx]}{value[group.key]===item&&<Check size={15}/>}
    </button>)}</div></CardContent>
   </Card>)}</div>
