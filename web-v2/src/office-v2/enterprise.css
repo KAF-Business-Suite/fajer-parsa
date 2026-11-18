@@ -317,3 +317,29 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=tab]:focus-v
 .fpx-root[data-theme=dark] .fpx-live-site-top h1,.fpx-root[data-theme=dark] .fpx-live-site-tile strong{color:#eaf2f7}
 .fpx-root[data-theme=dark] .fpx-live-site-tile,.fpx-root[data-theme=dark] .fpx-live-site-feedback{background:#284555;border-color:#385669;color:#d6e7ed}
 .fpx-root[data-theme=dark] .fpx-live-site-footer a{background:#215d52;color:#ebf8f4;border-color:#397b6b}
+
+
+/* FP-ADMIN-G6 — audit-backed, explicit Office status change; unchanged S21 shell. */
+.fpx-live-office-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.fpx-live-office-actions button{min-height:40px;border:1px solid #bcded4;border-radius:10px;background:#edf8f3;color:#146f62;font-size:12px;font-weight:750;padding:8px 12px}
+.fpx-live-office-actions button:disabled{opacity:.45}
+.fpx-live-office-feedback{font-size:12px;line-height:1.8;margin:15px 0 0;border-radius:11px;padding:11px 13px;border:1px solid #c5e0d2;background:#f0faf5;color:#166e56}
+.fpx-live-office-feedback[data-kind=error]{border-color:#e3cbb3;background:#fff9f2;color:#88562c}
+.fpx-office-dialog-overlay{position:fixed;inset:0;z-index:10000;background:rgba(8,25,41,.63);backdrop-filter:blur(4px)}
+.fpx-office-dialog{position:fixed;inset-inline:0;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10001;width:min(440px,calc(100vw - 30px));max-height:calc(100dvh - 48px);overflow:auto;border-radius:18px;padding:20px;background:#fff;border:1px solid #d9e5e6;box-shadow:0 24px 72px #112c4550;color:#284858;font-family:'Estedad Variable',system-ui,sans-serif}
+.fpx-office-dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.fpx-office-dialog-heading [data-radix-dialog-title]{font-size:18px;font-weight:800}
+.fpx-office-dialog-heading button{border:0;background:#f0f5f5;border-radius:10px;display:grid;place-items:center;width:40px;height:40px}
+.fpx-office-dialog [data-radix-dialog-description]{font-size:12px;line-height:1.85;color:#617d8a;margin:0 0 20px}
+.fpx-office-dialog-field{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;margin:12px 0;min-width:0}
+.fpx-office-dialog-field>span{font-weight:700}
+.fpx-office-dialog-field>strong{color:#197466}
+.fpx-office-dialog-field select{width:min(210px,60%);height:44px;border-radius:10px;border:1px solid #bfcfd7;background:#fff;color:#234959;font-family:inherit;font-size:13px;padding:6px 10px}
+.fpx-office-dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+.fpx-office-dialog-actions button{min-height:44px;border:1px solid #cad6dc;border-radius:10px;background:#f4f8f8;color:#446470;padding:10px 16px;font-size:12px;font-weight:750;display:inline-flex;align-items:center;gap:7px;font-family:inherit}
+.fpx-office-dialog-actions button[type=submit]{background:#176d63;color:white;border-color:#176d63}
+.fpx-office-dialog-actions button:disabled{opacity:.45;cursor:not-allowed}
+.fpx-root[data-theme=dark] .fpx-live-office-actions button{background:#254d48;color:#d3f1e7;border-color:#457b70}
+.fpx-root[data-theme=dark] .fpx-live-office-feedback{background:#285047;border-color:#376d59;color:#d7f3e8}
+@media(max-width:540px){.fpx-office-dialog{padding:16px}.fpx-office-dialog-actions{justify-content:stretch}.fpx-office-dialog-actions button{flex:1;justify-content:center}}
+@media(prefers-reduced-motion:reduce){.fpx-office-dialog-overlay{backdrop-filter:none}}
