@@ -10,7 +10,7 @@
  */
 const PROJECT='fajr-parsa-qa';
 const PATH='/api/resources/providers/cloudflare/fajr-parsa-qa';
-const OWNER_AUTHZ='https://krzxajtrhvupyywovdzy.supabase.co/rest/v1/rpc/fajr_site_control';
+const OWNER_AUTHZ='https://krzxajtrhvupyywovdzy.supabase.co/rest/v1/rpc/fajr_resource_owner_check';
 const API_ORIGIN='https://api.cloudflare.com';
 
 const validAccountId=(id)=>typeof id==='string'&&/^[0-9a-f]{32}$/.test(id);
@@ -30,12 +30,12 @@ export async function handleFajrPagesRead(request,env,services,transport=fetch){
   const session=await services.restore(request,env,transport,publicKey,sealed);
   if(session.error)return services.err(session.error,session.error===401?'sign_in_required':'office_unavailable',
    session.error===401?services.clearCookie():null);
-  // This established SQL RPC is isolated to Fajr and fail-closed for unrelated
-  // companies and staff. Owner must have canEdit AND canPublish for admin probe.
+  // Dedicated read-only SQL RPC enforces active Fajr membership and the CURRENT
+  // business_members.role='owner' on every call, not just a stale publish flag.
   const role=await transport(OWNER_AUTHZ,{
    method:'POST',
    headers:{apikey:publicKey,Authorization:'Bearer '+session.value.access,'Content-Type':'application/json',Accept:'application/json'},
-   body:JSON.stringify({p_action:'read',p_payload:{}}),
+   body:JSON.stringify({}),
    redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(8000)
   });
   if(!role.ok){
@@ -43,8 +43,8 @@ export async function handleFajrPagesRead(request,env,services,transport=fetch){
    if(role.status===403||role.status===400)return services.err(403,'access_denied');
    return services.err(503,'resource_auth_unavailable');
   }
-  const rights=await role.json().catch(()=>null);
-  if(rights?.canEdit!==true||rights?.canPublish!==true)return services.err(403,'access_denied');
+  const isCurrentOwner=await role.json().catch(()=>null);
+  if(isCurrentOwner!==true)return services.err(403,'access_denied');
   // Owner role is established; the API stays closed until a dedicated,
   // server-side Pages READ token + account ID are provisioned by an operator.
   if(!validAccountId(env?.FAJR_CLOUDFLARE_ACCOUNT_ID)||!validToken(env?.FAJR_CLOUDFLARE_READ_TOKEN))
