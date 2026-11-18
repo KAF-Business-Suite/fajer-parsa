@@ -37,6 +37,11 @@
 
 /* Only surfaces and colors: no width, height, padding, direction or position
  * changes to the owner's accepted S21 and responsive desktop shell. */
+/* Explicit state selector beats older .fpx-root[data-theme=dark] static
+ * background declarations without changing geometry or original vendor CSS. */
+.fpx-root:is([data-theme="light"],[data-theme="dark"]){
+  background:var(--fpx-canvas) !important;
+}
 .fpx-root{
   background:var(--fpx-canvas);
   color:var(--fpx-ink);
