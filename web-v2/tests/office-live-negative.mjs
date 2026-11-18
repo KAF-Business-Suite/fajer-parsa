@@ -3,9 +3,22 @@ import assert from 'node:assert/strict'
 const root='https://fajr-office-qa.khoojafahim.workers.dev'
 const origin='https://fajr-office-qa.khoojafahim.workers.dev'
 const strictBff=process.env.FAJR_OFFICE_LIVE_BFF_REQUIRED==='true'
+// Retry only transient TCP/timeout failures on SAFE GET reads. HTTP failures,
+ // authorization denials and writes are never retried or reclassified as PASS.
 const grab=async(path,init={})=>{
- const response=await fetch(root+path,{...init,signal:AbortSignal.timeout(16000),redirect:'error'})
- return {status:response.status,type:response.headers.get('content-type')||'',body:await response.text()}
+ let last;
+ const attempts=(init.method||'GET')==='GET'?3:1;
+ for(let i=0;i<attempts;i++){
+  try{
+   const response=await fetch(root+path,{...init,signal:AbortSignal.timeout(16000),redirect:'error'});
+   return {status:response.status,type:response.headers.get('content-type')||'',body:await response.text()};
+  }catch(error){
+   last=error;
+   if(i+1===attempts)break;
+   await new Promise(resolve=>setTimeout(resolve,250*(i+1)));
+  }
+ }
+ throw last;
 }
 test('live staff login shell and script load via HTTPS',async()=>{
  const home=await grab('')
@@ -70,7 +83,7 @@ test('deployed Worker fails closed for unauthenticated visitors; strict BFF chec
   assert.equal(office.status,401)
   assert.equal(legacy.status,403)
  }else{
-  console.log('LIVE_OFFICE_DENIALS=PASS; PERSISTENT_BFF_SESSION=UNVERIFIED_ON_ROLLED_BACK_WORKER')
+  console.log('LIVE_OFFICE_DENIALS=PASS; PERSISTENT_BFF_SESSION=NOT_TESTED_IN_NONSTRICT_MODE')
  }
 })
 
@@ -99,21 +112,13 @@ test('live QA synthetic invalid-credentials roundtrip proves Worker reaches Supa
 });
 
 
-// Network-only bounded retry: never retry auth writes or accept a non-200 probe.
-const readWithConnectRetry=async(path,init={})=>{
- let last
- for(let attempt=0;attempt<2;attempt++){
-  try{return await grab(path,init)}catch(e){last=e}
- }
- throw last
-}
 test('live QA security center denies unauthenticated access and resolves immutable console source',async()=>{
- const health=await readWithConnectRetry('/__qa/console-source-health')
+ const health=await grab('/__qa/console-source-health')
  assert.equal(health.status,200,'QA private console source must serve a verified immutable Pages build; body: '+health.body.slice(0,90))
  assert.deepEqual(JSON.parse(health.body),{status:'ready'})
- const withoutHeader=await readWithConnectRetry('/api/security/overview')
+ const withoutHeader=await grab('/api/security/overview')
  assert.equal(withoutHeader.status,403,'CSRF-style same-origin guard is mandatory')
- const withHeader=await readWithConnectRetry('/api/security/overview',{headers:{'X-FP-Office-Request':'same-origin'}})
+ const withHeader=await grab('/api/security/overview',{headers:{'X-FP-Office-Request':'same-origin'}})
  assert.equal(withHeader.status,401,'Unapproved visitor must never see owner account status')
  assert.deepEqual(JSON.parse(withHeader.body),{error:'sign_in_required'})
  for(const answer of [withoutHeader,withHeader]){
