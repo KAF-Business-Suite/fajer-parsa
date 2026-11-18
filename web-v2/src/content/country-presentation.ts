@@ -109,6 +109,12 @@ export const countryPresentation:Record<string,CountryPresentation> = {
       "تجارت و سفر"
     ]
   },
+  "عمان": {
+    "code": "OM",
+    "tags": ["ویزا و اقامت", "دعوتنامه و تجارت"],
+    "image": "/media/oman-destination.svg",
+    "place": "مسقط"
+  },
   "ترکیه": {
     "code": "TR",
     "tags": [

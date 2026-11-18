@@ -38,7 +38,7 @@ try{
   const section=page.locator('#service-guide')
   await section.waitFor({state:'visible'})
   assert.equal(await section.locator('.fp-guide-category').count(),6)
-  assert.equal(await section.locator('#fp-guide-destination option').count(),16)
+  assert.equal(await section.locator('#fp-guide-destination option').count(),17)
   assert.equal(await section.getByText(unavailable[lang],{exact:true}).count(),1)
   const disclosure=section.locator('.fp-guide-disclosure')
   assert.equal(await disclosure.count(),1)
@@ -112,7 +112,7 @@ try{
   await contact.waitFor({state:'detached'})
   assert.deepEqual(errors,[],'No runtime exceptions '+lang)
   await context.close()
-  console.log('PASS FP-07/09 '+lang+': compact catalog, real email/WhatsApp channels, email enquiry body, keyboard disclosure, safe touch controls, 6 services/15 destinations')
+  console.log('PASS FP-07/09 '+lang+': compact catalog, real email/WhatsApp channels, email enquiry body, keyboard disclosure, safe touch controls, 6 services/16 destinations')
  }
 }finally{
  await browser.close()

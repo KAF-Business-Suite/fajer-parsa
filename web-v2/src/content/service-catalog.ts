@@ -41,7 +41,7 @@ export const serviceCatalog: readonly ServiceRecord[] = serviceGroups.map((group
   cancellationPolicy: null,
 }))
 
-// These 15 destinations were listed as possible business scope, not verified
+// These 16 destinations are owner-directed enquiry scope, not verified
 // eligibility, availability, fees or documentation for a given passport.
 export const serviceInquiryDestinations: readonly string[] = countryServices.map(c=>c.name)
 
@@ -54,7 +54,7 @@ export function serviceIsReadyForPublicOffer(record: ServiceRecord): boolean {
 
 export function checkServiceCatalog(): string[] {
   const errors: string[] = []
-  if (serviceCatalog.length !== 6 || serviceInquiryDestinations.length !== 15)
+  if (serviceCatalog.length !== 6 || serviceInquiryDestinations.length !== 16)
     errors.push('Unexpected service/destination count; reconcile with owner-approved scope.')
   if (new Set(serviceCatalog.map(s=>s.slug)).size !== serviceCatalog.length)
     errors.push('Service slugs must be unique.')
