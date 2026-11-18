@@ -1,5 +1,18 @@
 # FP-09 / QA ingress contract — 2026-11-15
 
+## CURRENT — FP-09 real browser → DB → authorized office readback → cleanup PASS (18 Nov 2026)
+
+**Decision: QA END-TO-END SUBGATE CLOSED / PASS** on the existing isolated Pages alias, using only fictional test data. This supersedes the dated 'Still NOT VERIFIED' statements below for the same QA browser→database test; the old notes are retained for provenance and must not be interpreted as the current verdict.
+
+- Tested URL: https://fp-intake-safe-review.fajr-parsa-qa.pages.dev/?lang=fa ; Cloudflare immutable QA deployment `2d589418-277d-4033-a237-00671705f3f1` (SUCCESS, build merge SHA `cf812273570f78d574f4a97addced033531a42be`; source PR HEAD before this record `608a7e4fec2003536a2affc9a7659b6f764e6b1f`).
+- An actual normal browser exercised the service form, confirmed Dari/Pashto/English/Arabic, saw the explicit QA-only warning, used **only** a fictional `@example.invalid` address, checked consent, and passed ordinary Cloudflare Turnstile with visible 'Success!'. **Exactly one submission**, with server receipt `27cbd53d-2a12-4ef8-8c3c-bb15a7581229`. This was not a browser mock, CAPTCHA bypass or public Production request.
+- Independent Supabase DB read: **exactly 1 persisted matching synthetic record** (same UUID, service, destination and consent); **PASS**. Existing `public.fajr_office_list` returned that same receipt for an enabled authorized Fajr member (**RPC-based office readback PASS; not an employee interactive login test**). No real employee credentials were read or exposed.
+- Cleanup safety: checked referenced office audit rows **0** and matching record fields; deleted **only that precise synthetic receipt** in a guarded transaction; SQL returned **0 records remaining** (**PASS**). No other user/customer data was changed.
+- Separately tested `fajr_receive_web_request` new receipt and identical-request replay with an authorized office RPC listing in a transaction that was explicitly **rolled back**, confirming idempotency and zero lasting synthetic rows (**PASS**).
+- Exact app CI before the browser test: [independent #44344322778](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/44344322778) and [safe Pages QA #44344323844](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/44344323844), both **SUCCESS**.
+- Explicit environment boundaries: **QA PASS ≠ customer Production authorization**. Public main remains on existing Cloudflare Production `9ded561eae7394f38eb633d3ec890be51df3f830`; Cloudflare QA proxies allow synthetic emails only. KAF-31's seven production approval checks, legal service scope, privacy/retention and genuine staff S21 login/logout are still separate. Preserve fail-closed Production gate.
+- **Next big gate:** Finish authorized Fajr Office/Identity/Session acceptance under existing **KAF-35 + PR #14**: user opens/reloads same view, log-out blocks relogin, role-aware Fajr data, mobile S21 Back, audit/rollback, then reconfirm remaining customer-facing legal and production release checks under KAF-31. No duplicate app, repo, database, issue or paid provider.
+
 ## CURRENT — isolated QA Pages route published; live HTTP rejection tests PASS
 
 **Authoritative checkpoint after PR #24 code commit `b23cf575c54d8903e2ec05418b6b564fdf7b2c6a`.** The earlier private Worker and service-binding plan below is **historical only** and must not be implemented by default. Continue the same PR, KAF-25 and KAF-31; create no micro-gates.

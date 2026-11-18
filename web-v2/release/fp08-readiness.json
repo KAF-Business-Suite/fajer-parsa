@@ -106,6 +106,30 @@
       "independentEmailEvidenceFound": false,
       "originalEvidenceExpected": "No further repeat phone/visit requested. Separate evidence may be needed for release audit and exact authorized service scope.",
       "legalGateEffect": "none_without_verified_documentation"
+    },
+    "fp09QaEndToEnd": {
+      "evidenceDate": "2026-11-18",
+      "environment": "QA only",
+      "status": "PASS",
+      "steps": {
+        "realBrowserSyntheticContact": "PASS",
+        "fourLanguagesVisible": "PASS",
+        "turnstileStandardVerification": "PASS",
+        "singleRequestAccepted": "PASS",
+        "persistedReceiptReadback": "PASS",
+        "authorizedOfficeRpcReadback": "PASS",
+        "databaseIdempotencyRollbackTest": "PASS",
+        "exactSyntheticRecordCleanup": "PASS"
+      },
+      "receipt": "27cbd53d-2a12-4ef8-8c3c-bb15a7581229",
+      "browserRunReference": "Browser Use synthetic QA run 4f566bb2-0103-4a73-81fb-b4dcbb2049de",
+      "qaUrl": "https://fp-intake-safe-review.fajr-parsa-qa.pages.dev/?lang=fa",
+      "qaPagesDeployment": "2d589418-277d-4033-a237-00671705f3f1",
+      "qaBuildCommit": "cf812273570f78d574f4a97addced033531a42be",
+      "sourceCommit": "608a7e4fec2003536a2affc9a7659b6f764e6b1f",
+      "privacy": "synthetic contact @example.invalid only; no real customer information",
+      "cleanup": "SQL returned zero remaining receipt rows after deletion",
+      "limitations": "Authenticated staff UI session and production customer-intake security are not proved by this QA test."
     }
   }
 }
