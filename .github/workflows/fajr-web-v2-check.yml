@@ -54,6 +54,8 @@ jobs:
           node --test ../workers/fajr-office-qa/resource-provider-api.test.mjs
           node --test ../workers/fajr-office-qa/kaf-cases-api.test.mjs
           node --test ../workers/fajr-office-qa/console-gateway.test.mjs
+          node --test ../workers/fajr-office-qa/security-overview.test.mjs
+          node --test tests/security-overview.test.mjs
           node --test tests/private-office-bridge.test.mjs
           node --test tests/live-office-requests.test.mjs
           node --test tests/live-kaf-cases.test.mjs
@@ -65,6 +67,7 @@ jobs:
           node --check ../workers/fajr-office-qa/site-settings-api.mjs
           node --check ../workers/fajr-office-qa/resource-provider-api.mjs
           node --check ../workers/fajr-office-qa/console-gateway.mjs
+          node --check ../workers/fajr-office-qa/security-overview.mjs
           node --check ../workers/fajr-office-qa/site-settings-ui.mjs
           node --check ../workers/fajr-office-qa/worker.mjs
           node --check ../workers/fajr-office-qa/resources-ui.mjs
