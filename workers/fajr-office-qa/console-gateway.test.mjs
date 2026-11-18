@@ -93,3 +93,31 @@ test('mutations, query strings, unknown extensions and cross-site paths denied',
  assert.equal(await handlePrivateConsole(request('/assets/secret.json'),{},m.services,m.transport),null)
  assert.equal(m.calls.length,0)
 })
+
+test('QA source probe has no staff cookie requirement and checks only pinned immutable public frontend',async()=>{
+ const m=fake();
+ const r=await handlePrivateConsole(request('/__qa/console-source-health'),{},m.services,m.transport);
+ assert.equal(r.status,200);
+ assert.equal((await r.json()).status,'ready');
+ assert.equal(m.calls.length,1);
+ assert.equal(m.calls[0].url,consolePinnedOrigin()+'/office-preview');
+ assert.equal(m.calls[0].init.headers.Cookie,undefined);
+ const bad=fake({assetStatus:503});
+ const result=await handlePrivateConsole(request('/__qa/console-source-health'),{},bad.services,bad.transport);
+ assert.equal(result.status,503);
+ assert.deepEqual(await result.json(),{status:'source_unavailable'});
+ assert.equal((await handlePrivateConsole(request('/__qa/console-source-health?path=other'),{},m.services,m.transport)).status,400);
+ assert.equal((await handlePrivateConsole(request('/__qa/console-source-health',{},'POST'),{},m.services,m.transport)).status,405);
+})
+test('private route failure stage is sanitized and does not echo cookies',async()=>{
+ const m=fake({auth:503});
+ const r=await handlePrivateConsole(request('/console',{Cookie:cookie}),{},m.services,m.transport);
+ assert.equal(r.status,503);
+ assert.equal(r.headers.get('X-FP-Console-Stage'),'session_upstream');
+ assert.ok((await r.text()).includes('session_upstream'));
+ assert.doesNotMatch(await (async()=>JSON.stringify([...r.headers]))(),/synthetic-cookie|Authorization|Bearer/);
+ const upstream=fake({assetStatus:503});
+ const x=await handlePrivateConsole(request('/console',{Cookie:cookie}),{},upstream.services,upstream.transport);
+ assert.equal(x.status,503);
+ assert.equal(x.headers.get('X-FP-Console-Stage'),'source_upstream');
+})
