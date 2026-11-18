@@ -85,3 +85,19 @@ G4: WordPress/Vercel/application/document/communication connectors in domain-spe
 **Production unchanged:** Cloudflare Pages production SHA 9ded561eae7394f38eb633d3ec890be51df3f830. G2 actual permission-scoped provider connection, durable Supabase resource registry, active staff auth, customer data, messages/payments, server-side credentials, merge and public publishing NOT IMPLEMENTED. KAF-31 production release remains gated.
 
 **Single next action:** Owner reviews the complete new mobile resource flow and design as a whole. Once visually accepted, design the G2 read-only Cloudflare provider adapter and durable audit in the existing secure Office Worker/Supabase, with no unilateral production change.
+
+## KAF-35 G1 owner acceptance and G2 read-only provider implementation — 2026-11-18
+
+**Owner accepted the mobile shell and touch navigation** on Samsung S21 in chat on Nov 18, 2026. G1 **owner UX acceptance PASS**; no claim that all 46 menu items work with real data or that Production was released.
+
+**Non-blocking visual backlog:** rounded, soft, compact buttons, premium calm theme, personalizable density/fonts/tokens. Preserve all modules. Prioritize functional gates; do not consume this gate doing another redesign.
+
+**Next G2 source scope:** Cloudflare connector readback verified the exact Pages project fajr-parsa-qa, its subdomain fajr-parsa-qa.pages.dev and production branch main; this does not grant access to KAF/other projects.
+
+- workers/fajr-office-qa/resource-provider-api.mjs: exact GET route /api/resources/providers/cloudflare/fajr-parsa-qa with encrypted-cookie session, CSRF/same-origin guard, owner-only SQL role gate and single allowlisted Cloudflare Pages GET; only inspect action and sanitized response fields. No project/account/url query, user-supplied outbound URL, provider write or browser token.
+- supabase/migrations/20261118_001_fajr_resource_owner_check.sql: ADDITIVE MIGRATION SOURCE ONLY, NOT APPLIED to live Supabase. Checks CURRENT active Fajr owner status, office membership and publish/update flags on every read. Demoting the owner immediately revokes provider read permission.
+- workers/fajr-office-qa/resource-provider-api.test.mjs and disposable web-v2/server/office/site-control.postgres.test.mjs: deny wrong user/tenant, CSRF, revoked owner, missing secret and invalid provider reply; no remote mutation. CI wired to test.
+- Needed only in private Worker server environment after reviewed approval: FAJR_CLOUDFLARE_READ_TOKEN (Pages Read only) and FAJR_CLOUDFLARE_ACCOUNT_ID. Cloudflare Worker QA secret inventory on Nov 18 only listed FAJR_SESSION_KEY. No new token created, copied to GitHub, browser, or configured.
+- Existing Pages Admin QA stays synthetic, without real provider access; this read-only route is SOURCE-CODE PREPARED and is NOT deployed to the authenticated Worker. Verified role migration and server-side credential must be provisioned through separate reversible QA security gate before any live readback. No paid upgrade, production publish, API token exposure, customer message, or other resource write.
+
+**Next:** finish and record CI commit evidence. G2 full PASS requires (1) approved migration of owner-only checker, (2) least-privilege secret provisioned on QA Worker, (3) verified real readback and audit, (4) owner workspace permissions and documented rollback. No further cosmetic UI work until next domain gate.
