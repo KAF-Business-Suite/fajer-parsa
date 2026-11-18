@@ -343,3 +343,39 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=tab]:focus-v
 .fpx-root[data-theme=dark] .fpx-live-office-feedback{background:#285047;border-color:#376d59;color:#d7f3e8}
 @media(max-width:540px){.fpx-office-dialog{padding:16px}.fpx-office-dialog-actions{justify-content:stretch}.fpx-office-dialog-actions button{flex:1;justify-content:center}}
 @media(prefers-reduced-motion:reduce){.fpx-office-dialog-overlay{backdrop-filter:none}}
+
+
+/* FP-ADMIN-G7 — existing compact Admin shell, live RLS-scoped KAF records. */
+.fpx-live-kaf{display:grid;gap:14px;min-width:0}
+.fpx-live-kaf-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.fpx-live-kaf-badge{display:inline-flex;align-items:center;gap:7px;color:#1d766b;font-size:11px;font-weight:750}
+.fpx-live-kaf-header h1{color:var(--ink);font-size:clamp(22px,3vw,29px);margin:7px 0 6px;font-weight:800;line-height:1.35}
+.fpx-live-kaf-header p{color:var(--muted);font-size:12px;line-height:1.8;margin:0}
+.fpx-live-kaf-header>button{display:inline-flex;align-items:center;gap:7px;min-width:44px;min-height:44px;justify-content:center;border:1px solid #b8dcd2;background:#f1f9f6;color:#1b7565;border-radius:12px;padding:9px 13px;font:700 12px 'Estedad Variable',sans-serif}
+.fpx-live-kaf-header>button:disabled{opacity:.45}
+.fpx-live-kaf-scope,.fpx-live-kaf-footnote{font-size:12px;line-height:1.8;color:var(--muted);margin:0;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 14px}
+.fpx-live-kaf-count{font-size:12px;color:#667b88;margin:0}
+.fpx-live-kaf-message{padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--muted);font-size:13px;line-height:1.8;margin:0}
+.fpx-live-kaf-message[role=alert]{border-color:#e8d5b8;background:#fff8f0;color:#83572d}
+.fpx-live-kaf-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px}
+.fpx-live-kaf-card{display:grid;align-content:start;gap:13px;min-width:0;border:1px solid #dfebed;border-radius:16px;background:var(--surface);padding:15px;box-shadow:0 5px 20px #142e420a}
+.fpx-live-kaf-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.fpx-live-kaf-card-heading>div{min-width:0}
+.fpx-live-kaf-card-heading small{font-size:11px;color:#688494;overflow-wrap:anywhere}
+.fpx-live-kaf-card-heading h2{font-size:15px;line-height:1.5;color:var(--ink);font-weight:780;margin:5px 0 0;overflow-wrap:anywhere}
+.fpx-live-kaf-status{flex:none;max-width:40%;text-align:center;font-size:10px;font-weight:750;color:#176d63;background:#e9f6f0;border-radius:100px;padding:6px 9px}
+.fpx-live-kaf-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fpx-live-kaf-fields div{display:grid;gap:5px;min-width:0}
+.fpx-live-kaf-fields small{display:flex;align-items:center;gap:5px;color:#6c8391;font-size:11px}
+.fpx-live-kaf-fields strong{font-size:12px;font-weight:650;color:var(--ink);overflow-wrap:anywhere}
+.fpx-live-kaf-action{border-top:1px solid var(--line);padding-top:10px;margin:0;display:grid;gap:5px;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+.fpx-live-kaf-action strong{font-size:11px;color:#62808e}
+.fpx-live-kaf-action span{color:var(--ink)}
+.fpx-live-kaf-pagination{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fpx-live-kaf-pagination span{font-size:12px;color:var(--muted)}
+.fpx-live-kaf-pagination button{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:9px 12px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:700 12px 'Estedad Variable',sans-serif}
+.fpx-live-kaf-pagination button:disabled{opacity:.4}
+.fpx-root[data-theme=dark] .fpx-live-kaf-header h1,.fpx-root[data-theme=dark] .fpx-live-kaf-card-heading h2,.fpx-root[data-theme=dark] .fpx-live-kaf-fields strong,.fpx-root[data-theme=dark] .fpx-live-kaf-action span{color:#edf6f9}
+.fpx-root[data-theme=dark] .fpx-live-kaf-card{background:#243e4d;border-color:#3a5868}
+.fpx-root[data-theme=dark] .fpx-live-kaf-scope,.fpx-root[data-theme=dark] .fpx-live-kaf-footnote,.fpx-root[data-theme=dark] .fpx-live-kaf-message{background:#203847;border-color:#3a5868;color:#cee1e9}
+@media(max-width:540px){.fpx-live-kaf-header>button{padding:10px}.fpx-live-kaf-header>button span{display:none}.fpx-live-kaf-list{grid-template-columns:minmax(0,1fr)}.fpx-live-kaf-card{padding:13px}}
