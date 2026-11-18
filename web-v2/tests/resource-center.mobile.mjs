@@ -27,6 +27,24 @@ test('S21: mobile resources, non-destructive detach/relink, appearance, native B
    assert.equal(viewportMetrics.innerWidth,width,'mobile layout width must equal device CSS viewport, no shrink-to-fit')
    assert.equal(await page.locator('.fpx-mobile-tabs').isVisible(),true)
    assert.equal(await page.locator('.fpx-resource-entry').count(),3)
+   const categoryLayout=await page.locator('.fpx-resource-segments').evaluate(el=>{
+     const parent=el.getBoundingClientRect()
+     const tabs=[...el.querySelectorAll('[role=tab]')].map(tab=>{
+       const r=tab.getBoundingClientRect()
+       return {x:r.left,y:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height,visible:getComputedStyle(tab).visibility==='visible'}
+     })
+     return {tabCount:tabs.length,rows:new Set(tabs.map(t=>Math.round(t.y))).size,
+       allInside:tabs.every(t=>t.visible&&t.width>=55&&t.height>=44&&t.x>=parent.left-1&&t.right<=parent.right+1),
+       horizontalOverflow:el.scrollWidth>el.clientWidth+2}
+   })
+   assert.equal(categoryLayout.tabCount,5,'all five categories are present at '+width)
+   assert.equal(categoryLayout.rows,2,'all category tabs visible in two rows on S21 '+width)
+   assert.equal(categoryLayout.allInside,true,'no category clipped off screen at '+width)
+   assert.equal(categoryLayout.horizontalOverflow,false,'category strip must not need horizontal scrolling')
+   await page.locator('.fpx-resource-segments button').last().click()
+   assert.equal(await page.locator('.fpx-resource-entry').count(),0,'integration filter works by touch')
+   await page.locator('.fpx-resource-segments button').first().click()
+   assert.equal(await page.locator('.fpx-resource-entry').count(),3)
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true,'initial S21 overflow '+width)
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-resources.png',fullPage:true})
    await page.getByRole('button',{name:'افزودن منبع'}).first().click()
@@ -60,6 +78,8 @@ test('S21: mobile resources, non-destructive detach/relink, appearance, native B
    await page.getByRole('heading',{name:'منابع و سایت‌های من'}).waitFor()
    await page.locator('.fpx-lang-switch select').selectOption('en')
    await page.getByRole('heading',{name:'My sites & resources'}).waitFor()
+   assert.equal(await page.locator('.fpx-resource-segments button').count(),5,'all categories remain in EN')
+   assert.equal(await page.locator('.fpx-resource-segments').evaluate(el=>el.scrollWidth<=el.clientWidth+2),true,'no category clipping in EN')
    const navHit=await page.locator('.fpx-mobile-tabs button').nth(4).evaluate(el=>{
       const rect=el.getBoundingClientRect(),nav=el.parentElement.getBoundingClientRect()
       const midX=rect.x+rect.width/2,midY=rect.y+rect.height/2
