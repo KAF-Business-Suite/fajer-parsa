@@ -33,7 +33,7 @@ test('Enterprise admin: 45-feature bilingual shell, independent four-language we
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-home.png',fullPage:true})
    if(width===393){
     assert.equal(await page.locator('.fpx-mobile-tabs').isVisible(),true)
-    await page.locator('.fpx-mobile-tabs button').nth(2).click()
+    await page.locator('.fpx-mobile-tabs button').filter({hasText:'وب‌سایت'}).click()
    }else{
     assert.equal(await page.locator('.fpx-sidebar').isVisible(),true)
     await page.locator('.fpx-sidebar .fpx-nav-item').filter({hasText:'مدیریت وب‌سایت'}).click()
@@ -59,7 +59,11 @@ test('Enterprise admin: 45-feature bilingual shell, independent four-language we
    await page.getByRole('status').filter({hasText:'Nothing was published.'}).waitFor()
    assert.equal(await dialog.count(),0)
    // The module builder uses a reusable local template without backend writes.
-   if(width===393)await page.locator('.fpx-mobile-tabs button').nth(3).click()
+   if(width===393){
+    // Builder is in the mobile More drawer; the five real tabs now include Requests.
+    await page.locator('.fpx-mobile-tabs button').last().click()
+    await page.locator('.fpx-mobile-drawer .fpx-drawer-list button').filter({hasText:'Module & page builder'}).click()
+   }
    else{
     await page.locator('.fpx-group-head').filter({hasText:'Platform administration'}).click()
     await page.locator('.fpx-sidebar .fpx-nav-item').filter({hasText:'Module & page builder'}).click()
