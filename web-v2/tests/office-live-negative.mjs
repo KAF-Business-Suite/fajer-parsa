@@ -97,3 +97,18 @@ test('live QA synthetic invalid-credentials roundtrip proves Worker reaches Supa
  assert.equal(response.headers.get('set-cookie'),null,'A rejected synthetic sign-in must never create a staff session');
  console.log('LIVE_SYNTHETIC_AUTH_ROUNDTRIP=PASS (Worker->config->GoTrue reachability; no genuine account)');
 });
+
+
+test('live QA security center denies unauthenticated access and resolves immutable console source',async()=>{
+ const health=await grab('/__qa/console-source-health')
+ assert.equal(health.status,200,'QA private console source must serve a verified immutable Pages build')
+ assert.deepEqual(JSON.parse(health.body),{status:'ready'})
+ const withoutHeader=await grab('/api/security/overview')
+ assert.equal(withoutHeader.status,403,'CSRF-style same-origin guard is mandatory')
+ const withHeader=await grab('/api/security/overview',{headers:{'X-FP-Office-Request':'same-origin'}})
+ assert.equal(withHeader.status,401,'Unapproved visitor must never see owner account status')
+ assert.deepEqual(JSON.parse(withHeader.body),{error:'sign_in_required'})
+ for(const answer of [withoutHeader,withHeader]){
+  assert.doesNotMatch(answer.body,/refresh_token|access_token|secret|email_confirmed_at|@example/)
+ }
+})
