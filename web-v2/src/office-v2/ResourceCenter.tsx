@@ -14,8 +14,8 @@ type ResourceProps={
  lang:L;resources:PreviewResource[];onResources:(x:PreviewResource[])=>void;
  onToast:(text:string)=>void;
 }
-export type PreviewStyle={mode:'light'|'dark'|'system';accent:'jade'|'ocean'|'champagne';density:'comfortable'|'compact';corners:'rounded'|'extra';font:'vazirmatn'|'manrope'}
-export const defaultStyle:PreviewStyle={mode:'light',accent:'jade',density:'comfortable',corners:'rounded',font:'vazirmatn'}
+export type PreviewStyle={mode:'light'|'dark'|'system';accent:'jade'|'ocean'|'champagne';density:'comfortable'|'compact';corners:'rounded'|'extra';font:'estedad'}
+export const defaultStyle:PreviewStyle={mode:'light',accent:'jade',density:'comfortable',corners:'rounded',font:'estedad'}
 const copy={
  fa:{
   title:'منابع و سایت‌های من',sub:'تمام سایت‌ها، اپلیکیشن‌ها و منابع زیر یک کنسول؛ بدون انتقال مالکیت.',
@@ -194,17 +194,17 @@ type ThemeProps={lang:L;value:PreviewStyle;onChange:(v:PreviewStyle)=>void}
 const themes={
  fa:{title:'ظاهر و شخصی‌سازی',sub:'تنظیمات نمونهٔ پنل، بدون تغییر داده‌ها یا سایت عمومی.',
   mode:'حالت نمایش',light:'روشن',dark:'تاریک',system:'سیستم',accent:'رنگ اصلی',jade:'یشمی',ocean:'آبی',champagne:'شامپاینی',density:'تراکم اطلاعات',comfortable:'راحت',compact:'فشرده',
-  corners:'گوشه‌ها',rounded:'گرد',extra:'گردتر',font:'فونت',vazirmatn:'وزیرمتن',manrope:'منروپ',sample:'تغییرات در همین پیش‌نمایش دیده می‌شوند.',note:'در نسخهٔ واقعی پس از تأیید، تنظیمات به پروفایل مالک منتقل می‌شوند.'},
+  corners:'گوشه‌ها',rounded:'گرد',extra:'گردتر',font:'فونت رسمی',estedad:'استعداد',sample:'تغییرات در همین پیش‌نمایش دیده می‌شوند.',note:'در نسخهٔ واقعی پس از تأیید، تنظیمات به پروفایل مالک منتقل می‌شوند.'},
  en:{title:'Appearance & personalization',sub:'Preview console settings without touching any business data or public website.',
   mode:'Appearance',light:'Light',dark:'Dark',system:'System',accent:'Accent color',jade:'Jade',ocean:'Ocean',champagne:'Champagne',density:'Information density',comfortable:'Comfortable',compact:'Compact',
-  corners:'Corners',rounded:'Rounded',extra:'Extra rounded',font:'Typography',vazirmatn:'Vazirmatn',manrope:'Manrope',sample:'Changes apply to this demo only.',note:'Approved preferences can later be saved to the authorized owner profile.'}
+  corners:'Corners',rounded:'Rounded',extra:'Extra rounded',font:'Official typography',estedad:'Estedad',sample:'Changes apply to this demo only.',note:'Approved preferences can later be saved to the authorized owner profile.'}
 } as const
 export function ThemeLab({lang,value,onChange}:ThemeProps){
  const tx=themes[lang]
  const groups:{key:keyof PreviewStyle;items:string[]}[]=[
   {key:'mode',items:['light','dark','system']},{key:'accent',items:['jade','ocean','champagne']},
   {key:'density',items:['comfortable','compact']},{key:'corners',items:['rounded','extra']},
-  {key:'font',items:['vazirmatn','manrope']},
+  // FP-TYPE-01: one approved brand font; no switching to inconsistent UI families.
  ]
  return <div className="fpx-resource-root fpx-theme-lab" dir={lang==='en'?'ltr':'rtl'}>
   <div className="fpx-resource-summary"><div><span className="fpx-resource-kicker">CONTROL / DESIGN SYSTEM</span><h2>{tx.title}</h2><p>{tx.sub}</p></div><Palette size={27}/></div>
