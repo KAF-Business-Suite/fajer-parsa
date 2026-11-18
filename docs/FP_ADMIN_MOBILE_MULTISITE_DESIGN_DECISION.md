@@ -101,3 +101,23 @@ G4: WordPress/Vercel/application/document/communication connectors in domain-spe
 - Existing Pages Admin QA stays synthetic, without real provider access; this read-only route is SOURCE-CODE PREPARED and is NOT deployed to the authenticated Worker. Verified role migration and server-side credential must be provisioned through separate reversible QA security gate before any live readback. No paid upgrade, production publish, API token exposure, customer message, or other resource write.
 
 **Next:** finish and record CI commit evidence. G2 full PASS requires (1) approved migration of owner-only checker, (2) least-privilege secret provisioned on QA Worker, (3) verified real readback and audit, (4) owner workspace permissions and documented rollback. No further cosmetic UI work until next domain gate.
+
+## G2 private 46-module console integration — 2026-11-18
+
+**Owner-approved direction:** do not create a second app; the existing 46-module React console shares the existing Fajr Office encrypted HttpOnly cookie and scoped read-only provider API.
+
+**Source implemented:**
+- web-v2/src/office-v2/private-office-bridge.ts: only the canonical private QA origin /console triggers a same-origin credentialed GET to the existing Fajr Pages owner-read API. Validate exactly read-only response; never expose a provider token.
+- web-v2/src/office-v2/ResourceCenter.tsx: the private Resources tab shows only verified Pages metadata and recheck; the public Pages design remains mock-only. No persistence for the sample resources.
+- web-v2/src/office-v2/EnterpriseConsole.tsx: keep all 46 modules, private office/website shortcuts, and server-confirmed secure sign out.
+- workers/fajr-office-qa/console-gateway.mjs: exact GET /console requires current valid Office encrypted-cookie session via existing /api/session. It serves the same React build from an immutable pinned Cloudflare Pages QA snapshot https://f8ffa514.fajr-parsa-qa.pages.dev/office-preview. Has strict static /assets allowlist and CSP; never forwards cookie to Pages. Public no-auth sessions redirect to Office login.
+- workers/fajr-office-qa/worker.mjs and resources-ui.mjs: existing Office authenticated landing page and old Resources page link back to the single private console.
+- Added negative unit tests for unauthorized private shell, asset redirects, wrong provider metadata, logout boundaries and client origin checks. Existing Playwright S21 and PostgreSQL suites remain unchanged.
+
+**Independent PASS evidence:** [GitHub Actions run 44272835525](https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/44272835525) completed success, all three jobs; source code SHA 17c26d2489504cc627b10e079184965e289923ac. Immutable QA Pages build f8ffa514-e23e-4f1e-a931-9c54d8e622cc, success, static CSS/JS paths independently confirmed HTTP 200.
+QA Worker deployment c93c5ee8-bafd-482f-bec6-44798133efba, active version 2a80bb61-08d1-4a25-9599-8c5924ea4a51, 100%; three existing secrets inherited, rollback version b228cfec-eafd-4a3a-846b-34ef90cf2676 retained.
+External anonymous smoke: https://fajr-office-qa.khoojafahim.workers.dev/console redirects to Office login; / login HTTP 200; /api/resources/providers/cloudflare/fajr-parsa-qa returns HTTP 403. Public Production Pages unchanged SHA 9ded561eae7394f38eb633d3ec890be51df3f830. PR14 remains DRAFT / unmerged.
+
+**Pending acceptance (do not claim PASS):** authenticated owner browser opening private /console with 200 and verified read-only Cloudflare project card; only owner can supply an actual login session. This is different from anonymous denial PASS. Durable multi-site resource registry add/list/unlink/reconnect and 46 actual connected modules are NOT implemented. Do not use synthetic data as production source.
+
+**Owner link after sign-in:** https://fajr-office-qa.khoojafahim.workers.dev/console#/resources . Next gate is owner authenticated readback and then audited/persistent workspace-owned resource registry in existing Supabase. Premium compact/rounded button refinements remain backlog. KAF-31 production approval stays BLOCKED.
