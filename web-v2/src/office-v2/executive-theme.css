@@ -1,0 +1,208 @@
+/*
+ * FP-UI-01 / FP Executive (Warm Stone).
+ * MIT shadcn-admin semantic-token approach; original MIT components remain
+ * in ./oss/ with licence. Scoped only to Fajr Admin: NEVER the public site.
+ *
+ * This file is loaded AFTER enterprise.css and takes precedence ONLY for
+ * appearance. Protected nav geometry, data/permissions and routes are untouched.
+ */
+.fpx-root[data-theme="light"]{
+  color-scheme:light;
+  --fpx-canvas:#F4F1EB;--fpx-panel:#FFFEFC;--fpx-raised:#F9F6F0;
+  --fpx-header-bg:#FAF9F6;--fpx-sidebar-bg:#182E3E;
+  --fpx-ink:#1A3040;--fpx-subtle:#566976;--fpx-line:#E3DDD2;
+  --fpx-gold:#B18A55;--fpx-action:#203D4E;--fpx-action-text:#FCFAF5;
+  --fpx-success:#176F62;--fpx-success-bg:#E6F4EF;
+  --fpx-shadow:0 7px 25px rgba(31,44,52,.055),0 1px 2px rgba(31,44,52,.035);
+  --fpx-selected:#705334;--fpx-selected-bg:#F1E5D2;
+  --ink:var(--fpx-ink);--muted:var(--fpx-subtle);
+  --surface:var(--fpx-panel);--line:var(--fpx-line);--teal:var(--fpx-success);
+  --deep:var(--fpx-sidebar-bg);--gold:var(--fpx-gold);
+  --res-line:var(--fpx-line);--res-ink:var(--fpx-ink);--res-muted:var(--fpx-subtle);
+}
+.fpx-root[data-theme="dark"]{
+  color-scheme:dark;
+  --fpx-canvas:#111C26;--fpx-panel:#1A2B38;--fpx-raised:#213543;
+  --fpx-header-bg:#192C39;--fpx-sidebar-bg:#101D27;
+  --fpx-ink:#E9EBE9;--fpx-subtle:#B9C7CC;--fpx-line:#334956;
+  --fpx-gold:#D1AF78;--fpx-action:#D1AF78;--fpx-action-text:#182B38;
+  --fpx-success:#A6DAC5;--fpx-success-bg:#25463F;
+  --fpx-shadow:0 6px 22px rgba(0,0,0,.14),0 1px 2px rgba(0,0,0,.1);
+  --fpx-selected:#E7C996;--fpx-selected-bg:#33414A;
+  --ink:var(--fpx-ink);--muted:var(--fpx-subtle);
+  --surface:var(--fpx-panel);--line:var(--fpx-line);--teal:var(--fpx-success);
+  --deep:var(--fpx-sidebar-bg);--gold:var(--fpx-gold);
+  --res-line:var(--fpx-line);--res-ink:var(--fpx-ink);--res-muted:var(--fpx-subtle);
+}
+
+/* Only surfaces and colors: no width, height, padding, direction or position
+ * changes to the owner's accepted S21 and responsive desktop shell. */
+.fpx-root{
+  background:var(--fpx-canvas);
+  color:var(--fpx-ink);
+  font-family:'Estedad Variable',system-ui,sans-serif;
+}
+.fpx-root .fpx-frame{background:var(--fpx-canvas)}
+.fpx-root .fpx-sidebar{background:var(--fpx-sidebar-bg);box-shadow:2px 0 14px rgba(0,0,0,.035)}
+.fpx-root .fpx-header,
+.fpx-root .fpx-mobile-tabs{
+  background:var(--fpx-header-bg);
+  border-color:var(--fpx-line);
+  box-shadow:0 2px 12px rgba(27,44,54,.035);
+}
+.fpx-root .fpx-main{color:var(--fpx-ink)}
+.fpx-root .fpx-breadcrumb strong,
+.fpx-root .fpx-content-head h1,
+.fpx-root .fpx-live-office-top h2,
+.fpx-root .fpx-live-site-top h1,
+.fpx-root .fpx-live-kaf-header h1{color:var(--fpx-ink)}
+.fpx-root .fpx-content-head p,
+.fpx-root .fpx-breadcrumb span,
+.fpx-root .fpx-overline,
+.fpx-root .fpx-live-site-top p,
+.fpx-root .fpx-live-office-top p,
+.fpx-root .fpx-live-kaf-header p{color:var(--fpx-subtle)}
+.fpx-root .fpx-global-search,
+.fpx-root .fpx-lang-switch,
+.fpx-root .fpx-icon-button{
+  color:var(--fpx-ink);
+  background:var(--fpx-panel);
+  border-color:var(--fpx-line);
+}
+.fpx-root .fpx-icon-button:hover{background:var(--fpx-raised)}
+.fpx-root .fpx-lang-switch select{color:var(--fpx-ink);background:transparent}
+.fpx-root .fpx-global-search input{color:var(--fpx-ink)}
+.fpx-root .fpx-warning{
+  border-color:var(--fpx-line);
+  background:var(--fpx-raised);
+  color:var(--fpx-subtle);
+  box-shadow:none;
+}
+.fpx-root .fpx-warning-copy,.fpx-root .fpx-warning-lock{color:var(--fpx-subtle)}
+.fpx-root .fpx-warning-label{color:var(--fpx-success)}
+.fpx-root .fpx-workspace-card{
+  background:color-mix(in srgb,var(--fpx-sidebar-bg) 82%,white 18%);
+  border-color:color-mix(in srgb,var(--fpx-sidebar-bg) 50%,white 50%);
+}
+.fpx-root .fpx-nav-item.active{
+  background:color-mix(in srgb,var(--fpx-sidebar-bg) 65%,white 35%);
+  box-shadow:inset 3px 0 0 var(--fpx-gold);
+}
+.fpx-root .fpx-nav-item.active svg{color:var(--fpx-gold)}
+
+/* Visual treatment of existing cards, forms and table containers. */
+.fpx-root :is(
+ [data-slot="card"],.fpx-panel,.fpx-stat,.fpx-live-office,.fpx-live-site,
+ .fpx-live-kaf-card,.fpx-resource-panel,.fpx-resource-entry,
+ .fpx-resource-detail-card,.fpx-resource-stats>div,.fpx-theme-card
+ ){
+  background:var(--fpx-panel) !important;
+  border-color:var(--fpx-line) !important;
+  color:var(--fpx-ink);
+  box-shadow:var(--fpx-shadow) !important;
+}
+.fpx-root :is(.fpx-live-office-item,.fpx-live-site-tile,.fpx-live-kaf-scope,.fpx-live-kaf-footnote,
+ .fpx-live-kaf-message,.fpx-live-office-message,.fpx-resource-quiet,.fpx-category-grid button,
+ .fpx-shortcuts button){
+  background:var(--fpx-raised);
+  border-color:var(--fpx-line);
+  color:var(--fpx-ink);
+}
+.fpx-root :is(.fpx-live-office-row strong,.fpx-live-office-fields p,
+ .fpx-live-kaf-card-heading h2,.fpx-live-kaf-fields strong,.fpx-live-kaf-action span,
+ .fpx-resource-detail-head,.fpx-resource-entry strong,.fpx-theme-card [data-slot="card-title"]){
+  color:var(--fpx-ink);
+}
+.fpx-root :is(.fpx-live-kaf-card-heading small,.fpx-live-kaf-fields small,
+ .fpx-live-office-fields small,.fpx-live-site-tile small,.fpx-live-office-item code,
+ .fpx-live-kaf-action strong){color:var(--fpx-subtle)}
+.fpx-root :is(.fpx-live-kaf-action,.fpx-live-kaf-fields,
+ .fpx-resource-detail-card,.fpx-office-dialog-field){border-color:var(--fpx-line)}
+.fpx-root :is(.fpx-state-pill,.fpx-status){
+  background:var(--fpx-raised);
+  border-color:var(--fpx-line);
+  color:var(--fpx-subtle);
+}
+.fpx-root :is(.fpx-live-kaf-status,.fpx-live-office-row span:not([data-state="closed"])){
+  background:var(--fpx-success-bg);
+  color:var(--fpx-success);
+}
+.fpx-root :is(.fpx-private-shortcuts a,.fpx-private-shortcuts button,
+ .fpx-live-office-top button,.fpx-live-office-pagination button,
+ .fpx-live-kaf-header>button,.fpx-live-kaf-pagination button,.fpx-live-site-top button,
+ .fpx-resource-segments button,.fpx-theme-options button){
+  background:var(--fpx-panel);
+  border-color:var(--fpx-line);
+  color:var(--fpx-ink);
+  box-shadow:none;
+}
+.fpx-root :is(.fpx-live-office-actions button,.fpx-live-site-footer a,
+ .fpx-content-actions button,.fpx-filled,.fpx-resource-primary){
+  background:var(--fpx-action);
+  border-color:var(--fpx-action);
+  color:var(--fpx-action-text);
+  box-shadow:none;
+}
+.fpx-root :is(.fpx-private-shortcuts a,.fpx-private-shortcuts button):hover,
+.fpx-root .fpx-live-kaf-header>button:hover{background:var(--fpx-raised)}
+.fpx-root .fpx-mobile-tabs button{background:transparent!important;color:var(--fpx-subtle)}
+.fpx-root .fpx-mobile-tabs button.active{color:var(--fpx-selected)!important}
+.fpx-root .fpx-mobile-tabs button.active .fpx-nav-visual{
+  background:var(--fpx-selected-bg);
+  color:var(--fpx-selected);
+}
+.fpx-root .fpx-mobile-tabs button.active .fpx-nav-label{color:var(--fpx-selected)}
+.fpx-root .fpx-drawer-list button.active{
+  background:var(--fpx-selected-bg);
+  color:var(--fpx-selected);
+  border-inline-start-color:var(--fpx-gold);
+}
+.fpx-root .fpx-drawer-head,.fpx-root .fpx-drawer-list button,
+.fpx-root .fpx-mobile-drawer{
+  background:var(--fpx-panel);
+  color:var(--fpx-ink);
+  border-color:var(--fpx-line);
+}
+.fpx-root .fpx-drawer-list h3{background:var(--fpx-raised);color:var(--fpx-subtle)}
+.fpx-root :is(input,textarea,select):not(.fpx-global-search input):not(.fpx-lang-switch select){
+  border-color:var(--fpx-line);
+  accent-color:var(--fpx-gold);
+}
+.fpx-root :is(.fpx-theme-options button.active,.fpx-resource-segments button[aria-selected="true"]){
+  background:var(--fpx-selected-bg);
+  color:var(--fpx-selected);
+  border-color:var(--fpx-gold);
+}
+.fpx-root :is(button,input,select,textarea,[role="tab"],a):focus-visible{
+  outline:3px solid var(--fpx-gold);
+  outline-offset:2px;
+}
+.fpx-root[data-theme="dark"] :is(.fpx-resource-entry,.fpx-resource-panel,
+ .fpx-resource-warning,.fpx-theme-card,.fpx-live-office,.fpx-live-site,
+ .fpx-live-office-item,.fpx-live-kaf-card,.fpx-live-site-tile){
+  color:var(--fpx-ink);
+}
+
+/* Radix portals render under body, outside .fpx-root. Keep their theme in sync,
+ * but only while the admin shell is present; public Fajr forms are unaffected. */
+body:has(.fpx-root) :is(.fpx-dialog,.fpx-office-dialog,.fpx-office-dialog-heading button){
+  background:var(--fpx-panel,#FFFEFC);
+  color:var(--fpx-ink,#1A3040);
+  border-color:var(--fpx-line,#E3DDD2);
+}
+body:has(.fpx-root[data-theme="dark"]) :is(.fpx-dialog,.fpx-office-dialog){
+  --fpx-panel:#1A2B38;--fpx-ink:#E9EBE9;--fpx-line:#334956;
+  --fpx-subtle:#B9C7CC;
+}
+body:has(.fpx-root[data-theme="dark"]) .fpx-office-dialog select{
+  background:#213543;color:#E9EBE9;border-color:#334956;
+}
+body:has(.fpx-root[data-theme="dark"]) .fpx-office-dialog-heading button{
+  background:#263E4D;color:#E9EBE9;
+}
+
+/* Protect the owner's approved navigation geometry. No changes to responsive
+ * header height, bottom tab height, sidebar width or touch-target box sizes. */
+@media(prefers-reduced-motion:reduce){
+ .fpx-root :is(.fpx-mobile-tabs button,.fpx-nav-item,.fpx-icon-button){transition:none!important}
+}
