@@ -135,3 +135,32 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=tab]:focus-v
  .fpx-header>.fpx-header-actions{min-width:0;flex:0 0 auto}
  .fpx-mobile-tabs{width:100%;max-width:100%;min-width:0;grid-template-columns:repeat(5,minmax(0,1fr));overflow:hidden}
 }
+
+/* KAF-35 G3 — private read-only Office data, mobile-first and no fake KPIs. */
+.fpx-live-office{background:var(--panel,#fff);border:1px solid var(--line,#e2eaf0);border-radius:17px;padding:clamp(14px,2vw,25px);box-shadow:0 5px 20px #1b3a5310;min-width:0}
+.fpx-live-office-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.fpx-live-office-top h2{font-size:clamp(17px,2vw,22px);font-weight:800;margin:6px 0}
+.fpx-live-office-top p{color:#638194;line-height:1.7;font-size:12px;margin:0;max-width:620px}
+.fpx-live-office-mark{display:inline-flex;align-items:center;gap:6px;color:#146b60;font-size:11px;font-weight:750}
+.fpx-live-office-top button,.fpx-live-office-pagination button{border:1px solid #beded6;border-radius:10px;color:#126b61;background:#f3faf7;padding:9px 13px;font-size:12px;display:inline-flex;align-items:center;gap:7px;font-weight:750;min-height:39px}
+.fpx-live-office-top button:disabled,.fpx-live-office-pagination button:disabled{opacity:.4;cursor:not-allowed}
+.fpx-live-office-message{padding:20px;border:1px solid #e5eceb;border-radius:12px;background:#f8fbfc;color:#466475;font-size:13px;margin-top:20px}
+.fpx-live-office-message[role=alert]{background:#fff9f3;border-color:#e8d3bb;color:#78502b}
+.fpx-live-office-count{font-size:12px;font-weight:750;color:#355c69;margin:22px 0 14px}
+.fpx-live-office-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px}
+.fpx-live-office-item{border:1px solid #e2ebef;background:#fbfdfd;border-radius:13px;padding:15px;min-width:0}
+.fpx-live-office-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.fpx-live-office-row strong{font-size:13px;color:#243e4c;overflow-wrap:anywhere}
+.fpx-live-office-row span{border-radius:999px;background:#e8f4f1;color:#216e61;font-size:10px;padding:5px 8px;white-space:nowrap}
+.fpx-live-office-row span[data-state=closed]{background:#eef0f3;color:#536678}
+.fpx-live-office-row span[data-state=reviewing]{background:#fff3dd;color:#90631a}
+.fpx-live-office-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:15px 0}
+.fpx-live-office-fields small{color:#7f96a4;font-size:11px}
+.fpx-live-office-fields p{font-size:12px;color:#2f4d5f;margin:5px 0;overflow-wrap:anywhere}
+.fpx-live-office-item code{font-size:11px;color:#698490;letter-spacing:.02em}
+.fpx-live-office-pagination{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:20px}
+.fpx-live-office-pagination span{font-size:12px;color:#466274}
+@media(max-width:540px){.fpx-live-office{padding:13px}.fpx-live-office-top{gap:12px}.fpx-live-office-fields{gap:8px}.fpx-live-office-top button{width:auto}.fpx-live-office-pagination{gap:8px}.fpx-live-office-pagination button{padding:8px}}
+.fpx-root[data-theme=dark] .fpx-live-office{background:#1e3545;border-color:#365267}
+.fpx-root[data-theme=dark] .fpx-live-office-top h2,.fpx-root[data-theme=dark] .fpx-live-office-row strong,.fpx-root[data-theme=dark] .fpx-live-office-fields p{color:#eaf2f7}
+.fpx-root[data-theme=dark] .fpx-live-office-item,.fpx-root[data-theme=dark] .fpx-live-office-message{background:#264254;border-color:#365267;color:#d1e1e9}
