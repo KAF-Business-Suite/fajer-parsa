@@ -206,3 +206,10 @@ body:has(.fpx-root[data-theme="dark"]) .fpx-office-dialog-heading button{
 @media(prefers-reduced-motion:reduce){
  .fpx-root :is(.fpx-mobile-tabs button,.fpx-nav-item,.fpx-icon-button){transition:none!important}
 }
+
+/* Accessibility repair: preserve 56px header, but make its two small
+ * interactive areas 44px for touch. Their center/route/layout are unchanged. */
+@media(max-width:800px){
+ .fpx-root .fpx-header .fpx-lang-switch{min-height:44px;height:44px}
+ .fpx-root .fpx-header .fpx-avatar{min-width:44px;width:44px;min-height:44px;height:44px}
+}
