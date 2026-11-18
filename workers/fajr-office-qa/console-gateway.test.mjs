@@ -20,13 +20,13 @@ function fake({auth=200,assetStatus=200,wrongHtml=false,redirectAsset=false}={})
   if(url.endsWith('/office-preview'))return new Response(wrongHtml?'<html>wrong</html>':'<html lang="fa"><head><script type="module" src="./assets/office-preview-abc123.js"></script></head><body><div id="root"></div></body></html>',{status:200,headers:{'Content-Type':'text/html'}})
   return new Response('console.log("static test bundle")',{status:200,headers:{'Content-Type':'application/javascript'}})
  }
- const handleBff=async(req)=>{
+ const handleConsoleAccess=async(req)=>{
   assert.equal(new URL(req.url).pathname,'/api/session')
   assert.equal(req.headers.get('X-FP-Office-Request'),'same-origin')
   assert.equal(req.headers.get('Cookie'),cookie)
   return Response.json(auth===200?{authenticated:true}:{error:'denied'},{status:auth,headers:auth===200?{}:{'Set-Cookie':'__Host-fp-office-session=; Max-Age=0'}})
  }
- return{calls,transport,services:{handleBff,security}}
+ return{calls,transport,services:{handleConsoleAccess,security}}
 }
 test('private 46-module route not available on public/noncanonical domains',async()=>{
  const m=fake()
