@@ -3,7 +3,7 @@
  * Existing same-origin encrypted-cookie BFF -> server role, CAS, quota, audit.
  * NEVER optimistic success: a POST must be followed by authoritative GET.
  */
-import {readOfficeRequests} from './live-office-requests'
+import {readOfficeRequests} from './live-office-requests.ts'
 import type {OfficeRequestRow,OfficeStatus} from './live-office-requests'
 const statuses:readonly OfficeStatus[]=['received','reviewing','contacted','closed']
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
