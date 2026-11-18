@@ -13,7 +13,7 @@ import {
  ChartNoAxesCombined,Wallet,ReceiptText,CreditCard,ChartColumn,FileChartColumn,
  Settings,Blocks,Palette,Plug,Code2,CloudUpload,UsersRound,Shield,DatabaseBackup,
  SlidersHorizontal,Search,ChevronDown,ChevronLeft,ChevronRight,ArrowUpRight,
- Menu,X,Check,Eye,LockKeyhole,PanelLeftClose,PanelLeftOpen,FilePlus2,
+ Menu,X,Check,Eye,LockKeyhole,LogOut,PanelLeftClose,PanelLeftOpen,FilePlus2,
  FolderPlus,Plus,BookOpen,Globe2,Filter,MoreHorizontal,CheckCircle2,
  CircleHelp,Radio,RefreshCw,UploadCloud,PanelTop,Send,MonitorSmartphone,
  MessageSquareText,FileText,Columns3,Save,AlignLeft
@@ -182,6 +182,7 @@ export default function EnterpriseConsole(){
  const tx=phrases[lang] as Texts
  const current=byId(featureId)
  const dir=lang==='en'?'ltr':'rtl'
+ const mobileActiveId=mobileMenu?'more':(['overview','requests','resources','website'].includes(featureId)?featureId:'more')
  const isCustom=featureId.startsWith('demo-')
  const label=isCustom?(custom.find(x=>'demo-'+x===featureId)||tx.moduleName):current.label[lang]
  const filtered=useMemo(()=>features.filter(f=>(f.label[lang]+f.description[lang]).toLowerCase().includes(query.toLowerCase())),[query,lang])
@@ -222,10 +223,10 @@ export default function EnterpriseConsole(){
  }
  function featureHeader(){
   if(featureId==='resources'||featureId==='designsystem')return null
-   if(privateOffice&&featureId==='requests')return <div className="fpx-content-head"><div><div className="fpx-overline">{tx.workspace} / {groups.find(g=>g.id===current.group)?.name[lang]}</div><h1>{label}</h1><p>{lang==='fa'?'خواندن مستقیم فهرست درخواست‌ها؛ بدون دادهٔ نمایشی یا تغییر در سرور.':'Read verified Office requests; no demo data or server writes.'}</p></div></div>
+   if(privateOffice&&featureId==='requests')return null // Live requests card owns the single page title.
   return <div className="fpx-content-head"><div><div className="fpx-overline">{tx.workspace} / {groups.find(g=>g.id===current.group)?.name[lang]}</div><h1>{featureId==='overview'?tx.heading:label}</h1><p>{featureId==='overview'?tx.subtitle:current.description[lang]}</p></div><div className="fpx-content-actions"><span className="fpx-state-pill"><span/>{tx.pending}</span><button type="button" onClick={()=>setModal(current.mode==='publishing'||current.mode==='website'?'publish':'create')}><Plus size={16}/>{current.mode==='website'||current.mode==='publishing'?tx.review:tx.add}</button></div></div>
  }
- return <div className={'fpx-root '+(collapsed?'is-collapsed':'')} dir={dir} data-theme={appearance.mode==='system'?(systemDark?'dark':'light'):appearance.mode} data-tone={appearance.accent} data-density={appearance.density} data-corners={appearance.corners} data-font={appearance.font}>
+ return <div className={'fpx-root '+(collapsed?'is-collapsed':'')} dir={dir} data-theme={appearance.mode==='system'?(systemDark?'dark':'light'):appearance.mode} data-tone={appearance.accent} data-density={appearance.density} data-corners={appearance.corners} data-font={appearance.font} data-office={privateOffice?'private':'preview'}>
   <aside className="fpx-sidebar">{sidebar()}</aside>
   <div className="fpx-frame">
    <header className="fpx-header"><button type="button" className="fpx-icon-button fpx-menu-mobile" onClick={()=>setMobileMenu(true)} aria-label={tx.menu}><Menu size={22}/></button>
@@ -238,7 +239,7 @@ export default function EnterpriseConsole(){
     </div>
    </header>
    <main className="fpx-main">
-    <div className="fpx-warning"><span className="fpx-warning-label"><Eye size={15}/>{privateOffice?(lang==='fa'?'کنسول خصوصی':'Private console'):tx.mode}</span><span>{privateOffice?(lang==='fa'?'ورود دفتر فعال؛ فقط منابع تأییدشده وصل هستند. دیگر بخش‌ها هنوز نمایشی‌اند.':'Office session required; only verified resources are live. Other modules remain demos.'):tx.demoOnly}</span><span className="fpx-warning-lock"><LockKeyhole size={14}/>{tx.production}</span></div>{privateOffice&&<nav className="fpx-private-shortcuts" aria-label={lang==='fa'?'بخش‌های واقعی دفتر':'Live office sections'}><a href="/">{lang==='fa'?'دفتر و درخواست‌های واقعی':'Real office & requests'}</a><a href="/site-settings">{lang==='fa'?'مدیریت واقعی وب‌سایت':'Live website settings'}</a><a href="/resources">{lang==='fa'?'صفحهٔ قدیمی منابع':'Legacy resources page'}</a><button type="button" onClick={privateLogout}>{lang==='fa'?'خروج امن':'Secure sign out'}</button></nav>}
+     <div className="fpx-warning"><span className="fpx-warning-label"><Eye size={15}/>{privateOffice?(lang==='fa'?'کنسول خصوصی':'Private console'):tx.mode}</span><span className="fpx-warning-copy">{privateOffice?(lang==='fa'?'درخواست‌ها و منابعِ تأییدشده واقعی‌اند؛ سایر بخش‌ها هنوز نمایشی‌اند.':'Verified requests and resources are live; other modules remain previews.'):tx.demoOnly}</span><span className="fpx-warning-lock"><LockKeyhole size={14}/>{tx.production}</span></div>{privateOffice&&<nav className="fpx-private-shortcuts" aria-label={lang==='fa'?'دسترسی‌های دفتر':'Office shortcuts'}><a href="/"><BriefcaseBusiness size={17}/><span>{lang==='fa'?'دفتر':'Office'}</span></a><a href="/site-settings"><Globe2 size={17}/><span>{lang==='fa'?'تنظیمات سایت':'Site settings'}</span></a><a href="/resources"><Layers size={17}/><span>{lang==='fa'?'منابع':'Resources'}</span></a><button type="button" onClick={privateLogout}><LogOut size={17}/><span>{lang==='fa'?'خروج امن':'Sign out'}</span></button></nav>}
     {featureHeader()}
     {featureId==='requests'&&privateOffice?<LiveOfficeRequests lang={lang}/>:featureId==='resources'?<ResourceCenter lang={lang} resources={resources} onResources={setResources} onToast={toast}/>:featureId==='designsystem'?<ThemeLab lang={lang} value={appearance} onChange={setAppearance}/>:isCustom?<CustomModule name={label} lang={lang} tx={tx} onAdd={()=>setModal('create')}/>:current.mode==='dashboard'?<OverviewPage tx={tx} lang={lang} onGo={go}/>:current.mode==='website'?<WebsitePage tx={tx} lang={lang} publicLang={publicLang} setPublicLang={setPublicLang} onReview={()=>setModal('publish')} current={current}/>:current.mode==='builder'||current.mode==='workspace'?<BuilderPage tx={tx} lang={lang} current={current} onAdd={()=>setModal('create')} onGo={go}/>:current.mode==='connectors'?<ConnectorsPage tx={tx}/>:current.mode==='permissions'?<RolesPage tx={tx} lang={lang}/>:current.mode==='developer'?<DevPage tx={tx} current={current}/>:current.mode==='publishing'?<PublishingPage tx={tx} current={current} onReview={()=>setModal('publish')}/>:current.mode==='reports'?<ReportPage tx={tx} current={current}/>:current.mode==='media'?<MediaPage tx={tx} onReview={()=>setModal('create')}/>:<RecordsPage tx={tx} lang={lang} current={current} query={rowQuery} setQuery={setRowQuery} onAdd={()=>setModal('create')}/>}
     <footer className="fpx-footer"><span>{tx.builtBy} · MIT</span><span>Fajr Parsa · QA Admin Preview V4</span></footer>
@@ -246,12 +247,12 @@ export default function EnterpriseConsole(){
   </div>
   <nav className="fpx-mobile-tabs" aria-label={tx.menu}>{[
     {id:'overview',name:tx.overview,icon:LayoutDashboard},
+    {id:'requests',name:tx.requests,icon:Inbox},
     {id:'resources',name:lang==='fa'?'منابع':'Resources',icon:Layers},
     {id:'website',name:tx.website,icon:Globe2},
-    {id:'appbuilder',name:tx.console,icon:Blocks},
     {id:'more',name:tx.more,icon:MoreHorizontal}
-  ].map(item=><button key={item.id} aria-current={featureId===item.id?'page':undefined} className={featureId===item.id?'active':''} onClick={()=>item.id==='more'?setMobileMenu(true):go(item.id)} type="button"><item.icon size={19}/><span>{item.name}</span></button>)}</nav>
-  {mobileMenu&&<div className="fpx-drawer-cover" onClick={()=>setMobileMenu(false)}><aside className="fpx-mobile-drawer" onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-label={tx.all}><div className="fpx-drawer-head"><strong>{tx.all} · {totalFeatures}</strong><button type="button" aria-label={tx.close} onClick={()=>setMobileMenu(false)}><X size={18}/></button></div><div className="fpx-drawer-list">{groups.map(g=><div key={g.id}><h3>{g.name[lang]}</h3>{features.filter(f=>f.group===g.id).map(f=><button key={f.id} onClick={()=>go(f.id)} type="button"><Icon name={f.icon} size={17}/>{f.label[lang]}</button>)}</div>)}</div></aside></div>}
+   ].map(item=><button key={item.id} aria-current={mobileActiveId===item.id?'page':undefined} className={mobileActiveId===item.id?'active':''} aria-expanded={item.id==='more'?mobileMenu:undefined} onClick={()=>item.id==='more'?setMobileMenu(true):go(item.id)} type="button"><span className="fpx-nav-visual"><item.icon size={19}/></span><span className="fpx-nav-label">{item.name}</span></button>)}</nav>
+  {mobileMenu&&<div className="fpx-drawer-cover" onClick={()=>setMobileMenu(false)}><aside className="fpx-mobile-drawer" onClick={e=>e.stopPropagation()} role="dialog" aria-modal="true" aria-label={tx.all}><div className="fpx-drawer-head"><strong>{tx.all} · {totalFeatures}</strong><button type="button" aria-label={tx.close} onClick={()=>setMobileMenu(false)}><X size={18}/></button></div><div className="fpx-drawer-list">{groups.map(g=><div key={g.id}><h3>{g.name[lang]}</h3>{features.filter(f=>f.group===g.id).map(f=><button key={f.id} onClick={()=>go(f.id)} type="button" aria-current={featureId===f.id?'page':undefined} className={featureId===f.id?'active':''}><Icon name={f.icon} size={17}/>{f.label[lang]}</button>)}</div>)}</div></aside></div>}
   <Dialog.Root open={modal!==null} onOpenChange={open=>{if(!open)setModal(null)}}>
    <Dialog.Portal><Dialog.Overlay className="fpx-dialog-overlay"/><Dialog.Content className="fpx-dialog">
     <Dialog.Title>{modal==='publish'?tx.publishingModal:modal==='workspace'?tx.createWorkspace:tx.createModule}</Dialog.Title>
