@@ -184,13 +184,49 @@ export async function handleBff(request,env,transport=fetch){
  }catch{return err(503,'office_unavailable')}
 }
 
+
+/**
+ * QA private admin console: owner-only, read-only role check.
+ * The encrypted HttpOnly cookie is verified by Supabase Auth, then the
+ * CURRENT owner/office permission is rechecked by an existing SQL RPC.
+ * No case-list endpoint or office request quota is used on console navigation.
+ * Revocation, missing key, and provider failures fail closed.
+ */
+const CONSOLE_OWNER_RPC='https://krzxajtrhvupyywovdzy.supabase.co/rest/v1/rpc/fajr_resource_owner_check';
+export async function handleConsoleAccess(request,env,transport=fetch){
+ if(new URL(request.url).pathname!=='/api/session')return null;
+ if(request.method!=='GET')return err(405,'method_not_allowed');
+ if(!guard(request))return err(403,'forbidden');
+ if(!env?.FAJR_SESSION_KEY)return err(503,'session_unavailable');
+ try{
+  const sealed=await parseSession(request,env);
+  if(!sealed)return err(401,'sign_in_required',clearCookie());
+  const key=await publicKey(transport);
+  const session=await restore(request,env,transport,key,sealed);
+  if(session.error)return err(session.error,session.error===401?'sign_in_required':'office_unavailable',
+   session.error===401?clearCookie():null);
+  const role=await transport(CONSOLE_OWNER_RPC,{
+   method:'POST',
+   headers:{apikey:key,Authorization:'Bearer '+session.value.access,'Content-Type':'application/json',Accept:'application/json'},
+   body:'{}',redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(8000)
+  });
+  if(!role.ok){
+   if(role.status===401)return err(401,'sign_in_required',clearCookie());
+   if(role.status===403||role.status===400)return err(403,'access_denied');
+   return err(503,'console_auth_unavailable');
+  }
+  if((await role.json().catch(()=>null))!==true)return err(403,'access_denied');
+  return ok({authenticated:true,scope:'fajr_owner_console'},session.cookie);
+ }catch{return err(503,'console_auth_unavailable')}
+}
+
 export default {async fetch(request,env){
  const url=new URL(request.url);
  if(url.hostname!=='fajr-office-qa.khoojafahim.workers.dev')return new Response('Forbidden',{status:403});
  if(request.method==='GET'&&url.pathname==='/')return new Response(HTML,{headers:{...security,'Content-Type':'text/html; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/app.css')return new Response(CSS,{headers:{...security,'Content-Type':'text/css; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/app.js')return new Response(JS,{headers:{...security,'Content-Type':'text/javascript; charset=utf-8'}});
- const consoleResponse=await handlePrivateConsole(request,env,{handleBff,security});
+ const consoleResponse=await handlePrivateConsole(request,env,{handleConsoleAccess,security});
  if(consoleResponse)return consoleResponse;
  if(request.method==='GET'&&url.pathname==='/site-settings')return new Response(SITE_HTML,{headers:{...security,'Content-Type':'text/html; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/resources')return new Response(RESOURCE_HTML,{headers:{...security,'Content-Type':'text/html; charset=utf-8'}});
