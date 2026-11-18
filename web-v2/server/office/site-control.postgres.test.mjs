@@ -19,6 +19,7 @@ before(async()=>{
  await exec('psql',['-X','-v','ON_ERROR_STOP=1','-f',new URL('./sql-test/setup.sql',import.meta.url).pathname],{env});
  await command("create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$; update fajr_private.office_members set can_update=true where user_id='"+owner+"'");
  await exec('psql',['-X','-v','ON_ERROR_STOP=1','-f',new URL('../../../supabase/migrations/20261116_001_fajr_site_control.sql',import.meta.url).pathname],{env});
+ await exec('psql',['-X','-v','ON_ERROR_STOP=1','-f',new URL('../../../supabase/migrations/20261118_001_fajr_resource_owner_check.sql',import.meta.url).pathname],{env});
 });
 test('private tables inaccessible and unrelated tenants denied',async()=>{
  for(const role of ['anon','authenticated']){
@@ -56,10 +57,26 @@ test('explicit publish, public-only read and historical rollback',async()=>{
  assert.notEqual(restored.publishedRevision,firstPublished);
  assert.equal(restored.history.length,3);
 });
+test('owner-only resource probe checks active company membership AND present owner role',async()=>{
+ assert.equal(await as(owner,'authenticated','select public.fajr_resource_owner_check()'),'t');
+ assert.equal(await as(staff,'authenticated','select public.fajr_resource_owner_check()'),'f');
+ assert.equal(await as(other,'authenticated','select public.fajr_resource_owner_check()'),'f');
+ await assert.rejects(as(owner,'anon','select public.fajr_resource_owner_check()'),/permission denied/);
+ // A downgrade must take effect immediately even when can_publish_site stays true.
+ await command("update public.business_members set role='staff' where user_id='"+owner+"'");
+ assert.equal(await as(owner,'authenticated','select public.fajr_resource_owner_check()'),'f');
+ await command("update public.business_members set role='owner' where user_id='"+owner+"'");
+ assert.equal(await as(owner,'authenticated','select public.fajr_resource_owner_check()'),'t');
+ await command("update fajr_private.office_members set enabled=false where user_id='"+owner+"'");
+ assert.equal(await as(owner,'authenticated','select public.fajr_resource_owner_check()'),'f');
+ await command("update fajr_private.office_members set enabled=true where user_id='"+owner+"'");
+ assert.equal(await as(owner,'authenticated','select public.fajr_resource_owner_check()'),'t');
+});
 test('revoking company membership and publish role blocks writes',async()=>{
  await command("update public.business_members set companies=array['rpc'] where user_id='"+owner+"'");
  await assert.rejects(rpc(owner,'read'),/42501|forbidden/);
  await command("update public.business_members set companies=array['fajr','rpc'] where user_id='"+owner+"'");
  await command("update fajr_private.office_members set can_publish_site=false where user_id='"+owner+"'");
+ assert.equal(await as(owner,'authenticated','select public.fajr_resource_owner_check()'),'f');
  await assert.rejects(rpc(owner,'publish',{confirmed:true,expected:'x',expectedPublished:'x'}),/42501|publisher/);
 });
