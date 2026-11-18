@@ -97,8 +97,10 @@ test('S21: mobile resources, non-destructive detach/relink, appearance, native B
    await page.getByRole('heading',{name:'Appearance & personalization'}).waitFor()
    await page.getByRole('button',{name:/Dark/}).click()
    assert.equal(await page.locator('.fpx-root').getAttribute('data-theme'),'dark')
-   await page.getByRole('button',{name:/Ocean/}).click()
-   assert.equal(await page.locator('.fpx-root').getAttribute('data-tone'),'ocean')
+   // FP-UI-01: one official corporate identity; no ocean/jade alternate palettes.
+   assert.equal(await page.getByRole('button',{name:/Ocean/}).count(),0)
+   assert.equal(await page.getByRole('button',{name:/System/}).count(),0)
+   assert.equal(await page.locator('.fpx-root').getAttribute('data-tone'),'champagne')
    await page.getByRole('button',{name:/Extra rounded/}).click()
    assert.equal(await page.locator('.fpx-root').getAttribute('data-corners'),'extra')
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-appearance.png',fullPage:true})
