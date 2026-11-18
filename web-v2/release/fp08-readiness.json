@@ -81,6 +81,16 @@
     "officialRequestSentDate": "2026-11-15",
     "officialFollowupSentDate": "2026-11-18",
     "officialEmailEvidence": "restricted_business_mailbox",
-    "note": "Do not infer issuer approval from sent correspondence. Preserve seven blocked evidence checks and no-deploy default."
+    "note": "Do not infer issuer approval from sent correspondence. Preserve seven blocked evidence checks and no-deploy default.",
+    "issuerConfirmationOwnerReport": {
+      "recordedOn": "2026-11-18",
+      "status": "reported_by_owner_not_independently_documented",
+      "claimScope": "Owner reports that validity of the company's license was confirmed",
+      "authoritySourceNotReceived": true,
+      "authorityIdentityUnverified": true,
+      "independentEmailEvidenceFound": false,
+      "originalEvidenceExpected": "restricted authenticated issuer response or verifiable letter",
+      "legalGateEffect": "none_without_verified_documentation"
+    }
   }
 }

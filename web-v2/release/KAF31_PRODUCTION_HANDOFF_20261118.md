@@ -29,3 +29,13 @@ The existing `release/fp08-readiness.json` keeps all seven checks `blocked` (inc
 6. **Rollback** on a failure: stop further releases, restore the previously verified Cloudflare deployment `16950d0e-b5f6-42e5-bb83-3fc3bdd26e55` via authorized rollback operation; independently verify production readback and notify owner. Preserve all history, no unconditional force push.
 
 **Stop conditions:** missing or disputed official authorization; missing written privacy terms; live intake unauthorized; failed tests; unknown current production SHA; failed Cloudflare credentials; or any mismatch between build and deployed SHA. No direct, secret-based, unreviewed Pages upload.
+
+## Owner-reported license confirmation — 2026-11-18
+
+**Owner statement recorded:** the owner reports the company license validity was confirmed. This is a report of a real-world confirmation, **not a finding that this assistant has independently verified an issuing authority's letter, official registry entry or authenticated reply**. The statement does not specify the verifying office, method, dated document or legally permitted service scope.
+
+**Evidence check this session:** business and personal connected Gmail searches yielded no inbound official issuer confirmation; the original ministry enquiry thread contained the company's outgoing enquiry and follow-up only. The Fajr and owner Google Drive searches surfaced an existing scanned office-license packet and enquiry drafts but not a newly validated official confirmation. No confidential original or identifying document was copied into GitHub.
+
+**Recorded decision:** `deliveryProgress.issuerConfirmationOwnerReport.status=reported_by_owner_not_independently_documented`; keep `documentaryReview.issuerVerification=pending`, all seven required checks `blocked`, `productionAuthorization=false`, and the original `ownerAcceptance=null` until verifiable source and independent privacy/intake and service approvals are recorded. **Do not close KAF-31 or label legal clearance PASS** on the basis of user statement alone.
+
+**Minimal acceptance step:** locate or obtain issuer's private dated/authorized confirmation (including precise allowed activities); preserve it in the restricted company records, then update the issuer-evidence verdict with a non-sensitive citation and authorized reviewer. Verify the remaining legal and technical checks before enabling production release. The owner explicitly wants no gratuitous repeated requests: only ask for the official record/location if it cannot be found in connected sources.
