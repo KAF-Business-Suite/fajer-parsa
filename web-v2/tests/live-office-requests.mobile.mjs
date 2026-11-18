@@ -55,6 +55,29 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
    assert.match(await page.locator('.fpx-live-office-count').innerText(),/1/)
    assert.equal(await page.locator('html').getAttribute('dir'),'rtl')
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true,'No mobile horizontal overflow')
+   const nav=page.locator('.fpx-mobile-tabs')
+   assert.equal(await nav.locator('button').count(),5,'Exactly five navigation tabs')
+   assert.equal(await nav.locator('button[aria-current="page"]').count(),1,'Only one active navigation tab')
+   assert.match(await nav.locator('button[aria-current="page"]').innerText(),/درخواست‌ها/)
+   assert.equal(await page.locator('.fpx-content-head').count(),0,'No duplicate heading above the live requests card')
+   const layout=await page.evaluate(()=>{
+    const el=(s)=>document.querySelector(s).getBoundingClientRect()
+    const buttons=[...document.querySelectorAll('.fpx-private-shortcuts a,.fpx-private-shortcuts button')]
+    return{nav:el('.fpx-mobile-tabs').height,header:el('.fpx-header').height,
+      shortcuts:buttons.map(x=>({height:x.getBoundingClientRect().height,width:x.getBoundingClientRect().width})),
+      liveCard:el('.fpx-live-office').width,viewport:innerWidth}
+   })
+   assert.ok(layout.nav<=64,'Bottom navigation should be compact: '+JSON.stringify(layout))
+   assert.ok(layout.header<=58,'Header should be compact: '+JSON.stringify(layout))
+   assert.equal(layout.shortcuts.length,4)
+   assert.ok(layout.shortcuts.every(b=>b.height>=44&&b.width>=44),'Shortcuts must remain touchable')
+   assert.ok(layout.liveCard<=layout.viewport,'Live card must fit viewport')
+   await nav.locator('button').last().click()
+   await page.getByRole('dialog',{name:/همهٔ بخش‌ها/}).waitFor()
+   assert.equal(await nav.locator('button[aria-current="page"]').count(),1)
+   assert.match(await nav.locator('button[aria-current="page"]').innerText(),/بیشتر/)
+   await page.getByRole('button',{name:'بستن'}).click()
+   assert.match(await nav.locator('button[aria-current="page"]').innerText(),/درخواست‌ها/)
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-private-requests.png',fullPage:true})
    mode='limited'
    await page.getByRole('button',{name:'تازه‌سازی'}).click()
