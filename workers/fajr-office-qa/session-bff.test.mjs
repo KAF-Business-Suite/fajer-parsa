@@ -231,3 +231,20 @@ test('credentials absent from client code and office backend remains sole data a
  assert.doesNotMatch(code,/sessionStorage\.setItem|localStorage\.setItem|grant_type=password|grant_type=refresh_token/)
  assert.doesNotMatch(code,/service_role|SUPABASE_SERVICE_ROLE_KEY/)
 })
+
+// neutral server-session check: never show the sign-in screen during a valid cookie restore.
+test('secure Office startup shows a neutral loading view, restores safe history state and clears on logout',async()=>{
+ const {default:worker}=await import('./worker.mjs')
+ const page=await (await worker.fetch(new Request(base+'/'),env)).text()
+ const script=await (await worker.fetch(new Request(base+'/app.js'),env)).text()
+ const css=await (await worker.fetch(new Request(base+'/app.css'),env)).text()
+ assert.match(page,/id="session-loading"[^>]*role="status"/)
+ assert.match(page,/id="login-view"[^>]*hidden/)
+ assert.match(css,/\[hidden\]\{display:none!important\}/)
+ assert.match(script,/bff\('GET','\/api\/session',null\)/)
+ assert.match(script,/return load\(bootPage\)/)
+ assert.match(script,/history\.replaceState\(/)
+ assert.match(script,/history\.replaceState\(null/)
+ assert.match(script,/revealOffice\(false\)/)
+ assert.doesNotMatch(script,/sessionStorage\.setItem|localStorage\.setItem/)
+})
