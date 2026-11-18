@@ -75,6 +75,14 @@ test('Enterprise admin: 45-feature bilingual shell, independent four-language we
    await creator.getByRole('button',{name:'Add to preview'}).click()
    await page.getByRole('heading',{name:'QA Example Workspace'}).waitFor()
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-builder.png',fullPage:true})
+   // Owner security module is visible in the SAME shell. A design preview must
+   // never make a real authenticated identity request or show invented statuses.
+   await page.evaluate(()=>{location.hash='/security'})
+   await page.getByRole('heading',{name:'Account identity & security'}).waitFor()
+   await page.getByRole('status').filter({hasText:'Sign in to the private console'}).waitFor()
+   assert.equal(await page.locator('.fpx-security-refresh').isDisabled(),true)
+   assert.equal(await page.locator('.fpx-security-signout').count(),0)
+   await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-security.png',fullPage:true})
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true,'horizontal overflow after navigation at '+width)
    assert.deepEqual(errors,[],'browser console errors at '+width)
    await context.close()
