@@ -44,3 +44,17 @@ assert.ok(dictionary.includes('"ترکیه": {'), 'Country Türkiye requires exp
 assert.ok(dictionary.includes('"تابعیت": '), 'Nationality label requires explicit translation')
 assert.ok(dictionary.includes('"خدمات سفر به": '), 'Country finder heading requires explicit translation')
 console.log(JSON.stringify({gate:'FP-UX-02',status:'PASS',countries:names.length,translatedKeys:keys.size,pashtoKeys:psMap.size,sourceLabelsAudited:new Set(inData).size,untranslated:missing.length,pashtoMissing:0}))
+
+
+// TEMPORARY QA asset capture for one-time local vendoring; remove after committing the licensed photograph.
+const omanRemote='https://images.pexels.com/photos/30799019/pexels-photo-30799019.jpeg?auto=compress&cs=tinysrgb&w=960&h=640&fit=crop&fm=webp&q=74'
+const omanResult=await fetch(omanRemote,{signal:AbortSignal.timeout(20000)})
+assert.ok(omanResult.ok,'Official Pexels image endpoint unavailable: '+omanResult.status)
+const omanBytes=Buffer.from(await omanResult.arrayBuffer())
+assert.ok(omanBytes.length>9000 && omanBytes.length<1000000,'Invalid public photo byte count')
+assert.equal(omanBytes.toString('ascii',0,4),'RIFF','Image is not a WebP file')
+const omanB64=omanBytes.toString('base64')
+const chunks=omanB64.match(/.{1,4000}/g)||[]
+for(let i=0;i<chunks.length;i++)console.log('FP_OMAN_IMG_PART_'+String(i).padStart(3,'0')+'='+chunks[i])
+const {createHash}=await import('node:crypto')
+console.log('FP_OMAN_IMG_FINISH sha256='+createHash('sha256').update(omanBytes).digest('hex')+' count='+chunks.length+' size='+omanBytes.length)
