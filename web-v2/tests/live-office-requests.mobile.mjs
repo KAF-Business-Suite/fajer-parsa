@@ -17,6 +17,7 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
   await mkdir('test-results',{recursive:true})
   for(const width of [360,393]){
    let mode='guest'
+   let siteMode='ready'
    const requests=[]
    const context=await browser.newContext({viewport:{width,height:800},isMobile:true,hasTouch:true,reducedMotion:'reduce'})
    const page=await context.newPage()
@@ -36,6 +37,14 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
      const name=u.pathname.slice(8)
      const mime=name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':name.endsWith('.woff2')?'font/woff2':'application/octet-stream'
      await route.fulfill({status:200,body:await readFile(resolve(root,'assets',name)),contentType:mime});return
+    }
+    if(u.pathname==='/api/site-settings/draft'){
+     requests.push({path:u.pathname,method:route.request().method(),header:route.request().headers()['x-fp-office-request']})
+     const status=siteMode==='denied'?403:siteMode==='guest'?401:siteMode==='down'?503:200
+     const body=siteMode==='ready'?{draftRevision:'d5072836-0d50-4dfa-88dc-596e9befd276',publishedRevision:null,canEdit:true,canPublish:false,
+       draft:{secret:'must-not-render'},history:[{private:'must-not-render'}]}:{error:'unauthorized'}
+     await route.fulfill({status,contentType:'application/json',body:JSON.stringify(body)})
+     return
     }
     if(u.pathname==='/api/office'){
      requests.push({path:u.pathname,offset:u.searchParams.get('offset'),method:route.request().method(),header:route.request().headers()['x-fp-office-request']})
@@ -120,10 +129,37 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
    await page.getByRole('alert').filter({hasText:'محدودیت درخواست‌های دفتر'}).waitFor()
    assert.equal(await page.getByText('QA Synthetic Service').count(),0)
    assert.ok(requests.some(x=>x.path==='/api/office'&&x.offset==='0'&&x.method==='GET'&&x.header==='same-origin'))
+   // FP-ADMIN-G5: existing private Website tab must use only the secured
+   // GET site-settings read endpoint, never synthetic Publish buttons.
+   siteMode='ready'
+   await nav.locator('button').filter({hasText:'وب‌سایت'}).click()
+   const website=page.locator('.fpx-live-site')
+   await website.waitFor()
+   await website.getByRole('heading',{name:'مدیریت واقعی وب‌سایت'}).waitFor()
+   await website.getByText('d5072836-0d50-4dfa-88dc-596e9befd276').waitFor()
+   await website.getByRole('link',{name:/ورود به تنظیمات اصلی/}).waitFor()
+   assert.equal(await website.getByRole('link',{name:/ورود به تنظیمات اصلی/}).getAttribute('href'),'/site-settings')
+   assert.equal(await website.getByText('must-not-render').count(),0)
+   assert.equal(await website.getByRole('button',{name:/نشر/}).count(),0)
+   assert.ok(requests.some(x=>x.path==='/api/site-settings/draft'&&x.method==='GET'&&x.header==='same-origin'))
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true)
+   await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-private-live-site.png',fullPage:true})
+   siteMode='denied'
+   await website.getByRole('button',{name:'تازه‌سازی'}).click()
+   await website.getByRole('alert').filter({hasText:'مجوز دیدن تنظیمات'}).waitFor()
+   assert.equal(await website.locator('.fpx-live-site-tile').count(),0)
+   siteMode='guest'
+   await website.getByRole('button',{name:'تازه‌سازی'}).click()
+   await website.getByRole('alert').filter({hasText:'نشست دفتر پایان یافته'}).waitFor()
+   assert.equal(await website.locator('.fpx-live-site-tile').count(),0)
+   // Public preview remains entirely synthetic, without accessing settings BFF.
+   const siteReadCount=requests.filter(x=>x.path==='/api/site-settings/draft').length
+   await nav.locator('button').filter({hasText:'درخواست‌ها'}).click()
    const count=requests.filter(x=>x.path==='/api/office').length
    await page.goto(publicOrigin+'/office-preview#/requests',{waitUntil:'networkidle',timeout:20000})
    assert.equal(await page.locator('.fpx-live-office').count(),0,'Public design must never read actual office records')
    assert.equal(requests.filter(x=>x.path==='/api/office').length,count)
+   assert.equal(requests.filter(x=>x.path==='/api/site-settings/draft').length,siteReadCount,'Public preview must not read private site settings')
    assert.deepEqual(errors,[],'Browser errors at '+width)
    assert.equal(requests.filter(x=>x.unexpected).length,0)
    await context.close()
