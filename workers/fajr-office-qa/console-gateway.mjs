@@ -82,14 +82,14 @@ export async function handlePrivateConsole(request,env,services,transport=fetch)
  if(!cookie.includes('__Host-fp-office-session=')){
   return new Response(null,{status:302,headers:{...services.security,Location:'/', 'Cache-Control':'no-store'}})
  }
- // Browser navigation cannot send the custom CSRF/API header. Reuse the
- // EXISTING secure /api/session BFF server-side, with only the HttpOnly cookie.
- // That BFF rechecks Supabase Auth and the current staff Office authorization.
+ // Browser navigation cannot send the custom CSRF/API header. Owner access
+ // is verified through the existing encrypted cookie, Auth and SQL role RPC.
+ // Do not couple console navigation to the cases-list quota/read endpoint.
  const privateSessionRequest=new Request(OFFICE_ORIGIN+'/api/session',{
   method:'GET',headers:{Cookie:cookie,'X-FP-Office-Request':'same-origin'}
  });
  let auth;
- try{auth=await services.handleBff(privateSessionRequest,env,transport)}
+ try{auth=await services.handleConsoleAccess(privateSessionRequest,env,transport)}
  catch{return fail(503,services.security,'session_exception')}
  if(!auth||auth.status!==200){
   if(auth?.status===401)return new Response(null,{status:302,headers:{
