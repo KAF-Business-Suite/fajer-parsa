@@ -4,7 +4,7 @@
 .fpx-resource-root button{font-family:inherit}
 .fpx-resource-summary{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:4px 0 5px}
 .fpx-resource-summary>div{min-width:0}
-.fpx-resource-kicker{font:800 10px Manrope,sans-serif;letter-spacing:.12em;color:#aa9b84}
+.fpx-resource-kicker{font:800 10px 'Estedad Variable',sans-serif;letter-spacing:.12em;color:#aa9b84}
 .fpx-resource-summary h2{font-size:clamp(18px,5vw,24px);font-weight:850;line-height:1.5;margin:6px 0;color:inherit}
 .fpx-resource-summary p{font-size:11px;line-height:1.85;color:var(--res-muted);margin:0;max-width:580px}
 .fpx-resource-primary{border:1px solid #176d67;background:#167f77;color:white;border-radius:13px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 13px;min-height:43px;white-space:nowrap;box-shadow:0 4px 15px #17776e24}
