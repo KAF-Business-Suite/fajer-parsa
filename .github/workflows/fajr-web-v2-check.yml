@@ -55,6 +55,7 @@ jobs:
           node --test ../workers/fajr-office-qa/console-gateway.test.mjs
           node --test tests/private-office-bridge.test.mjs
           node --test tests/live-office-requests.test.mjs
+          node --test tests/office-status-change.test.mjs
           node --test tests/live-office-summary.test.mjs
           node --test tests/site-control-snapshot.test.mjs
           node --test tests/site-control-normalization.test.mjs
@@ -87,6 +88,7 @@ jobs:
         run: |
           node --test tests/office-v2-preview.mjs
           node --test tests/live-office-requests.mobile.mjs
+          node --test tests/office-status-change.mobile.mjs
       - name: Verify Samsung S21 mobile multi-site preview with safe link/detach/reconnect and appearance
         run: node --test tests/resource-center.mobile.mjs
       - name: Verify private connected-resources interface at S21 widths without real customer data
