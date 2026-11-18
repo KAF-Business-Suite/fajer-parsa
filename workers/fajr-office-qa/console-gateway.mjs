@@ -85,7 +85,7 @@ export async function handlePrivateConsole(request,env,services,transport=fetch)
  }
  const cookie=request.headers.get('Cookie')||'';
  if(!cookie.includes('__Host-fp-office-session=')){
-  return new Response(null,{status:302,headers:{...services.security,Location:'/', 'Cache-Control':'no-store'}})
+  return new Response(null,{status:302,headers:{...services.security,Location:'/?next=console', 'Cache-Control':'no-store'}})
  }
  // Browser navigation cannot send the custom CSRF/API header. Owner access
  // is verified through the existing encrypted cookie, Auth and SQL role RPC.
@@ -98,7 +98,7 @@ export async function handlePrivateConsole(request,env,services,transport=fetch)
  catch{return fail(503,services.security,'session_exception')}
  if(!auth||auth.status!==200){
   if(auth?.status===401)return new Response(null,{status:302,headers:{
-   ...services.security,Location:'/', 'Cache-Control':'no-store',
+   ...services.security,Location:'/?next=console', 'Cache-Control':'no-store',
    ...(auth.headers.get('Set-Cookie')?{'Set-Cookie':auth.headers.get('Set-Cookie')}:{})
   }});
   return fail(auth?.status===403?403:503,services.security,auth?.status===403?'permission':'session_upstream');
