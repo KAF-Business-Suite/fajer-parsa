@@ -91,3 +91,35 @@
 .fpx-resource-check{position:relative;z-index:3;min-height:42px;cursor:pointer}
 .fpx-resource-check input{position:relative;z-index:4;pointer-events:auto;cursor:pointer;flex:0 0 16px}
 .fpx-resource-root :is(button,input,select,label){scroll-margin-top:86px;scroll-margin-bottom:86px}
+
+/* S21 category choices: show all five in two rows; no clipped/hidden initial tab.
+   Every resource type remains directly visible and touchable in FA/EN. */
+@media(max-width:800px){
+ .fpx-resource-segments{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  overflow:visible;
+  padding:0 0 13px;
+  max-width:100%;
+  min-width:0;
+ }
+ .fpx-resource-segments button{
+  width:100%;
+  min-width:0;
+  min-height:49px;
+  padding:7px 6px;
+  align-items:center;
+  justify-content:center;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  text-align:center;
+  line-height:1.45;
+  font-size:10px;
+  gap:5px;
+ }
+ .fpx-resource-segments button svg{flex:0 0 16px}
+}
+@media(max-width:380px){
+ .fpx-resource-segments button{font-size:9.5px;gap:3px;padding-inline:4px}
+}
