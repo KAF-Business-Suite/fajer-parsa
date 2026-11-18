@@ -1,0 +1,95 @@
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import {handlePrivateConsole,consoleAssetPathAllowed,consolePinnedOrigin} from './console-gateway.mjs'
+
+const BASE='https://fajr-office-qa.khoojafahim.workers.dev'
+const CSP="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
+const security={'Content-Security-Policy':CSP,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}
+const cookie='__Host-fp-office-session=synthetic-cookie-only'
+function request(path,headers={},method='GET'){return new Request(BASE+path,{method,headers})}
+function fake({auth=200,assetStatus=200,wrongHtml=false,redirectAsset=false}={}){
+ const calls=[]
+ const transport=async(url,init)=>{
+  calls.push({url,init})
+  assert.equal(init.redirect,'manual')
+  assert.equal(init.method,'GET')
+  assert.equal(init.cache,'no-store')
+  assert.ok(!init.headers.Cookie&&!init.headers.Authorization,'No cookie or API key may reach immutable Pages')
+  if(assetStatus!==200)return new Response('Blocked',{status:assetStatus})
+  if(redirectAsset)return new Response(null,{status:302,headers:{Location:'https://attacker.example'}})
+  if(url.endsWith('/office-preview'))return new Response(wrongHtml?'<html>wrong</html>':'<html lang="fa"><head><script type="module" src="./assets/office-preview-abc123.js"></script></head><body><div id="root"></div></body></html>',{status:200,headers:{'Content-Type':'text/html'}})
+  return new Response('console.log("static test bundle")',{status:200,headers:{'Content-Type':'application/javascript'}})
+ }
+ const handleBff=async(req)=>{
+  assert.equal(new URL(req.url).pathname,'/api/session')
+  assert.equal(req.headers.get('X-FP-Office-Request'),'same-origin')
+  assert.equal(req.headers.get('Cookie'),cookie)
+  return Response.json(auth===200?{authenticated:true}:{error:'denied'},{status:auth,headers:auth===200?{}:{'Set-Cookie':'__Host-fp-office-session=; Max-Age=0'}})
+ }
+ return{calls,transport,services:{handleBff,security}}
+}
+test('private 46-module route not available on public/noncanonical domains',async()=>{
+ const m=fake()
+ assert.equal(await handlePrivateConsole(new Request('https://fajr-parsa-qa.pages.dev/console'),{},m.services,m.transport),null)
+ assert.equal(await handlePrivateConsole(request('/unknown'),{},m.services,m.transport),null)
+ assert.equal(await handlePrivateConsole(request('/assets/../../etc/passwd'),{},m.services,m.transport),null)
+ assert.equal(m.calls.length,0)
+})
+test('no cookie returns office login redirect BEFORE any network or HTML',async()=>{
+ const m=fake()
+ const r=await handlePrivateConsole(request('/console'),{},m.services,m.transport)
+ assert.equal(r.status,302)
+ assert.equal(r.headers.get('Location'),'/')
+ assert.equal(r.headers.get('Cache-Control'),'no-store')
+ assert.equal(m.calls.length,0)
+})
+test('invalid or revoked staff session never releases private HTML',async()=>{
+ for(const code of [401,403,503]){
+  const m=fake({auth:code})
+  const r=await handlePrivateConsole(request('/console',{Cookie:cookie}),{},m.services,m.transport)
+  assert.equal(r.status,code===401?302:code)
+  assert.equal(m.calls.length,0,'no Pages content fetched before Office privilege acceptance')
+ }
+})
+test('authorized staff sees existing 46 module bundle and strictly same-origin CSP',async()=>{
+ const m=fake()
+ const r=await handlePrivateConsole(request('/console',{Cookie:cookie}),{},m.services,m.transport)
+ assert.equal(r.status,200)
+ assert.equal(r.headers.get('Cache-Control'),'private, no-store')
+ assert.equal(r.headers.get('X-Robots-Tag'),'noindex, nofollow')
+ assert.match(r.headers.get('Content-Security-Policy'),/font-src 'self'/)
+ assert.match(r.headers.get('Content-Security-Policy'),/script-src 'self'/)
+ const html=await r.text()
+ assert.ok(html.includes('id="root"'))
+ assert.equal(m.calls.length,1)
+ assert.equal(m.calls[0].url,consolePinnedOrigin()+'/office-preview')
+})
+test('asset proxy allows only immutable local hashed assets; no user-controlled host or redirect',async()=>{
+ assert.equal(consoleAssetPathAllowed('/assets/office-preview-abc123.js'),true)
+ assert.equal(consoleAssetPathAllowed('/assets/font-abc.woff2'),true)
+ for(const bad of ['/assets/../../api.js','/assets/foo.js/next','/assets/.env',
+ '/assets/x.html','/assets/x.txt','/assets/x.js?url=https://evil.com','/assets/%2e%2e%2fsecret.js','/console-assets/s.js'])
+  assert.equal(consoleAssetPathAllowed(bad),false,bad)
+ const m=fake()
+ const r=await handlePrivateConsole(request('/assets/office-preview-abc123.js',{Cookie:cookie}),{},m.services,m.transport)
+ assert.equal(r.status,200)
+ assert.match(r.headers.get('Content-Type'),/text\/javascript/)
+ assert.equal(m.calls.length,1)
+ assert.equal(m.calls[0].url,consolePinnedOrigin()+'/assets/office-preview-abc123.js')
+ const noRedirect=fake({redirectAsset:true})
+ assert.equal((await handlePrivateConsole(request('/assets/office-preview-abc123.js'),{},noRedirect.services,noRedirect.transport)).status,503)
+})
+test('immutable source unavailable or malformed HTML fails closed without switching to mutable alias',async()=>{
+ for(const flags of [{assetStatus:503},{wrongHtml:true}]){
+  const m=fake(flags)
+  const r=await handlePrivateConsole(request('/console',{Cookie:cookie}),{},m.services,m.transport)
+  assert.equal(r.status,503)
+ }
+})
+test('mutations, query strings, unknown extensions and cross-site paths denied',async()=>{
+ const m=fake()
+ assert.equal((await handlePrivateConsole(request('/console',{},'POST'),{},m.services,m.transport)).status,405)
+ assert.equal((await handlePrivateConsole(request('/console?next=https://evil.com'),{},m.services,m.transport)).status,400)
+ assert.equal(await handlePrivateConsole(request('/assets/secret.json'),{},m.services,m.transport),null)
+ assert.equal(m.calls.length,0)
+})
