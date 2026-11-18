@@ -92,6 +92,29 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
    await page.getByRole('button',{name:'بستن'}).click()
    assert.match(await nav.locator('button[aria-current="page"]').innerText(),/درخواست‌ها/)
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-private-requests.png',fullPage:true})
+   // FP-ADMIN-G4: existing Home tab must show only validated, permissioned
+   // first-page counts, not the four demo dashes or unverified global totals.
+   await nav.locator('button').first().click()
+   const overview=page.locator('.fpx-live-overview')
+   await overview.waitFor()
+   await overview.getByRole('heading',{name:'نمای مدیریتی فجرپارسا'}).waitFor()
+   await overview.getByText('فقط ۲۵ درخواست نخست', {exact:false}).waitFor()
+   await overview.locator('.fpx-live-overview-stat').first().getByText('1',{exact:true}).waitFor()
+   assert.deepEqual(await overview.locator('.fpx-live-overview-stat .fpx-stat-title strong').allTextContents(),['1','1','0','0','0'])
+   assert.equal(await page.locator('.fpx-content-actions button').count(),0,'No fake Create/Add operation on live private Home')
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true)
+   await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-private-live-overview.png',fullPage:true})
+   mode='limited'
+   await overview.getByRole('button',{name:'تازه‌سازی'}).click()
+   await overview.getByRole('alert').filter({hasText:'محدودیت دریافت درخواست‌ها'}).waitFor()
+   assert.equal(await overview.locator('.fpx-live-overview-stat').count(),0,'No false numbers after API 429')
+   mode='guest'
+   await overview.getByRole('button',{name:'تازه‌سازی'}).click()
+   await overview.getByRole('alert').filter({hasText:'نشست دفتر پایان یافته'}).waitFor()
+   assert.equal(await overview.locator('.fpx-live-overview-stat').count(),0)
+   // Request module remains independent, with the same protected read-only API.
+   await nav.locator('button').filter({hasText:'درخواست‌ها'}).click()
+   await page.locator('.fpx-live-office').waitFor()
    mode='limited'
    await page.getByRole('button',{name:'تازه‌سازی'}).click()
    await page.getByRole('alert').filter({hasText:'محدودیت درخواست‌های دفتر'}).waitFor()
