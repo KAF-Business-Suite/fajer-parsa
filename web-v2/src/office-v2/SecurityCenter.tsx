@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react'
 import {CheckCircle2,Clock3,Fingerprint,KeyRound,LockKeyhole,
- RefreshCw,ShieldCheck,ShieldAlert,LogOut,Mail,Link2,Smartphone} from 'lucide-react'
+ RefreshCw,ShieldCheck,ShieldAlert,LogOut,Mail,Link2,Smartphone,ExternalLink,Globe2,BriefcaseBusiness,Layers,Palette} from 'lucide-react'
 import type {AdminLanguage} from './console-model'
 import {readSecurityOverview} from './security-overview'
 import type {SecurityReadResult,SecurityOverview} from './security-overview'
@@ -9,7 +9,9 @@ import './security-center.css'
 const words={
  fa:{
   heading:'امنیت و هویت حساب',intro:'وضعیت واقعی حساب مدیر از نشست امن و مجوز سرور؛ بدون نمایش رمز یا توکن.',
-  verified:'اطلاعات مجاز · فقط مشاهده',preview:'برای مشاهدهٔ اطلاعات واقعی، وارد کنسول خصوصی شوید.',
+  verified:'اطلاعات مجاز · فقط مشاهده',preview:'این صفحه فقط نمونهٔ طراحی است؛ تغییر واقعی باید در کنسول خصوصی انجام شود.',
+  enterReal:'بازکردن کنسول خصوصی و ورود امن',realActions:'کنترول‌های واقعی دفتر',officeLink:'مدیریت درخواست‌ها',siteLink:'تنظیمات وب‌سایت',resourcesLink:'بررسی منابع متصل',themeLink:'تنظیم ظاهر کنسول',
+  actionsNote:'این مسیرها به ابزارهای فعلی دفتر وصل هستند. تغییر اطلاعات فقط با مجوز و تأیید سرور انجام می‌شود.',
   loading:'در حال بررسی نشست و مجوز حساب…',refresh:'بررسی دوباره',active:'نشست فعلی',
   personal:'این دستگاه تا ۷ روز به یاد سپرده شده است.',normal:'نشست عادی؛ تازه‌سازی صفحه به‌تنهایی آن را خاتمه نمی‌دهد.',
   expires:'اعتبار نشست تا',email:'تأیید ایمیل',mfa:'Authenticator (کد ۶ رقمی)',
@@ -29,7 +31,9 @@ const words={
  },
  en:{
   heading:'Account identity & security',intro:'Your verified owner-account status from the secure session and server permissions; no password or tokens are exposed.',
-  verified:'Verified private view · read only',preview:'Sign in to the private console to see real account status.',
+  verified:'Verified private view · read only',preview:'This is a design-only preview; real changes require the private console.',
+  enterReal:'Open private console and sign in securely',realActions:'Working office controls',officeLink:'Manage requests',siteLink:'Website settings',resourcesLink:'Connected resources',themeLink:'Console appearance',
+  actionsNote:'These lead to existing authorized office tools. Any changes are checked and confirmed by the server.',
   loading:'Checking verified session and account permissions…',refresh:'Refresh status',active:'Current session',
   personal:'This personal device is remembered for up to 7 days.',normal:'Normal browser session; refreshing the page alone does not end it.',
   expires:'Session expires',email:'Verified email',mfa:'Authenticator (6-digit code)',
@@ -88,7 +92,7 @@ export function SecurityCenter({lang,privateOffice}:{lang:AdminLanguage;privateO
    <button type="button" className="fpx-security-refresh" disabled={!privateOffice||!state}
     onClick={()=>setRevision(x=>x+1)}><RefreshCw size={16}/>{tx.refresh}</button>
   </div>
-  {!privateOffice?<p className="fpx-security-feedback" role="status">{tx.preview}</p>:
+  {!privateOffice?<div className="fpx-security-preview-notice" role="status"><p>{tx.preview}</p><a className="fpx-security-launch" href="https://fajr-office-qa.khoojafahim.workers.dev/console#/security"><LockKeyhole size={17}/>{tx.enterReal}<ExternalLink size={15}/></a></div>:
    !state?<p className="fpx-security-feedback" role="status">{tx.loading}</p>:
    error?<p className="fpx-security-feedback" role="alert">{error}</p>:
    <div className="fpx-security-overview">
@@ -105,6 +109,15 @@ export function SecurityCenter({lang,privateOffice}:{lang:AdminLanguage;privateO
      <p>{tx.future}</p>
     </article>
    </div>}
+  {privateOffice&&data&&<section className="fpx-security-workflow" aria-label={tx.realActions}>
+   <div className="fpx-security-subheading"><h2>{tx.realActions}</h2></div>
+   <div className="fpx-security-workflow-grid">
+    <a href="/"><BriefcaseBusiness size={19}/><span>{tx.officeLink}</span><ExternalLink size={15}/></a>
+    <a href="/site-settings"><Globe2 size={19}/><span>{tx.siteLink}</span><ExternalLink size={15}/></a>
+    <a href="/resources"><Layers size={19}/><span>{tx.resourcesLink}</span><ExternalLink size={15}/></a>
+    <a href="#/designsystem"><Palette size={19}/><span>{tx.themeLink}</span><ExternalLink size={15}/></a>
+   </div><p className="fpx-security-workflow-note">{tx.actionsNote}</p>
+  </section>}
   <div className="fpx-security-subheading"><h2>{tx.methods}</h2></div>
   <div className="fpx-security-methods">
    <article><KeyRound size={21}/><div><strong>{tx.emailPassword}</strong><small>{tx.passwordReady}</small></div></article>
