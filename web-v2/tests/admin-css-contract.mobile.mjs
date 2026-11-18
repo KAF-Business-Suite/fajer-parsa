@@ -69,6 +69,16 @@ test('FP-UI-01 S21 360/393 and 1280: two modes, nonsecret persistence, same nav 
    await page.waitForFunction(()=>document.querySelector('.fpx-root')?.getAttribute('data-theme')==='dark')
    let dark=await root.evaluate(r=>({background:getComputedStyle(r).backgroundColor,canvas:getComputedStyle(r).getPropertyValue('--fpx-canvas').trim()}))
    assert.equal(dark.canvas,'#111C26')
+   // Wait for painted background to settle after React attribute/theme update.
+   try{
+    await page.waitForFunction(()=>getComputedStyle(document.querySelector('.fpx-root')).backgroundColor==='rgb(17, 28, 38)',null,{timeout:2500})
+   }catch(error){
+    const diagnostic=await root.evaluate(el=>({theme:el.getAttribute('data-theme'),bg:getComputedStyle(el).backgroundColor,
+     cssVariable:getComputedStyle(el).getPropertyValue('--fpx-canvas'),inline:el.getAttribute('style')}))
+    console.log('FP_UI01_DARK_BG_DIAG',JSON.stringify(diagnostic))
+    throw error
+   }
+   dark=await root.evaluate(el=>({background:getComputedStyle(el).backgroundColor,canvas:getComputedStyle(el).getPropertyValue('--fpx-canvas').trim()}))
    assert.notEqual(dark.background,initial.background)
    await page.screenshot({path:'test-results/fp-ui01-'+width+'-dark.png',fullPage:true})
    await page.reload({waitUntil:'networkidle'})
