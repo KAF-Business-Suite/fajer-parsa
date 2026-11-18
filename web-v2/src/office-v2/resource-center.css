@@ -141,3 +141,7 @@
 .fpx-root[data-theme=dark] .fpx-live-resource{background:#1a433e;border-color:#368779;color:#dbf5ed}
 .fpx-root[data-theme=dark] .fpx-live-resource-ok{background:#224a45;border-color:#407d72}
 .fpx-root[data-theme=dark] .fpx-live-resource-head>button,.fpx-root[data-theme=dark] .fpx-private-shortcuts a{background:#244651;border-color:#407d72;color:#d2efe9}
+
+.fpx-private-shortcuts button{display:inline-flex;align-items:center;background:#fff;border:1px solid #d7e6e8;color:#286b7c;border-radius:11px;padding:8px 11px;font-size:11px;font-weight:700;min-height:42px}
+.fpx-private-shortcuts button:hover{background:#e9f7f2}
+.fpx-root[data-theme=dark] .fpx-private-shortcuts button{background:#244651;border-color:#407d72;color:#d2efe9}
