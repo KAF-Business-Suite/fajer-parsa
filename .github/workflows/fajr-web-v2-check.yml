@@ -94,6 +94,8 @@ jobs:
           node --test tests/office-status-change.mobile.mjs
       - name: Verify Samsung S21 mobile multi-site preview with safe link/detach/reconnect and appearance
         run: node --test tests/resource-center.mobile.mjs
+      - name: Verify FP-UI-01 semantic CSS, Light/Dark S21 and desktop contract
+        run: node --test tests/admin-css-contract.mobile.mjs
       - name: Verify private connected-resources interface at S21 widths without real customer data
         run: node --test tests/private-resources.mobile.mjs
       - name: Verify PR14 candidate Office in Chromium with synthetic intercepted APIs
