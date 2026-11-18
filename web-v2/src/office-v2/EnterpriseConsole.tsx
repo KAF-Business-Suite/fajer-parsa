@@ -25,6 +25,7 @@ import {Input} from './oss/input'
 import {adminLanguages,byId,features,groups,publicLanguages,totalFeatures} from './console-model'
 import type {AdminLanguage,AdminGroup,Feature,FeatureMode} from './console-model'
 import './enterprise.css'
+import './executive-theme.css'
 import {ResourceCenter,ThemeLab,defaultStyle} from './ResourceCenter'
 import {isPrivateOfficeConsole} from './private-office-bridge'
 import {LiveOfficeRequests} from './LiveOfficeRequests'
@@ -149,6 +150,18 @@ const roleLabels:{fa:string;en:string}[]=[
  {fa:'ارتباطات و مارکتینگ',en:'Communications & marketing'},
 ]
 const connectors=['Cloudflare','Supabase','GitHub','WhatsApp Business','Google Workspace','Meta Business','Google Analytics','Vercel']
+/** Non-secret, browser-local appearance preference only. Authorization never reads this. */
+const appearanceKey='fp-admin-appearance-v1'
+function readAppearancePreference():PreviewStyle{
+ try{
+  const saved=JSON.parse(window.localStorage.getItem(appearanceKey)||'null') as Partial<PreviewStyle>|null
+  return {...defaultStyle,
+   mode:saved?.mode==='dark'?'dark':'light',
+   density:saved?.density==='compact'?'compact':'comfortable',
+   corners:saved?.corners==='extra'?'extra':'rounded',
+   accent:'champagne'}
+ }catch{return {...defaultStyle}}
+}
 const buildingBlocks:{fa:string;en:string;icon:string}[]=[
  {fa:'صفحهٔ وب‌سایت',en:'Website page',icon:'panels-top-left'},
  {fa:'جدول مدیریت',en:'Data management table',icon:'files'},
@@ -162,9 +175,12 @@ export default function EnterpriseConsole(){
  const [lang,setLang]=useState<AdminLanguage>('fa')
  const privateOffice=isPrivateOfficeConsole(window.location)
  const [resources,setResources]=useState<PreviewResource[]>(()=>previewSeed.map(x=>({...x})))
- const [appearance,setAppearance]=useState<PreviewStyle>(defaultStyle)
- const [systemDark,setSystemDark]=useState(()=>window.matchMedia?.('(prefers-color-scheme: dark)').matches??false)
- useEffect(()=>{const q=window.matchMedia('(prefers-color-scheme: dark)');const change=()=>setSystemDark(q.matches);q.addEventListener('change',change);return()=>q.removeEventListener('change',change)},[])
+ const [appearance,setAppearance]=useState<PreviewStyle>(readAppearancePreference)
+ useEffect(()=>{
+  try{window.localStorage.setItem(appearanceKey,JSON.stringify({
+   mode:appearance.mode,density:appearance.density,corners:appearance.corners
+  }))}catch{/* Theme preferences never block access or rendering. */}
+ },[appearance.mode,appearance.density,appearance.corners])
  const [featureId,setFeatureId]=useState(()=>{
    const hash=decodeURIComponent(location.hash.replace(/^#\/?/,''))
    return features.some(x=>x.id===hash)?hash:'overview'
@@ -229,7 +245,7 @@ export default function EnterpriseConsole(){
    if(privateOffice&&(['requests','overview','website','cases','tasks'].includes(featureId)))return null // Live Office modules own their titles; no simulated publish/create actions.
   return <div className="fpx-content-head"><div><div className="fpx-overline">{tx.workspace} / {groups.find(g=>g.id===current.group)?.name[lang]}</div><h1>{featureId==='overview'?tx.heading:label}</h1><p>{featureId==='overview'?tx.subtitle:current.description[lang]}</p></div><div className="fpx-content-actions"><span className="fpx-state-pill"><span/>{tx.pending}</span><button type="button" onClick={()=>setModal(current.mode==='publishing'||current.mode==='website'?'publish':'create')}><Plus size={16}/>{current.mode==='website'||current.mode==='publishing'?tx.review:tx.add}</button></div></div>
  }
- return <div className={'fpx-root '+(collapsed?'is-collapsed':'')} dir={dir} data-theme={appearance.mode==='system'?(systemDark?'dark':'light'):appearance.mode} data-tone={appearance.accent} data-density={appearance.density} data-corners={appearance.corners} data-font={appearance.font} data-office={privateOffice?'private':'preview'}>
+ return <div className={'fpx-root '+(collapsed?'is-collapsed':'')} dir={dir} data-theme={appearance.mode} data-tone={appearance.accent} data-density={appearance.density} data-corners={appearance.corners} data-font={appearance.font} data-office={privateOffice?'private':'preview'}>
   <aside className="fpx-sidebar">{sidebar()}</aside>
   <div className="fpx-frame">
    <header className="fpx-header"><button type="button" className="fpx-icon-button fpx-menu-mobile" onClick={()=>setMobileMenu(true)} aria-label={tx.menu}><Menu size={22}/></button>
