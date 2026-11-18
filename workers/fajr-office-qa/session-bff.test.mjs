@@ -186,7 +186,12 @@ test('revoked user fails restore, server clears cookie',async()=>{
 })
 test('invalid or tampered cookie cannot be read',async()=>{
  const m=mock(),{cookie}=await login(m.transport)
- const tampered=cookie.slice(0,-1)+(cookie.endsWith('A')?'B':'A')
+ // Changing the final base64url character can modify unused padding bits only.
+ // Mutate a middle ciphertext character to guarantee an actual authenticated-byte change.
+ const separator=cookie.indexOf('=')
+ const payload=cookie.slice(separator+1)
+ const index=Math.floor(payload.length/2)
+ const tampered=cookie.slice(0,separator+1)+payload.slice(0,index)+(payload[index]==='A'?'B':'A')+payload.slice(index+1)
  const result=await handleBff(request('/api/session',{cookie:tampered}),env,m.transport)
  assert.equal(result.status,401)
 })
