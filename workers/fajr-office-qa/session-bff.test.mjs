@@ -297,3 +297,52 @@ test('console guard rejects unsupported methods and unrelated routes',async()=>{
  assert.equal((await handleConsoleAccess(request('/api/session',{method:'POST',body:{}}),env,m.transport)).status,405)
  assert.equal(m.calls.length,0)
 })
+
+test('device logout always clears browser cookie even when upstream revocation is unverified',async()=>{
+ const original=mock(),{cookie}=await login(original.transport,true);
+ for(const failure of ['config_down','identity_unavailable','network_exception']){
+  const m=mock();
+  const transport=(url,init)=>{
+   if(failure==='config_down'&&String(url)===config)return reply(503,{error:'unavailable'});
+   if(failure==='identity_unavailable'&&String(url)===auth+'/logout')return reply(503,{error:'upstream_unavailable'});
+   if(failure==='network_exception'&&String(url)===auth+'/logout')return Promise.reject(Error('offline'));
+   return m.transport(url,init);
+  };
+  const response=await handleBff(request('/api/session/logout',{method:'POST',cookie}),env,transport);
+  assert.equal(response.status,200,failure);
+  assert.deepEqual(await response.json(),{signedOut:true,providerRevocation:'unverified'},failure);
+  assert.match(response.headers.get('Set-Cookie')||'',/^__Host-fp-office-session=; Path=\/; Max-Age=0; HttpOnly; Secure; SameSite=Lax/,failure);
+  const after=mock();
+  const denied=await handleBff(request('/api/session'),env,after.transport);
+  assert.equal(denied.status,401,'logout client no longer sends expired cookie');
+  assert.equal(after.calls.length,0,'subsequent anonymous session never contacts an identity provider');
+ }
+});
+test('device logout clears cookie when session key is missing, without weakening other routes',async()=>{
+ const m=mock();
+ const before=m.calls.length;
+ const response=await handleBff(request('/api/session/logout',{method:'POST',cookie:'__Host-fp-office-session=unreadable'}),{},m.transport);
+ assert.equal(response.status,200);
+ assert.deepEqual(await response.json(),{signedOut:true,providerRevocation:'unverified'});
+ assert.match(response.headers.get('Set-Cookie')||'',/Max-Age=0; HttpOnly; Secure/);
+ assert.equal(m.calls.length,before);
+ const protectedResponse=await handleBff(request('/api/session'),{},m.transport);
+ assert.equal(protectedResponse.status,503,'other endpoints remain fail-closed when encryption key is unavailable');
+});
+test('a malformed local cookie can be cleared without contacting Supabase',async()=>{
+ const m=mock();
+ const response=await handleBff(request('/api/session/logout',{method:'POST',cookie:'__Host-fp-office-session=definitely-invalid'}),env,m.transport);
+ assert.equal(response.status,200);
+ assert.deepEqual(await response.json(),{signedOut:true});
+ assert.match(response.headers.get('Set-Cookie')||'',/Max-Age=0/);
+ assert.equal(m.calls.length,0);
+});
+test('staff language-switch history preserves only safe page/scroll state; logout warning is explicit',async()=>{
+ const {default:worker}=await import('./worker.mjs');
+ const script=await(await worker.fetch(new Request(base+'/app.js'),env)).text();
+ assert.match(script,/history\.replaceState\(\{\.\.\.\(history\.state/);
+ assert.match(script,/\[VIEW_KEY\]:\{page:pageIndex,y:/);
+ assert.doesNotMatch(script,/history\.replaceState\(null,'',next\.pathname/);
+ assert.match(script,/providerRevocation==='unverified'/);
+ assert.doesNotMatch(script,/sessionStorage\.setItem|localStorage\.setItem/);
+});
