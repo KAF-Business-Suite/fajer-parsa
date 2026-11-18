@@ -6,6 +6,8 @@ import {Input} from './oss/input'
 import {addBookmark,detachFromConsole,relinkInConsole,previewSeed} from './resource-registry'
 import type {PreviewResource,ResourceKind,Provider} from './resource-registry'
 import './resource-center.css'
+import {isPrivateOfficeConsole,readOwnerPagesMetadata} from './private-office-bridge'
+import type {OwnerPagesMetadata,ReadResult} from './private-office-bridge'
 
 type L='fa'|'en'
 type ResourceProps={
@@ -83,6 +85,17 @@ export function ResourceCenter({lang,resources,onResources,onToast}:ResourceProp
   (r.name+' '+r.provider+' '+r.url).toLowerCase().includes(query.trim().toLowerCase())
  ),[resources,tab,includeDetached,query])
  const normal=resources.filter(r=>r.status==='bookmark').length
+ const privateMode=isPrivateOfficeConsole(window.location)
+ const [liveRead,setLiveRead]=useState<ReadResult>({status:'unavailable',data:null})
+ const [refreshing,setRefreshing]=useState(false)
+ const [readCount,setReadCount]=useState(0)
+ useEffect(()=>{
+  if(!privateMode)return
+  let active=true
+  setRefreshing(true)
+  readOwnerPagesMetadata().then(result=>{if(active)setLiveRead(result)}).finally(()=>{if(active)setRefreshing(false)})
+  return()=>{active=false}
+ },[privateMode,readCount])
  useEffect(()=>{
   function onBack(){setSelected(null);setAddOpen(false);setConfirmOpen(false)}
   window.addEventListener('popstate',onBack)
@@ -104,6 +117,11 @@ export function ResourceCenter({lang,resources,onResources,onToast}:ResourceProp
  }
  const restore=()=>{if(!details)return;onResources(relinkInConsole(resources,details.id));onToast(tx.restored)}
  return <div className="fpx-resource-root" dir={dir}>
+  {privateMode&&<section className="fpx-live-resource" aria-label={lang==='fa'?'اتصال تأییدشدهٔ دفتر':'Verified office connection'}>
+   <div className="fpx-live-resource-head"><ShieldCheck size={19}/><strong>{lang==='fa'?'اتصال واقعی دفتر خصوصی':'Private office verified connection'}</strong><button type="button" disabled={refreshing} onClick={()=>setReadCount(n=>n+1)}><RefreshCw size={16}/>{lang==='fa'?'بررسی دوباره':'Recheck'}</button></div>
+   {refreshing?<p role="status">{lang==='fa'?'در حال بررسی مجوز و اتصال…':'Checking authorization and connection…'}</p>:liveRead.status==='connected'?<div className="fpx-live-resource-ok"><strong>{liveRead.data.name} · Cloudflare Pages</strong><p>{lang==='fa'?'فقط مشاهدهٔ تأییدشده؛ ویرایش و نشر فعال نیست':'Verified read-only; editing and publishing are not enabled'}</p><small dir="ltr">{liveRead.data.url} · {liveRead.data.productionBranch}</small></div>:<p role="status">{liveRead.status==='access_denied'?(lang==='fa'?'این حساب مجوز مالک برای خواندن منابع را ندارد.':'Owner permission is required to inspect resources.'):liveRead.status==='sign_in_required'?(lang==='fa'?'برای بررسی وارد دفتر شوید.':'Please sign in to the office.'):(lang==='fa'?'اتصال فعلاً قابل تأیید نیست؛ دادهٔ ساختگی را واقعی تلقی نکنید.':'Connection not verified; demo items are not live resources.')}</p>}
+   <p className="fpx-live-resource-note">{lang==='fa'?'فهرست پایین هنوز نمایشی و غیردائمی است.':'The list below remains synthetic and is not saved.'}</p>
+  </section>}
   {details?<div className="fpx-resource-detail">
    <button className="fpx-resource-back" type="button" onClick={closeDetail}>{lang==='fa'?<ArrowRight size={18}/>:<ArrowLeft size={18}/>} {tx.back}</button>
    <Card className="fpx-resource-detail-card">
