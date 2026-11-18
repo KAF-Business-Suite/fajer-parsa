@@ -65,5 +65,22 @@
     "personalDataCopiedIntoRepository": false,
     "reviewDocument": "release/FP08_LICENSE_SCOPE_REVIEW_20261115.md",
     "scope": "visual evidence only; not a government validity confirmation"
+  },
+  "deliveryProgress": {
+    "lastReviewedAt": "2026-11-18",
+    "productionStatus": "NOT_RELEASED",
+    "qaCandidateCommit": "d084439e2fa7763d0098b2f39b27d1b1f4c9e8e6",
+    "qaIndependentRun": "https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/44329555885",
+    "qaSafeDeployRun": "https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/44329555971",
+    "qaOmanUrl": "https://fp07-service-catalog-preview.fajr-parsa-qa.pages.dev/?lang=fa#/country/om",
+    "lastKnownProductionCommit": "9ded561eae7394f38eb633d3ec890be51df3f830",
+    "lastKnownProductionDeployment": "16950d0e-b5f6-42e5-bb83-3fc3bdd26e55",
+    "ownerRequestedProduction": true,
+    "ownerRequestIsLegalProof": false,
+    "issuingAuthorityVerification": "pending_formal_response",
+    "officialRequestSentDate": "2026-11-15",
+    "officialFollowupSentDate": "2026-11-18",
+    "officialEmailEvidence": "restricted_business_mailbox",
+    "note": "Do not infer issuer approval from sent correspondence. Preserve seven blocked evidence checks and no-deploy default."
   }
 }
