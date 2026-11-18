@@ -99,13 +99,21 @@ test('live QA synthetic invalid-credentials roundtrip proves Worker reaches Supa
 });
 
 
+// Network-only bounded retry: never retry auth writes or accept a non-200 probe.
+const readWithConnectRetry=async(path,init={})=>{
+ let last
+ for(let attempt=0;attempt<2;attempt++){
+  try{return await grab(path,init)}catch(e){last=e}
+ }
+ throw last
+}
 test('live QA security center denies unauthenticated access and resolves immutable console source',async()=>{
- const health=await grab('/__qa/console-source-health')
- assert.equal(health.status,200,'QA private console source must serve a verified immutable Pages build')
+ const health=await readWithConnectRetry('/__qa/console-source-health')
+ assert.equal(health.status,200,'QA private console source must serve a verified immutable Pages build; body: '+health.body.slice(0,90))
  assert.deepEqual(JSON.parse(health.body),{status:'ready'})
- const withoutHeader=await grab('/api/security/overview')
+ const withoutHeader=await readWithConnectRetry('/api/security/overview')
  assert.equal(withoutHeader.status,403,'CSRF-style same-origin guard is mandatory')
- const withHeader=await grab('/api/security/overview',{headers:{'X-FP-Office-Request':'same-origin'}})
+ const withHeader=await readWithConnectRetry('/api/security/overview',{headers:{'X-FP-Office-Request':'same-origin'}})
  assert.equal(withHeader.status,401,'Unapproved visitor must never see owner account status')
  assert.deepEqual(JSON.parse(withHeader.body),{error:'sign_in_required'})
  for(const answer of [withoutHeader,withHeader]){
