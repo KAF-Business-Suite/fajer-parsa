@@ -79,7 +79,7 @@ test('Enterprise admin: 45-feature bilingual shell, independent four-language we
    // never make a real authenticated identity request or show invented statuses.
    await page.evaluate(()=>{location.hash='/security'})
    await page.getByRole('heading',{name:'Account identity & security'}).waitFor()
-   await page.getByRole('status').filter({hasText:'Sign in to the private console'}).waitFor()
+   await page.getByRole('status').filter({hasText:'This is a design-only preview'}).waitFor()
    assert.equal(await page.locator('.fpx-security-refresh').isDisabled(),true)
    assert.equal(await page.locator('.fpx-security-launch').getAttribute('href'),'https://fajr-office-qa.khoojafahim.workers.dev/console#/security')
    await page.getByRole('link',{name:/Open private console and sign in securely/}).waitFor()
