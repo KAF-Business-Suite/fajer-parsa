@@ -9,7 +9,7 @@
  *
  * Stage and test in QA before updating the pin. No live writes here.
  */
-const PINNED_PAGES_ORIGIN='https://6f92834c.fajr-parsa-qa.pages.dev';
+const PINNED_PAGES_ORIGIN='https://f8ffa514.fajr-parsa-qa.pages.dev';
 const OFFICE_ORIGIN='https://fajr-office-qa.khoojafahim.workers.dev';
 const MIME={
  js:'text/javascript; charset=utf-8',
