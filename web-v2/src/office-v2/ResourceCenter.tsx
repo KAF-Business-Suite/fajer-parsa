@@ -7,7 +7,7 @@ import {addBookmark,detachFromConsole,relinkInConsole,previewSeed} from './resou
 import type {PreviewResource,ResourceKind,Provider} from './resource-registry'
 import './resource-center.css'
 import {isPrivateOfficeConsole,readOwnerPagesMetadata} from './private-office-bridge'
-import type {OwnerPagesMetadata,ReadResult} from './private-office-bridge'
+import type {ReadResult} from './private-office-bridge'
 
 type L='fa'|'en'
 type ResourceProps={
