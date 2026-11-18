@@ -52,9 +52,11 @@ jobs:
         run: |
           node --test ../workers/fajr-office-qa/site-settings-api.test.mjs
           node --test ../workers/fajr-office-qa/resource-provider-api.test.mjs
+          node --test ../workers/fajr-office-qa/kaf-cases-api.test.mjs
           node --test ../workers/fajr-office-qa/console-gateway.test.mjs
           node --test tests/private-office-bridge.test.mjs
           node --test tests/live-office-requests.test.mjs
+          node --test tests/live-kaf-cases.test.mjs
           node --test tests/office-status-change.test.mjs
           node --test tests/live-office-summary.test.mjs
           node --test tests/site-control-snapshot.test.mjs
@@ -88,6 +90,7 @@ jobs:
         run: |
           node --test tests/office-v2-preview.mjs
           node --test tests/live-office-requests.mobile.mjs
+          node --test tests/live-kaf-cases.mobile.mjs
           node --test tests/office-status-change.mobile.mjs
       - name: Verify Samsung S21 mobile multi-site preview with safe link/detach/reconnect and appearance
         run: node --test tests/resource-center.mobile.mjs
