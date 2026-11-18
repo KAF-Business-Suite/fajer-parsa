@@ -312,7 +312,7 @@ try {
       const contact=page.locator('.country-page-actions a[href="https://wa.me/93728507933"]')
       assert.equal(await contact.count(),1,'Oman-specific opt-in WhatsApp '+language)
       assert.equal(await page.locator('.country-page-photo img').evaluate(img=>img.complete&&img.naturalWidth>0),true,'Oman real location photograph '+language)
-      assert.match(await page.locator('.country-page-photo img').getAttribute('src'),/images\.pexels\.com\/photos\/30799019\//,'Actual Muscat photograph URL '+language)
+      assert.equal(await page.locator('.country-page-photo img').getAttribute('src'),'/media/oman-destination.webp','Locally served Muscat photograph '+language)
       assert.match(await page.locator('.country-page-photo figcaption').innerText(),/Reyyan/,'Photo credited to author '+language)
       await page.locator('.country-choice-card button').first().click()
       const dialog=page.getByRole('dialog')
