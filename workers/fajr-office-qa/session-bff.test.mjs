@@ -346,3 +346,26 @@ test('staff language-switch history preserves only safe page/scroll state; logou
  assert.match(script,/providerRevocation==='unverified'/);
  assert.doesNotMatch(script,/sessionStorage\.setItem|localStorage\.setItem/);
 });
+
+
+test('staff sign-in is accessible and restores only allowlisted console destination',async()=>{
+ const {default:worker}=await import('./worker.mjs');
+ const page=await(await worker.fetch(new Request(base+'/'),env)).text();
+ const script=await(await worker.fetch(new Request(base+'/app.js'),env)).text();
+ const css=await(await worker.fetch(new Request(base+'/app.css'),env)).text();
+ assert.match(page,/<body class="fp-auth-active">/);
+ assert.match(page,/id="email"[^>]*autocomplete="username"/);
+ assert.match(page,/id="password"[^>]*autocomplete="current-password"/);
+ assert.match(page,/id="password-visibility"[^>]*aria-pressed="false"/);
+ assert.match(page,/id="login-progress"[^>]*role="status"/);
+ assert.match(page,/id="login-button"[^>]*aria-busy="false"/);
+ assert.match(script,/function nextPrivateView\(\)\{return new URLSearchParams\(location\.search\)\.get\('next'\)==='console'\?'\/console':null\}/);
+ assert.match(script,/updatePasswordVisibilityLabel\(\)/);
+ assert.match(script,/document\.body\.classList\.toggle\('fp-auth-active',!yes\)/);
+ assert.match(script,/location\.replace\(target\)/);
+ assert.match(script,/localStorage\.getItem\('fp-admin-appearance-v1'\)/);
+ assert.doesNotMatch(script,/localStorage\.setItem|sessionStorage\.setItem/);
+ assert.match(css,/body\.fp-auth-active main\.wrap\{display:grid/);
+ assert.match(css,/html\[data-theme=dark\] body\.fp-auth-active/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
+});
