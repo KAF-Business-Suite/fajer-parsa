@@ -26,6 +26,7 @@ import {adminLanguages,byId,features,groups,publicLanguages,totalFeatures} from 
 import type {AdminLanguage,AdminGroup,Feature,FeatureMode} from './console-model'
 import './enterprise.css'
 import {ResourceCenter,ThemeLab,defaultStyle} from './ResourceCenter'
+import {isPrivateOfficeConsole} from './private-office-bridge'
 import type {PreviewStyle} from './ResourceCenter'
 import {previewSeed} from './resource-registry'
 import type {PreviewResource} from './resource-registry'
@@ -155,6 +156,7 @@ const buildingBlocks:{fa:string;en:string;icon:string}[]=[
 
 export default function EnterpriseConsole(){
  const [lang,setLang]=useState<AdminLanguage>('fa')
+ const privateOffice=isPrivateOfficeConsole(window.location)
  const [resources,setResources]=useState<PreviewResource[]>(()=>previewSeed.map(x=>({...x})))
  const [appearance,setAppearance]=useState<PreviewStyle>(defaultStyle)
  const [systemDark,setSystemDark]=useState(()=>window.matchMedia?.('(prefers-color-scheme: dark)').matches??false)
@@ -226,7 +228,7 @@ export default function EnterpriseConsole(){
     </div>
    </header>
    <main className="fpx-main">
-    <div className="fpx-warning"><span className="fpx-warning-label"><Eye size={15}/>{tx.mode}</span><span>{tx.demoOnly}</span><span className="fpx-warning-lock"><LockKeyhole size={14}/>{tx.production}</span></div>
+    <div className="fpx-warning"><span className="fpx-warning-label"><Eye size={15}/>{privateOffice?(lang==='fa'?'کنسول خصوصی':'Private console'):tx.mode}</span><span>{privateOffice?(lang==='fa'?'ورود دفتر فعال؛ فقط منابع تأییدشده وصل هستند. دیگر بخش‌ها هنوز نمایشی‌اند.':'Office session required; only verified resources are live. Other modules remain demos.'):tx.demoOnly}</span><span className="fpx-warning-lock"><LockKeyhole size={14}/>{tx.production}</span></div>{privateOffice&&<nav className="fpx-private-shortcuts" aria-label={lang==='fa'?'بخش‌های واقعی دفتر':'Live office sections'}><a href="/">{lang==='fa'?'دفتر و درخواست‌های واقعی':'Real office & requests'}</a><a href="/site-settings">{lang==='fa'?'مدیریت واقعی وب‌سایت':'Live website settings'}</a><a href="/resources">{lang==='fa'?'صفحهٔ قدیمی منابع':'Legacy resources page'}</a></nav>}
     {featureHeader()}
     {featureId==='resources'?<ResourceCenter lang={lang} resources={resources} onResources={setResources} onToast={toast}/>:featureId==='designsystem'?<ThemeLab lang={lang} value={appearance} onChange={setAppearance}/>:isCustom?<CustomModule name={label} lang={lang} tx={tx} onAdd={()=>setModal('create')}/>:current.mode==='dashboard'?<OverviewPage tx={tx} lang={lang} onGo={go}/>:current.mode==='website'?<WebsitePage tx={tx} lang={lang} publicLang={publicLang} setPublicLang={setPublicLang} onReview={()=>setModal('publish')} current={current}/>:current.mode==='builder'||current.mode==='workspace'?<BuilderPage tx={tx} lang={lang} current={current} onAdd={()=>setModal('create')} onGo={go}/>:current.mode==='connectors'?<ConnectorsPage tx={tx}/>:current.mode==='permissions'?<RolesPage tx={tx} lang={lang}/>:current.mode==='developer'?<DevPage tx={tx} current={current}/>:current.mode==='publishing'?<PublishingPage tx={tx} current={current} onReview={()=>setModal('publish')}/>:current.mode==='reports'?<ReportPage tx={tx} current={current}/>:current.mode==='media'?<MediaPage tx={tx} onReview={()=>setModal('create')}/>:<RecordsPage tx={tx} lang={lang} current={current} query={rowQuery} setQuery={setRowQuery} onAdd={()=>setModal('create')}/>}
     <footer className="fpx-footer"><span>{tx.builtBy} · MIT</span><span>Fajr Parsa · QA Admin Preview V4</span></footer>
