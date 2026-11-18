@@ -192,6 +192,14 @@ export default function EnterpriseConsole(){
  },[])
  useEffect(()=>{document.documentElement.lang=lang;document.documentElement.dir=dir;document.title=label+' | Fajr Parsa Console Preview'},[lang,dir,label])
  function go(id:string){location.hash='/'+encodeURIComponent(id);setFeatureId(id);setMobileMenu(false);setRowQuery('');setCurrentTab('overview');window.scrollTo({top:0,behavior:'instant'})}
+ async function privateLogout(){
+  if(!privateOffice)return
+  try{
+   const response=await fetch('/api/session/logout',{method:'POST',credentials:'same-origin',headers:{'X-FP-Office-Request':'same-origin'},cache:'no-store'})
+   if(response.ok){window.location.replace('/');return}
+  }catch{}
+  toast(lang==='fa'?'خروج امن تأیید نشد؛ لطفاً در دفتر اصلی دوباره تلاش کنید.':'Sign out could not be verified. Please try again in the office.')
+ }
  function toggleGroup(id:AdminGroup){setExpanded(x=>x.includes(id)?x.filter(y=>y!==id):[...x,id])}
  function toast(m:string){setNotice(m)}
  function sidebar(){
@@ -228,7 +236,7 @@ export default function EnterpriseConsole(){
     </div>
    </header>
    <main className="fpx-main">
-    <div className="fpx-warning"><span className="fpx-warning-label"><Eye size={15}/>{privateOffice?(lang==='fa'?'کنسول خصوصی':'Private console'):tx.mode}</span><span>{privateOffice?(lang==='fa'?'ورود دفتر فعال؛ فقط منابع تأییدشده وصل هستند. دیگر بخش‌ها هنوز نمایشی‌اند.':'Office session required; only verified resources are live. Other modules remain demos.'):tx.demoOnly}</span><span className="fpx-warning-lock"><LockKeyhole size={14}/>{tx.production}</span></div>{privateOffice&&<nav className="fpx-private-shortcuts" aria-label={lang==='fa'?'بخش‌های واقعی دفتر':'Live office sections'}><a href="/">{lang==='fa'?'دفتر و درخواست‌های واقعی':'Real office & requests'}</a><a href="/site-settings">{lang==='fa'?'مدیریت واقعی وب‌سایت':'Live website settings'}</a><a href="/resources">{lang==='fa'?'صفحهٔ قدیمی منابع':'Legacy resources page'}</a></nav>}
+    <div className="fpx-warning"><span className="fpx-warning-label"><Eye size={15}/>{privateOffice?(lang==='fa'?'کنسول خصوصی':'Private console'):tx.mode}</span><span>{privateOffice?(lang==='fa'?'ورود دفتر فعال؛ فقط منابع تأییدشده وصل هستند. دیگر بخش‌ها هنوز نمایشی‌اند.':'Office session required; only verified resources are live. Other modules remain demos.'):tx.demoOnly}</span><span className="fpx-warning-lock"><LockKeyhole size={14}/>{tx.production}</span></div>{privateOffice&&<nav className="fpx-private-shortcuts" aria-label={lang==='fa'?'بخش‌های واقعی دفتر':'Live office sections'}><a href="/">{lang==='fa'?'دفتر و درخواست‌های واقعی':'Real office & requests'}</a><a href="/site-settings">{lang==='fa'?'مدیریت واقعی وب‌سایت':'Live website settings'}</a><a href="/resources">{lang==='fa'?'صفحهٔ قدیمی منابع':'Legacy resources page'}</a><button type="button" onClick={privateLogout}>{lang==='fa'?'خروج امن':'Secure sign out'}</button></nav>}
     {featureHeader()}
     {featureId==='resources'?<ResourceCenter lang={lang} resources={resources} onResources={setResources} onToast={toast}/>:featureId==='designsystem'?<ThemeLab lang={lang} value={appearance} onChange={setAppearance}/>:isCustom?<CustomModule name={label} lang={lang} tx={tx} onAdd={()=>setModal('create')}/>:current.mode==='dashboard'?<OverviewPage tx={tx} lang={lang} onGo={go}/>:current.mode==='website'?<WebsitePage tx={tx} lang={lang} publicLang={publicLang} setPublicLang={setPublicLang} onReview={()=>setModal('publish')} current={current}/>:current.mode==='builder'||current.mode==='workspace'?<BuilderPage tx={tx} lang={lang} current={current} onAdd={()=>setModal('create')} onGo={go}/>:current.mode==='connectors'?<ConnectorsPage tx={tx}/>:current.mode==='permissions'?<RolesPage tx={tx} lang={lang}/>:current.mode==='developer'?<DevPage tx={tx} current={current}/>:current.mode==='publishing'?<PublishingPage tx={tx} current={current} onReview={()=>setModal('publish')}/>:current.mode==='reports'?<ReportPage tx={tx} current={current}/>:current.mode==='media'?<MediaPage tx={tx} onReview={()=>setModal('create')}/>:<RecordsPage tx={tx} lang={lang} current={current} query={rowQuery} setQuery={setRowQuery} onAdd={()=>setModal('create')}/>}
     <footer className="fpx-footer"><span>{tx.builtBy} · MIT</span><span>Fajr Parsa · QA Admin Preview V4</span></footer>
