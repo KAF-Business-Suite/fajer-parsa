@@ -89,9 +89,33 @@ test('immutable source unavailable or malformed HTML fails closed without switch
 test('mutations, query strings, unknown extensions and cross-site paths denied',async()=>{
  const m=fake()
  assert.equal((await handlePrivateConsole(request('/console',{},'POST'),{},m.services,m.transport)).status,405)
- assert.equal((await handlePrivateConsole(request('/console?next=https://evil.com'),{},m.services,m.transport)).status,400)
+ assert.equal((await handlePrivateConsole(request('/assets/office-preview-abc123.js?remote=https://evil.com'),{},m.services,m.transport)).status,400)
  assert.equal(await handlePrivateConsole(request('/assets/secret.json'),{},m.services,m.transport),null)
  assert.equal(m.calls.length,0)
+})
+
+test('tracking query on /console does not block safe owner navigation or affect backend or fixed source',async()=>{
+ // This was reported from the actual S21 screenshot: temporarily unavailable (query).
+ // Hash fragments stay in the browser and do not reach the server.
+ const m=fake()
+ const path='/console?utm_source=chatgpt&next=https%3A%2F%2Fattacker.example%2Fcallback'
+ const ok=await handlePrivateConsole(request(path+'#/requests',{Cookie:cookie}),{},m.services,m.transport)
+ assert.equal(ok.status,200)
+ assert.ok((await ok.text()).includes('id="root"'))
+ assert.equal(ok.headers.get('Cache-Control'),'private, no-store')
+ assert.equal(m.calls.length,1)
+ assert.equal(m.calls[0].url,consolePinnedOrigin()+'/office-preview')
+ assert.equal(m.calls[0].init.headers.Cookie,undefined)
+ assert.equal(m.calls[0].init.headers.Authorization,undefined)
+ const guest=fake()
+ const denied=await handlePrivateConsole(request(path),{},guest.services,guest.transport)
+ assert.equal(denied.status,302)
+ assert.equal(denied.headers.get('Location'),'/')
+ assert.equal(guest.calls.length,0)
+ const revoked=fake({auth:403})
+ const forbidden=await handlePrivateConsole(request(path,{Cookie:cookie}),{},revoked.services,revoked.transport)
+ assert.equal(forbidden.status,403)
+ assert.equal(revoked.calls.length,0)
 })
 
 test('QA source probe has no staff cookie requirement and checks only pinned immutable public frontend',async()=>{
