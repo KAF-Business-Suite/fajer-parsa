@@ -49,7 +49,7 @@ export function LiveKafCases({lang,mode}:{lang:AdminLanguage;mode:Mode}){
   setState(null)
   readKafCases(page).then(result=>{if(active)setState(result)})
   return()=>{active=false}
- },[page,revision])
+ },[page,revision,mode])
  const busy=state===null
  const all=state?.status==='ok'?state.items:[]
  const rows=mode==='tasks'?all.filter(item=>item.nextAction.trim().length>0):all
