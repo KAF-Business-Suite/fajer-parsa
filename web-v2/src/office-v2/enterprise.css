@@ -269,3 +269,26 @@ button:focus-visible,input:focus-visible,select:focus-visible,[role=tab]:focus-v
 @media(prefers-reduced-motion:reduce){
  .fpx-mobile-tabs button,.fpx-mobile-tabs .fpx-nav-visual{transition:none!important;transform:none!important}
 }
+
+
+/* FP-ADMIN-G4: real, page-scoped owner overview; reuses the existing cards. */
+.fpx-live-overview{min-width:0;gap:13px}
+.fpx-live-overview-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.fpx-live-overview-top h1{font-size:clamp(23px,3.3vw,31px);line-height:1.3;margin:7px 0 6px;color:var(--ink);font-weight:800}
+.fpx-live-overview-top p{font-size:13px;line-height:1.7;color:var(--muted);margin:0}
+.fpx-live-overview-kicker{display:inline-flex;align-items:center;gap:6px;font-weight:750;font-size:11px;color:var(--teal)}
+.fpx-live-overview-top>button{min-height:42px;border:1px solid #c1dcd6;border-radius:12px;background:#f5faf8;color:#167568;padding:9px 12px;display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:12px}
+.fpx-live-overview-top>button:disabled{opacity:.45;cursor:not-allowed}
+.fpx-live-overview-scope{font-size:12px;color:#516d7c;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px;line-height:1.7;margin:0}
+.fpx-live-overview-feedback{padding:17px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--muted);font-size:13px;line-height:1.8}
+.fpx-live-overview-feedback[role=alert]{background:#fff8f0;border-color:#ebd4b5;color:#78582f}
+.fpx-live-overview-stats{min-width:0}
+.fpx-live-overview-stat .fpx-stat-title strong{font-variant-numeric:tabular-nums}
+.fpx-live-overview-more{font-size:12px;color:var(--muted);padding:11px 14px;border-inline-start:3px solid var(--teal);margin:0}
+.fpx-live-overview-links{display:flex;gap:10px;flex-wrap:wrap}
+.fpx-live-overview-links button{min-height:44px;border-radius:12px;border:1px solid #c6ded9;background:var(--surface);color:var(--teal);font-size:12px;font-weight:750;padding:10px 14px;display:flex;align-items:center;gap:9px}
+.fpx-live-overview-links button:hover{background:#eef8f4}
+@media(max-width:540px){.fpx-live-overview-top{align-items:center}.fpx-live-overview-top h1{font-size:22px}.fpx-live-overview-top>button{min-width:44px;min-height:44px;justify-content:center;padding:10px}.fpx-live-overview-top>button span{display:none}.fpx-live-overview-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.fpx-live-overview-links button{justify-content:center;padding:10px 6px;font-size:11px}}
+.fpx-root[data-theme=dark] .fpx-live-overview-top h1{color:#edf5f9}
+.fpx-root[data-theme=dark] .fpx-live-overview-scope,.fpx-root[data-theme=dark] .fpx-live-overview-feedback,.fpx-root[data-theme=dark] .fpx-live-overview-links button{background:#243d4c;color:#d5e6ec;border-color:#395568}
+.fpx-root[data-theme=dark] .fpx-live-overview-feedback[role=alert]{background:#493a2c;color:#f4dbc5;border-color:#82694f}
