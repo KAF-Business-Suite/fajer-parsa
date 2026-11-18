@@ -7,7 +7,7 @@ import assert from 'node:assert/strict'
 const root = resolve('dist')
 const output = resolve(process.env.QA_OUTPUT || 'test-results')
 await mkdir(output, { recursive: true })
-const mime = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.css':'text/css', '.woff2':'font/woff2', '.webp':'image/webp', '.png':'image/png' }
+const mime = { '.html':'text/html; charset=utf-8', '.js':'text/javascript', '.css':'text/css', '.woff2':'font/woff2', '.webp':'image/webp', '.png':'image/png', '.svg':'image/svg+xml' }
 const server = createServer(async (req,res) => {
   const path = resolve(root, '.' + new URL(req.url, 'http://localhost').pathname.replace(/\/$/, '/index.html'))
   if (!path.startsWith(root + sep)) { res.writeHead(403); res.end(); return }
