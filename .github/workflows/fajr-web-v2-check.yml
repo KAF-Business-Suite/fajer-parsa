@@ -56,6 +56,7 @@ jobs:
           node --test tests/private-office-bridge.test.mjs
           node --test tests/live-office-requests.test.mjs
           node --test tests/live-office-summary.test.mjs
+          node --test tests/site-control-snapshot.test.mjs
           node --test tests/site-control-normalization.test.mjs
           node --test tests/resource-registry.test.mjs
           node --check ../workers/fajr-office-qa/site-settings-api.mjs
