@@ -1,13 +1,14 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {webcrypto} from 'node:crypto'
-import {handleBff} from './worker.mjs'
+import {handleBff,handleConsoleAccess} from './worker.mjs'
 if(!globalThis.crypto)globalThis.crypto=webcrypto
 
 const base='https://fajr-office-qa.khoojafahim.workers.dev'
 const auth='https://krzxajtrhvupyywovdzy.supabase.co/auth/v1'
 const config='https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-office/config'
 const office='https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-office/api/office'
+const ownerRpc='https://krzxajtrhvupyywovdzy.supabase.co/rest/v1/rpc/fajr_resource_owner_check'
 const key=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt'])
 const env={FAJR_SESSION_KEY:key}
 const authHeader='X-FP-Office-Request'
@@ -18,7 +19,7 @@ function request(path,{method='GET',body,cookie,origin=base,header=true,fetchSit
  return new Request(base+path,{method,headers,...(method==='POST'?{body:JSON.stringify(body||{})}:{})})
 }
 function reply(status,data){return Response.json(data,{status})}
-function mock({denied=false,expires_in=3600,invalid=false,revoked=false}={}){
+function mock({denied=false,expires_in=3600,invalid=false,revoked=false,owner=true,roleStatus=200}={}){
  const calls=[];
  const transport=async(url,init={})=>{
   const u=String(url),method=init.method||'GET'
@@ -28,6 +29,14 @@ function mock({denied=false,expires_in=3600,invalid=false,revoked=false}={}){
   if(u.includes('/token?grant_type=refresh_token'))return reply(200,{access_token:'token.synthetic.rotated',refresh_token:'token-synthetic-rotated',expires_in:3600})
   if(u===auth+'/user')return revoked?reply(401,{error:'invalid_session'}):reply(200,{id:fixture.id,role:'authenticated',is_anonymous:false})
   if(u===auth+'/logout')return new Response(null,{status:204})
+  if(u===ownerRpc){
+   assert.equal(method,'POST')
+   assert.equal(init.redirect,'manual')
+   assert.equal(init.cache,'no-store')
+   assert.equal(init.headers?.Authorization,'Bearer token.synthetic.access')
+   assert.deepEqual(JSON.parse(init.body),{})
+   return reply(roleStatus,roleStatus===200?owner:{error:'role_unavailable'})
+  }
   if(u.startsWith(office)){
    assert.equal(init.headers?.Origin,base)
    assert.match(init.headers?.Authorization||'',/^Bearer token\.synthetic\./)
@@ -252,4 +261,39 @@ test('secure Office startup shows a neutral loading view, restores safe history 
  assert.match(script,/history\.replaceState\(null/)
  assert.match(script,/revealOffice\(false\)/)
  assert.doesNotMatch(script,/sessionStorage\.setItem|localStorage\.setItem/)
+})
+
+test('owner-only console checks live role without consuming request-list quota',async()=>{
+ const m=mock(),{cookie}=await login(m.transport,true)
+ const previous=m.calls.filter(x=>x.url.startsWith(office)).length
+ const response=await handleConsoleAccess(request('/api/session',{cookie}),env,m.transport)
+ assert.equal(response.status,200)
+ assert.deepEqual(await response.json(),{authenticated:true,scope:'fajr_owner_console'})
+ assert.equal(m.calls.filter(x=>x.url.startsWith(office)).length,previous)
+ assert.equal(m.calls.at(-1).url,ownerRpc)
+ assert.equal(m.calls.at(-1).method,'POST')
+ assert.doesNotMatch(JSON.stringify([...response.headers]),/synthetic-only|Bearer|token\.synthetic|refresh/)
+})
+test('owner-only console fails closed on revoked, non-owner, absent cookie or RPC errors',async()=>{
+ const initial=mock(),{cookie}=await login(initial.transport,true)
+ for(const [opts,expected] of [[{owner:false},403],[{roleStatus:401},401],[{roleStatus:403},403],[{roleStatus:503},503],[{revoked:true},401]]){
+  const m=mock(opts)
+  const response=await handleConsoleAccess(request('/api/session',{cookie}),env,m.transport)
+  assert.equal(response.status,expected,JSON.stringify(opts))
+  assert.ok(!m.calls.some(x=>x.url.startsWith(office)), 'No business data reads before console access')
+  if(expected===401)assert.match(response.headers.get('Set-Cookie')||'',/Max-Age=0/)
+ }
+ const anon=mock()
+ assert.equal((await handleConsoleAccess(request('/api/session'),env,anon.transport)).status,401)
+ assert.equal(anon.calls.length,0)
+ assert.equal((await handleConsoleAccess(request('/api/session',{cookie,header:false}),env,anon.transport)).status,403)
+ assert.equal((await handleConsoleAccess(request('/api/session',{cookie,fetchSite:'cross-site'}),env,anon.transport)).status,403)
+ assert.equal((await handleConsoleAccess(request('/api/session',{cookie}),{},anon.transport)).status,503)
+ assert.equal(anon.calls.length,0)
+})
+test('console guard rejects unsupported methods and unrelated routes',async()=>{
+ const m=mock()
+ assert.equal(await handleConsoleAccess(request('/api/office'),env,m.transport),null)
+ assert.equal((await handleConsoleAccess(request('/api/session',{method:'POST',body:{}}),env,m.transport)).status,405)
+ assert.equal(m.calls.length,0)
 })
