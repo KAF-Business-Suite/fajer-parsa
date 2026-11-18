@@ -39,7 +39,7 @@ test('private QA resource page: safe mobile FA/EN, denied guest, read-only owner
    const errors=[]
    page.on('pageerror',e=>errors.push(String(e)))
    page.on('request',r=>{if(!r.url().startsWith(base+'/'))outbound.push(r.url())})
-   await page.goto(base+'/resources',{waitUntil:'networkidle'})
+   await page.goto(base+'/resources',{waitUntil:'domcontentloaded',timeout:15000})
    await page.getByRole('heading',{name:'مدیریت منابع متصل'}).waitFor()
    await page.getByRole('status').filter({hasText:'ابتدا وارد دفتر شوید'}).waitFor()
    assert.equal(await page.locator('html').getAttribute('dir'),'rtl')
