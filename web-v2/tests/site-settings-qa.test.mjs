@@ -43,3 +43,40 @@ test('upstream outage or redirect is fail closed',async()=>{
  const r=await onRequestGet(request(origin),transport);
  assert.equal(r.status,503);
 });
+
+test('four-language public settings accept only exact approved nested structure',async()=>{
+ const text4={fa:'کابل',ps:'کابل',en:'Kabul',ar:'كابل'};
+ const value={...published,
+  contact:{...published.contact,phone:'+93700123456',mapUrl:'https://maps.app.goo.gl/example123'},
+  office:{address:text4,hours:{fa:'۹-۵',ps:'۹-۵',en:'9-5',ar:'٩-٥'}},
+  content:{notice:text4,faq:[{question:text4,answer:text4}]}
+ };
+ const r=await onRequestGet(request(origin),mock(value).transport);
+ assert.equal(r.status,200);
+ assert.deepEqual(await r.json(),value);
+});
+test('never expose nested private/draft fields or untrusted phone/maps/translated content',async()=>{
+ const text4={fa:'متن',ps:'متن',en:'Text',ar:'نص'};
+ const base={...published,
+  office:{address:text4,hours:text4},
+  content:{notice:text4,faq:[{question:text4,answer:text4}]}
+ };
+ const blocked=[
+  {...base,contact:{...base.contact,phone:'javascript:alert(1)'}},
+  {...base,contact:{...base.contact,mapUrl:'https://maps.app.goo.gl.evil.invalid/x'}},
+  {...base,contact:{...base.contact,mapUrl:'http://maps.google.com/maps'}},
+  {...base,office:{...base.office,privateNote:'do not publish'}},
+  {...base,office:{address:{...text4,privatePhone:'do not publish'},hours:text4}},
+  {...base,office:{address:{fa:'only Dari'},hours:text4}},
+  {...base,content:{...base.content,internalDraft:true}},
+  {...base,content:{notice:text4,faq:[{question:text4,answer:{...text4,secret:'do not publish'}}]}},
+  {...base,content:{notice:text4,faq:Array(6).fill({question:text4,answer:text4})}},
+  {...base,content:{notice:{...text4,fa:'x'.repeat(501)},faq:[]}},
+  {...base,contact:{...base.contact,mapUrl:{url:'https://maps.app.goo.gl/a'}}}
+ ];
+ for(const value of blocked){
+  const r=await onRequestGet(request(origin),mock(value).transport);
+  assert.equal(r.status,503,'invalid nested public settings must fail closed');
+  assert.deepEqual(await r.json(),{error:'temporarily_unavailable'});
+ }
+});
