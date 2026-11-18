@@ -4,7 +4,7 @@ import {handleFajrPagesRead} from './resource-provider-api.mjs'
 
 const ORIGIN='https://fajr-office-qa.khoojafahim.workers.dev'
 const PATH='/api/resources/providers/cloudflare/fajr-parsa-qa'
-const ROLE='https://krzxajtrhvupyywovdzy.supabase.co/rest/v1/rpc/fajr_site_control'
+const ROLE='https://krzxajtrhvupyywovdzy.supabase.co/rest/v1/rpc/fajr_resource_owner_check'
 const CF='https://api.cloudflare.com/client/v4/accounts/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/pages/projects/fajr-parsa-qa'
 const TOKEN='synthetic-never-production-read-token'
 const env={FAJR_SESSION_KEY:'synthetic',FAJR_CLOUDFLARE_ACCOUNT_ID:'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',FAJR_CLOUDFLARE_READ_TOKEN:TOKEN}
@@ -38,8 +38,8 @@ function mocked({owner=true,roleStatus=200,cfStatus=200,badProject=false,upstrea
     assert.equal(init.method,'POST')
     assert.equal(init.headers.Authorization,'Bearer fake-owner-jwt')
     assert.equal(init.headers.apikey,'sb_publishable_synthetic')
-    assert.equal(JSON.parse(init.body).p_action,'read')
-    return Response.json({canEdit:owner,canPublish:owner},{status:roleStatus})
+    assert.deepEqual(JSON.parse(init.body),{})
+    return Response.json(owner,{status:roleStatus})
    }
    if(url===CF){
     assert.equal(init.method,'GET')
