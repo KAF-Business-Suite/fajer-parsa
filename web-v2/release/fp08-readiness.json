@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "gate": "KAF-31 / FP-08",
+  "scope": "Fajr Parsa website public release and customer-intake readiness",
+  "productionAuthorization": false,
+  "ownerAcceptance": null,
+  "checks": {
+    "company_license_and_services": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "OWNER CONTACT STEP COMPLETE (2026-11-18): owner reports personal phone confirmation and in-person visit confirming current agency license validity. Do NOT ask owner to repeat these actions. Customer-production gate remains blocked for separately verifiable authority/service scope, written privacy/terms and independent live technical/security checks; this is not a denial of owner's statement."
+    },
+    "public_business_identity_and_contacts": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "Confirm legal company name, operating address and official contact channels before website release."
+    },
+    "country_service_conditions": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "For every service claimed available, document destination restrictions, required documents and review validity. Inquiry-only categories must not be marked approved."
+    },
+    "written_price_refund_terms": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "No published fees, fixed timelines, refunds or guarantees without dated written terms."
+    },
+    "privacy_and_consent_copy": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "Owner-approved privacy/contact consent wording and retention procedures; avoid collecting unnecessary identity documents."
+    },
+    "customer_intake_live_security": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "Independent production ingress, Turnstile, RLS/RBAC, office readback, replay/quota, deletion/rollback, and S21 Back validation."
+    },
+    "approved_qa_release_evidence": {
+      "status": "blocked",
+      "source": null,
+      "reviewer": null,
+      "reviewedAt": null,
+      "notes": "Exact branch SHA, full CI and QA preview, owner visual acceptance, release change-control and rollback plan."
+    }
+  },
+  "documentaryReview": {
+    "reviewDate": "2026-11-15",
+    "source": "Owner-restricted Drive packet: اسناد دفتر (4 scanned pages; not embedded or published)",
+    "travelAgencyLicensePrintedEnd": "2027-03-22",
+    "municipalTradePermitPrintedEnd": "2027-03-23",
+    "issuerVerification": "pending",
+    "specializedTourismEndorsements": "not_established",
+    "personalDataCopiedIntoRepository": false,
+    "reviewDocument": "release/FP08_LICENSE_SCOPE_REVIEW_20261115.md",
+    "scope": "visual evidence only; not a government validity confirmation",
+    "ownerDirectVerification": {
+      "status": "completed_owner_attestation",
+      "confirmedSubject": "Current license validity only (not approval for all specialized services)",
+      "confirmationMethods": [
+        "phone_call",
+        "in_person_visit"
+      ],
+      "basis": "First-hand confirmation reported by owner in this conversation",
+      "visitAndCallDates": "not provided",
+      "recordedAt": "2026-11-18",
+      "authorityDocumentOrRegistry": "not independently reviewed by assistant",
+      "confirmationScope": "agency license validity",
+      "noRepeatContactRequested": true,
+      "productionLegalClearance": false
+    }
+  },
+  "deliveryProgress": {
+    "lastReviewedAt": "2026-11-18",
+    "productionStatus": "NOT_RELEASED",
+    "qaCandidateCommit": "d084439e2fa7763d0098b2f39b27d1b1f4c9e8e6",
+    "qaIndependentRun": "https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/44329555885",
+    "qaSafeDeployRun": "https://github.com/KAF-Business-Suite/fajer-parsa/actions/runs/44329555971",
+    "qaOmanUrl": "https://fp07-service-catalog-preview.fajr-parsa-qa.pages.dev/?lang=fa#/country/om",
+    "lastKnownProductionCommit": "9ded561eae7394f38eb633d3ec890be51df3f830",
+    "lastKnownProductionDeployment": "16950d0e-b5f6-42e5-bb83-3fc3bdd26e55",
+    "ownerRequestedProduction": true,
+    "ownerRequestIsLegalProof": false,
+    "issuingAuthorityVerification": "pending_formal_response",
+    "officialRequestSentDate": "2026-11-15",
+    "officialFollowupSentDate": "2026-11-18",
+    "officialEmailEvidence": "restricted_business_mailbox",
+    "note": "Do not infer issuer approval from sent correspondence. Preserve seven blocked evidence checks and no-deploy default.",
+    "issuerConfirmationOwnerReport": {
+      "recordedOn": "2026-11-18",
+      "status": "owner_phone_and_visit_report_completed",
+      "claimScope": "Owner personally contacted and visited the issuing authority, reports current agency license validity confirmed.",
+      "authoritySourceNotReceived": true,
+      "authorityIdentityUnverified": true,
+      "independentEmailEvidenceFound": false,
+      "originalEvidenceExpected": "No further repeat phone/visit requested. Separate evidence may be needed for release audit and exact authorized service scope.",
+      "legalGateEffect": "none_without_verified_documentation"
+    },
+    "fp09QaEndToEnd": {
+      "evidenceDate": "2026-11-18",
+      "environment": "QA only",
+      "status": "PASS",
+      "steps": {
+        "realBrowserSyntheticContact": "PASS",
+        "fourLanguagesVisible": "PASS",
+        "turnstileStandardVerification": "PASS",
+        "singleRequestAccepted": "PASS",
+        "persistedReceiptReadback": "PASS",
+        "authorizedOfficeRpcReadback": "PASS",
+        "databaseIdempotencyRollbackTest": "PASS",
+        "exactSyntheticRecordCleanup": "PASS"
+      },
+      "receipt": "27cbd53d-2a12-4ef8-8c3c-bb15a7581229",
+      "browserRunReference": "Browser Use synthetic QA run 4f566bb2-0103-4a73-81fb-b4dcbb2049de",
+      "qaUrl": "https://fp-intake-safe-review.fajr-parsa-qa.pages.dev/?lang=fa",
+      "qaPagesDeployment": "2d589418-277d-4033-a237-00671705f3f1",
+      "qaBuildCommit": "cf812273570f78d574f4a97addced033531a42be",
+      "sourceCommit": "608a7e4fec2003536a2affc9a7659b6f764e6b1f",
+      "privacy": "synthetic contact @example.invalid only; no real customer information",
+      "cleanup": "SQL returned zero remaining receipt rows after deletion",
+      "limitations": "Authenticated staff UI session and production customer-intake security are not proved by this QA test."
+    }
+  }
+}

@@ -68,6 +68,12 @@ jobs:
       - name: Install exactly the locked dependencies
         working-directory: web-v2
         run: npm ci --no-audit --no-fund
+      - name: FP-08 verify evidence schema and fail-closed release policy
+        working-directory: web-v2
+        run: node tests/fp08-release-gate.mjs
+      - name: Verify public-only site settings schema (no service secrets)
+        working-directory: web-v2
+        run: npm run test:site-settings
       - name: Test intake in isolation
         working-directory: web-v2
         run: npm run test:intake
@@ -77,6 +83,9 @@ jobs:
       - name: Install Chromium for free browser QA
         working-directory: web-v2
         run: npx playwright install --with-deps chromium
+      - name: FP-07 prove four-language service catalog and enquiry context
+        working-directory: web-v2
+        run: node tests/service-catalog-qa.mjs
       - name: Verify production UI with local Chromium
         working-directory: web-v2
         run: npm run test:smoke
@@ -134,6 +143,10 @@ jobs:
           fi
           echo "deploy=$deploy" >> "$GITHUB_OUTPUT"
           echo "Selected release: $deploy"
+      - name: FP-08 block production until owner-approved legal and service evidence
+        if: steps.policy.outputs.deploy == 'production'
+        working-directory: web-v2
+        run: node scripts/fp08-release-gate.mjs production
       - name: Check credentials and block stale production sources
         # Manual verify invokes read-only token and exact project GET; the deploy step stays gated on deploy != none.
         if: steps.policy.outputs.deploy != 'none' || (github.event_name == 'workflow_dispatch' && inputs.target == 'verify')
@@ -229,3 +242,123 @@ jobs:
             --project-name=fajr-parsa-qa \
             --branch="$branch" \
             --commit-hash="$GITHUB_SHA"
+
+      - name: FP-07 publish protected synthetic service-guide preview
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 24 && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'work/fp07-service-trust-catalog-20261115' && github.event.pull_request.head.repo.full_name == github.repository }}
+        working-directory: web-v2
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: "false"
+        run: |
+          set -euo pipefail
+          test -s dist/index.html
+          test "${{ github.event.pull_request.number }}" = "24"
+          test "${{ github.event.pull_request.head.ref }}" = "work/fp07-service-trust-catalog-20261115"
+          test "${{ github.event.pull_request.base.ref }}" = "main"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          [[ "$CLOUDFLARE_ACCOUNT_ID" =~ ^[0-9a-f]{32}$ ]]
+          response="$(curl --fail --silent --show-error --max-time 20 \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/fajr-parsa-qa")"
+          test "$(printf '%s' "$response" | jq -r '.success == true and .result.name == "fajr-parsa-qa"')" = true
+          # Existing Cloudflare Pages project, non-production branch, exact tested commit.
+          npx --yes wrangler@4 pages deploy dist \
+            --project-name=fajr-parsa-qa \
+            --branch=fp07-service-catalog-preview \
+            --commit-hash="$GITHUB_SHA"
+          echo "FP07_PREVIEW_ONLY=PASS; PRODUCTION_UNCHANGED_BY_POLICY"
+
+      - name: FP-09 publish isolated synthetic-only QA intake to existing Pages alias
+        # Only this Draft PR. The public widget key is safe to embed in browser code.
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 24 && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.ref == 'work/fp07-service-trust-catalog-20261115' && github.event.pull_request.head.repo.full_name == github.repository }}
+        working-directory: web-v2
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          VITE_FAJR_INTAKE_ENABLED: "true"
+          VITE_FAJR_QA_SYNTHETIC_ONLY: "true"
+          VITE_FAJR_TURNSTILE_SITEKEY: "0x4AAAAAAFrqV6izkeFDGOwS"
+          WRANGLER_SEND_METRICS: "false"
+        run: |
+          set -euo pipefail
+          test "$GITHUB_EVENT_NAME" = pull_request
+          test "${{ github.event.pull_request.number }}" = "24"
+          test "${{ github.event.pull_request.head.ref }}" = "work/fp07-service-trust-catalog-20261115"
+          test "${{ github.event.pull_request.base.ref }}" = main
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          [[ "$CLOUDFLARE_ACCOUNT_ID" =~ ^[0-9a-f]{32}$ ]]
+          test -f qa-only/functions/api/requests.ts
+          test ! -d functions
+          test ! -f dist/_worker.js
+          # Standard CI tested the default-disabled public build.
+          # Rebuild only for existing isolated QA alias with synthetic-only form.
+          npm run build
+          test -s dist/index.html
+          mkdir -p functions/api
+          cp qa-only/functions/api/requests.ts functions/api/requests.ts
+          test -f qa-only/functions/api/site-settings/public.js
+          mkdir -p functions/api/site-settings
+          cp qa-only/functions/api/site-settings/public.js functions/api/site-settings/public.js
+          test "$(find functions -type f | wc -l)" -eq 2
+          test ! -e functions/api/site-settings/draft.js
+          test ! -e functions/api/site-settings/publish.js
+          npx --yes wrangler@4 pages functions build functions --project-directory . --outfile "$RUNNER_TEMP/fp09-qa-only-bundle.mjs"
+          test -s "$RUNNER_TEMP/fp09-qa-only-bundle.mjs"
+          npx --yes wrangler@4 pages deploy dist \
+            --project-name=fajr-parsa-qa \
+            --branch=fp-intake-safe-review \
+            --commit-hash="$GITHUB_SHA"
+          # Prove real HTTP reachability and fail-closed behavior from the CI runner.
+          # No valid Turnstile token, customer data, privileged credential or DB write is used.
+          QA_ORIGIN="https://fp-intake-safe-review.fajr-parsa-qa.pages.dev"
+          page_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp09-page.html" --write-out '%{http_code}' "$QA_ORIGIN/?lang=fa")"
+          test "$page_code" = 200
+          test -s "$RUNNER_TEMP/fp09-page.html"
+          # FP-SITE-CONTROL: public GET must return only approved fields, or a clean
+          # not-yet-published 404. It must never expose drafts or personal data.
+          settings_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp-site-public.json" --write-out '%{http_code}' "$QA_ORIGIN/api/site-settings/public")"
+          if [[ "$settings_code" == 404 ]]; then
+            jq -e '.error == "not_published"' "$RUNNER_TEMP/fp-site-public.json"
+            echo "FP_SITE_PUBLIC_QA_NOT_PUBLISHED=PASS"
+          elif [[ "$settings_code" == 200 ]]; then
+            jq -e '.version == 1 and .site == "fajr-parsa" and (.revision | type=="string") and
+              (.contact.whatsapp | type=="string") and (.contact.email | type=="string") and
+              (.design.fontPreset | type=="string") and
+              ((keys - ["version","site","revision","publishedAt","contact","design","office","content"]) | length==0) and
+              ((.contact | keys) - ["whatsapp","email","phone","mapUrl"] | length==0) and
+              ((.design | keys) - ["fontPreset"] | length==0)' "$RUNNER_TEMP/fp-site-public.json"
+            echo "FP_SITE_PUBLIC_QA_SANITIZED_READBACK=PASS"
+          else
+            echo "::error::FP-SITE-CONTROL public read returned HTTP $settings_code instead of a valid published snapshot or not-published 404"
+            exit 1
+          fi
+          reject_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp09-host-denied.json" --write-out '%{http_code}' \
+            --request POST --header 'Content-Type: application/json' \
+            --header 'Origin: https://fp07-service-catalog-preview.fajr-parsa-qa.pages.dev' \
+            --data '{"requestId":"d5072836-0d50-4dfa-88dc-596e9befd276","contact":"qa-ci@example.invalid","consent":true}' \
+            "$QA_ORIGIN/api/requests")"
+          test "$reject_code" = 503
+          jq -e '.error == "intake_not_enabled"' "$RUNNER_TEMP/fp09-host-denied.json"
+          reject_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp09-real-contact-denied.json" --write-out '%{http_code}' \
+            --request POST --header 'Content-Type: application/json' \
+            --header "Origin: $QA_ORIGIN" \
+            --data '{"requestId":"d5072836-0d50-4dfa-88dc-596e9befd276","contact":"example@example.com","consent":true}' \
+            "$QA_ORIGIN/api/requests")"
+          test "$reject_code" = 400
+          jq -e '.error == "qa_synthetic_contact_required"' "$RUNNER_TEMP/fp09-real-contact-denied.json"
+          # Valid structure, synthetic contact, intentionally invalid challenge:
+          # confirms real Pages -> existing Supabase Edge enforcement without saving a request.
+          reject_code="$(curl --silent --show-error --max-time 20 --output "$RUNNER_TEMP/fp09-invalid-challenge-denied.json" --write-out '%{http_code}' \
+            --request POST --header 'Content-Type: application/json' \
+            --header "Origin: $QA_ORIGIN" \
+            --data '{"requestId":"d5072836-0d50-4dfa-88dc-596e9befd276","service":"ویزا و اقامت","destination":"امارات","variant":"QA","contact":"qa-ci@example.invalid","consent":true,"challenge":"invalid-ci-only-token","website":""}' \
+            "$QA_ORIGIN/api/requests")"
+          test "$reject_code" = 403
+          jq -e '.error == "challenge_failed"' "$RUNNER_TEMP/fp09-invalid-challenge-denied.json"
+          rm -rf functions
+          echo "FP09_SYNTHETIC_QA_PAGES_DEPLOYED_AND_HTTP_DENIALS=PASS; NOT_PRODUCTION; NO_NEW_SECRETS"

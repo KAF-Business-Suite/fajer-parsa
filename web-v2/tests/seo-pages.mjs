@@ -216,10 +216,11 @@ try {
       await contact.waitFor()
       const sheetBounds=await contact.evaluate(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,viewportW:innerWidth,viewportH:innerHeight}})
       assert.ok(sheetBounds.left>=0 && sheetBounds.right<=sheetBounds.viewportW && sheetBounds.top>=0 && sheetBounds.bottom<=sheetBounds.viewportH,code+' contact sheet outside viewport '+JSON.stringify(sheetBounds))
-      assert.equal(await contact.getByRole('link').count(),1,'Only verified WhatsApp is an active contact link')
-      assert.match(await contact.getByRole('link').first().getAttribute('href'),/^https:\/\/wa\.me\/93777377774$/)
-      assert.equal(await contact.locator('.fp-channel-pending').count(),3)
-      assert.equal(await contact.locator('a[href^="mailto:"],a[href*="t.me"]').count(),0)
+      assert.equal(await contact.getByRole('link').count(),2,'WhatsApp and work email are the two usable channels')
+      assert.match(await contact.locator('a[href^="https://wa.me/"]').getAttribute('href'),/^https:\/\/wa\.me\/93777377774$/)
+      assert.match(await contact.locator('a[href^="mailto:"]').getAttribute('href'),/^mailto:fp\.rpc\.khwaja@gmail\.com\?subject=/)
+      assert.equal(await contact.locator('.fp-channel-pending').count(),0,'Remove nonfunctional channel placeholders')
+      assert.equal(await contact.locator('a[href*="t.me"]').count(),0)
       await page.keyboard.press('Escape')
       await contact.waitFor({state:'detached'})
     }
@@ -264,7 +265,7 @@ try {
       await page.goto(origin+'/?lang='+code,{waitUntil:'networkidle'})
       await page.waitForFunction(lang=>document.documentElement.lang===lang,htmlLang)
       const options=await page.locator('#destination option').evaluateAll(els=>els.map(x=>({value:x.value,label:x.textContent?.trim()})))
-      assert.equal(options.length,16,'All fifteen destination countries must have visible options')
+      assert.equal(options.length,17,'All sixteen destination countries must have visible options')
       assert.equal(options.find(x=>x.value==='ترکیه')?.label,turkey)
       for(const option of options.slice(1)){
         assert.ok(option.label,code+' missing translated country '+option.value)
@@ -296,6 +297,30 @@ try {
       await page.locator('.country-page h1').waitFor()
       assert.ok((await page.locator('.country-page h1').innerText()).includes(turkey),code+' country route is unlocalized')
       assert.equal(await page.locator('.fp-bottom-nav').getAttribute('data-active-tab'),'services')
+    }
+  })
+  await test('FP-OMAN-01: four-language Oman services, link and draft, mobile safe',async()=>{
+    const countries={fa:'عمان',ps:'عمان',en:'Oman',ar:'عُمان'}
+    for(const language of ['fa','ps','en','ar']){
+      await page.setViewportSize({width:393,height:852})
+      await page.goto(origin+'/?lang='+language+'#/country/om',{waitUntil:'networkidle'})
+      await page.locator('.country-page h1').waitFor()
+      assert.ok((await page.locator('.country-page h1').innerText()).includes(countries[language]),'Heading '+language)
+      assert.equal(await page.locator('.country-choice-card').count(),4,'Oman services '+language)
+      const labels=await page.locator('.country-choice-card h3').allInnerTexts()
+      assert.ok(labels.every(x=>x.length>12),'Localized service labels '+language)
+      const contact=page.locator('.country-page-actions a[href="https://wa.me/93728507933"]')
+      assert.equal(await contact.count(),1,'Oman-specific opt-in WhatsApp '+language)
+      assert.equal(await page.locator('.country-page-photo img').evaluate(img=>img.complete&&img.naturalWidth>0),true,'Oman real location photograph '+language)
+      assert.equal(await page.locator('.country-page-photo img').getAttribute('src'),'/media/oman-destination.webp','Locally served Muscat photograph '+language)
+      assert.match(await page.locator('.country-page-photo figcaption').innerText(),/Reyyan/,'Photo credited to author '+language)
+      await page.locator('.country-choice-card button').first().click()
+      const dialog=page.getByRole('dialog')
+      await dialog.waitFor()
+      assert.equal(await dialog.locator('#draft-destination').inputValue(),countries[language],'Destination '+language)
+      assert.notEqual(await dialog.locator('#draft-service').inputValue(),'','Service preselected '+language)
+      await page.keyboard.press('Escape')
+      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Mobile overflow '+language)
     }
   })
   await test('One global language control, native labels and shareable language state',async()=>{

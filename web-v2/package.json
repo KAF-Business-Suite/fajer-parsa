@@ -10,8 +10,9 @@
     "typecheck": "tsc -b",
     "test:seo": "node tests/i18n-contract.mjs && node tests/seo-pages.mjs",
     "test:smoke": "node tests/smoke.mjs",
+    "test:site-settings": "node tests/site-settings-contract.mjs && node --test tests/site-settings-qa.test.mjs",
     "export:preview": "node scripts/export-preview.mjs",
-    "test:intake": "node --test tests/intake-client.test.mjs server/intake/handler.test.mjs server/intake/fp04-scenarios.test.mjs",
+    "test:intake": "node --test tests/intake-client.test.mjs server/intake/handler.test.mjs server/intake/fp04-scenarios.test.mjs server/intake/pages-entry.test.mjs tests/fp09-qa-proxy.test.mjs tests/fp09-bootstrap-deny.test.mjs",
     "test:intake-form": "node tests/intake-form.mjs"
   },
   "dependencies": {

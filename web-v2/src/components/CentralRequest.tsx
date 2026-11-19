@@ -1,10 +1,14 @@
 import {useEffect,useRef,useState} from 'react'
 import {submitIntake,intakeErrorMessage} from '../lib/intake-client'
 import {siteText,type SiteLanguage} from '../content/site-i18n'
+import {IntakeReceipt} from './IntakeReceipt'
 
 // Localized only within the guarded, disabled-by-default synthetic intake component.
 // The 324-key site catalog stays canonical and keeps its exact-key contract.
 const centralCopy: Record<string, {ps:string;en:string;ar:string}> = {
+  "دکمهٔ ثبت، درخواست را به دفتر می‌فرستد. واتساپ و ایمیل جداگانه است.": {ps:"د ثبت تڼۍ غوښتنه دفتر ته لېږي. واتساپ او برېښنالیک جلا دي.",en:"Register sends this enquiry to the office. WhatsApp and email are separate.",ar:"زر التسجيل يرسل الطلب إلى المكتب. واتساب والبريد منفصلان."},
+  "ایمیل ساختگی برای آزمون": {ps:"د ازموینې برېښنالیک",en:"Test email only",ar:"بريد تجريبي فقط"},
+  "برای آزمون فقط ایمیل ساختگی با پایان @example.invalid پذیرفته می‌شود.": {ps:"د ازموینې لپاره یوازې په @example.invalid پای ته رسېدونکی برېښنالیک منل کېږي.",en:"For this test, use only an email ending @example.invalid.",ar:"لهذا الاختبار، استخدم بريداً ينتهي بـ @example.invalid فقط."},
   "تأیید امنیتی بارگذاری نشد؛ دوباره تلاش کنید.": {ps:"امنیتي تایید بار نه شو؛ بیا هڅه وکړئ.",en:"Security verification did not load; please try again.",ar:"تعذّر تحميل التحقق الأمني؛ حاول مرة أخرى."},
   "تأیید امنیتی در دسترس نیست؛ فعلاً از راه تماس دفتر استفاده کنید.": {ps:"امنیتي تایید اوس نشته؛ له دفتر سره اړیکه ونیسئ.",en:"Security verification is unavailable; please contact the office.",ar:"التحقق الأمني غير متاح؛ يرجى التواصل مع المكتب."},
   "برای ثبت، رضایت تماس را تأیید کنید.": {ps:"د ثبت لپاره د اړیکې رضایت تایید کړئ.",en:"Please consent before registering the request.",ar:"يرجى الموافقة قبل تسجيل الطلب."},
@@ -41,13 +45,14 @@ function loadWidget(){
   }).catch(error=>{scriptPromise=undefined;throw error})
   return scriptPromise
 }
-export function CentralRequest({service,destination,variant,onLock,language='fa'}:{service:string;destination:string;variant:string;onLock:()=>void;language?:SiteLanguage}){
+export function CentralRequest({service,destination,variant,onLock,onReceipt,language='fa'}:{service:string;destination:string;variant:string;onLock:()=>void;onReceipt?:()=>void;language?:SiteLanguage}){
   const t=(value:string)=>language==='fa'?value:(centralCopy[value]?.[language]??siteText(value,language))
   const [contact,setContact]=useState('');const [consent,setConsent]=useState(false);const [token,setToken]=useState('')
   const [busy,setBusy]=useState(false);const [started,setStarted]=useState(false);const [error,setError]=useState('');const [receipt,setReceipt]=useState('')
   const requestId=useRef(crypto.randomUUID());const container=useRef<HTMLDivElement>(null);const widget=useRef<string|undefined>(undefined);const sending=useRef(false)
   const active=useRef(true)
   const sitekey=(import.meta.env as Record<string,string>).VITE_FAJR_TURNSTILE_SITEKEY
+  const syntheticOnly=(import.meta.env as Record<string,string>).VITE_FAJR_QA_SYNTHETIC_ONLY==='true'
   useEffect(()=>{active.current=true;let canceled=false
     loadWidget().then(()=>{if(canceled||!container.current)return;widget.current=window.turnstile!.render(container.current,{sitekey,action:'fajr_intake',size:'flexible',callback:(value:string)=>{if(active.current)setToken(value)},'expired-callback':()=>{if(active.current)setToken('')},'error-callback':()=>{if(active.current){setToken('');setError(t('تأیید امنیتی بارگذاری نشد؛ دوباره تلاش کنید.'))}}})}).catch(()=>{if(!canceled)setError(t('تأیید امنیتی در دسترس نیست؛ فعلاً از راه تماس دفتر استفاده کنید.'))})
     return()=>{canceled=true;active.current=false;if(widget.current)window.turnstile?.remove(widget.current)}
@@ -57,20 +62,21 @@ export function CentralRequest({service,destination,variant,onLock,language='fa'
     if(!consent){setError(t('برای ثبت، رضایت تماس را تأیید کنید.'));return}
     const value=contact.trim()
     if(value.length<7||value.length>120||(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)&&!/^\+?[0-9 ()-]{7,24}$/.test(value))){setError(t('شماره تماس یا ایمیل معتبر بنویسید.'));return}
+    if(syntheticOnly&&!value.toLowerCase().endsWith('@example.invalid')){setError(t('برای آزمون فقط ایمیل ساختگی با پایان @example.invalid پذیرفته می‌شود.'));return}
     if(!token){setError(t('ابتدا تأیید امنیتی را کامل کنید.'));return}
     sending.current=true;setBusy(true);setStarted(true);setError('');onLock()
     let completed=false
-    try{const result=await submitIntake({requestId:requestId.current,service,destination,variant,contact:value,consent:true,challenge:token,website:''});completed=true;if(active.current)setReceipt(result.receipt)}
+    try{const result=await submitIntake({requestId:requestId.current,service,destination,variant,contact:value,consent:true,challenge:token,website:''});completed=true;if(active.current){setReceipt(result.receipt);onReceipt?.()}}
     catch(reason){if(active.current)setError(t(intakeErrorMessage(reason)))}
     finally{sending.current=false;if(active.current){setBusy(false);setToken('');if(!completed&&widget.current)window.turnstile?.reset(widget.current)}}
   }
   return <section className="central-request" aria-labelledby="central-request-title">
-    <h3 id="central-request-title">{t("ثبت بررسی اولیه در دفتر")}</h3>
-    <p className="draft-note">{t("آزمایشی: فقط اطلاعات ساختگی وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.")}</p>
-    {receipt?<div role="status"><strong>{t("درخواست اولیه ثبت شد")}</strong><p>{t("رسید ثبت: ")}<bdi>{receipt}</bdi></p><small>{t("این رسید تأیید ویزا یا نتیجهٔ بررسی نیست. برای پیگیری آن را نگه دارید.")}</small></div>:<>
-      <label htmlFor="intake-contact">{t("شماره تماس یا ایمیل")}</label><input id="intake-contact" type="text" dir="auto" maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
+    {!receipt && <><h3 id="central-request-title">{t("ثبت بررسی اولیه در دفتر")}</h3>
+    {syntheticOnly && <p className="draft-note">{t("آزمایشی: فقط اطلاعات ساختگی وارد کنید. کشور، خدمت انتخاب‌شده و راه تماس ثبت می‌شود؛ زمان سفر، تعداد نفرات و اسناد در این مرحله ارسال نمی‌شوند.")}</p>}</>}
+    {receipt?<IntakeReceipt receipt={receipt} service={service} destination={destination} language={language}/>:<>
+      <label htmlFor="intake-contact">{syntheticOnly?t("ایمیل ساختگی برای آزمون"):t("شماره تماس یا ایمیل")}</label><input id="intake-contact" type={syntheticOnly?"email":"text"} dir={syntheticOnly?"ltr":"auto"} placeholder={syntheticOnly?"qa-fp09@example.invalid":undefined} maxLength={120} value={contact} disabled={started} autoComplete="off" onChange={event=>setContact(event.target.value)}/>
       <label className="intake-consent"><input type="checkbox" checked={consent} disabled={started} onChange={event=>setConsent(event.target.checked)}/> {t("رضایت دارم اطلاعات همین درخواست برای بررسی و تماس دفتر ذخیره شود.")}</label>
-      <div ref={container}/><button type="button" className="primary-action" disabled={busy||!token} onClick={send}>{busy?t('در حال ثبت…'):started?t('بررسی دوبارهٔ همین درخواست'):t('ثبت درخواست اولیه')}</button>
+      <div ref={container}/><p className="fp-submit-explanation">{t("دکمهٔ ثبت، درخواست را به دفتر می‌فرستد. واتساپ و ایمیل جداگانه است.")}</p><button type="button" className="primary-action" disabled={busy||!token} onClick={send}>{busy?t('در حال ثبت…'):started?t('بررسی دوبارهٔ همین درخواست'):t('ثبت درخواست اولیه')}</button>
       {started&&<p className="draft-note">{t("برای جلوگیری از ثبت تکراری، اطلاعات این تلاش ثابت مانده است. تازه‌کردن صفحه یا شروع فرم جدید ممکن است درخواست دیگری ایجاد کند.")}</p>}
     </>}
     {error&&<p role="alert">{error}</p>}

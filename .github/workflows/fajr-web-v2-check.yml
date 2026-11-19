@@ -32,12 +32,41 @@ jobs:
           cache-dependency-path: web-v2/package-lock.json
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
+      - name: FP-08 verify evidence schema and fail-closed release policy
+        run: node tests/fp08-release-gate.mjs
+      - name: FP-SITE-CONTROL validate public settings contract (offline)
+        run: npm run test:site-settings
       - name: Run offline-safe intake server/client unit tests
         run: npm run test:intake
+      - name: FP-09 compile isolated QA-only Pages Function without deployment
+        run: |
+          set -euo pipefail
+          test "$(find qa-only/functions -type f | wc -l)" -eq 2
+          test -f qa-only/functions/api/requests.ts
+          test -f qa-only/functions/api/site-settings/public.js
+          test ! -e qa-only/functions/api/site-settings/draft.js
+          test ! -e qa-only/functions/api/site-settings/publish.js
+          npx --yes wrangler@4 pages functions build qa-only/functions \
+            --project-directory . \
+            --outfile "$RUNNER_TEMP/fp09-qa-only-worker.mjs"
+          test -s "$RUNNER_TEMP/fp09-qa-only-worker.mjs"
+          test ! -d functions
+          echo "FP09_QA_FUNCTION_BUILD=PASS; NO_RELEASE=ENFORCED"
+      - name: FP-09 dry-run private QA Worker with rate-limit binding, no deploy
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4 deploy --config qa-only/worker/wrangler.toml --dry-run --outdir "$RUNNER_TEMP/fp09-private-worker"
+          find "$RUNNER_TEMP/fp09-private-worker" -type f -name '*.js' -print -quit | grep -q .
+          echo "FP09_PRIVATE_WORKER_DRY_RUN=PASS; NO_EXTERNAL_MUTATION=ENFORCED"
       - name: Build the static site
         run: npm run build
       - name: Install Chromium for local browser QA
         run: npx playwright install --with-deps chromium
+      - name: FP-07 prove four-language service catalog and enquiry context
+        working-directory: web-v2
+        run: node tests/service-catalog-qa.mjs
       - name: Verify website UX with local browser and synthetic data
         run: npm run test:smoke
       - name: Verify crawlable inbound HTML and local Pages routing (no deploy)
@@ -57,5 +86,7 @@ jobs:
             web-v2/test-results/inbound-seo-results.json
             web-v2/test-results/inbound-response.html
             web-v2/test-results/inbound-pages.log
+            web-v2/test-results/intake-form-results.json
+            web-v2/test-results/fp09-receipt-mobile.png
           if-no-files-found: error
           retention-days: 3

@@ -3,6 +3,13 @@
 import { pashtoTextMap } from './site-ps'
 export type SiteLanguage = 'fa' | 'ps' | 'en' | 'ar'
 const textMap: Record<string, {en:string;ar:string}> = {
+  "عمان": { "en": "Oman", "ar": "عُمان" },
+  "مسقط": { "en": "Muscat", "ar": "مسقط" },
+  "بررسی ویزای تجارتی و اقامت دوساله عمان": { "en": "Oman business visa and two-year residency enquiry", "ar": "الاستفسار عن تأشيرة تجارية وإقامة لمدة سنتين في عُمان" },
+  "بررسی اقامت شریک تجارتی عمان": { "en": "Oman business partner residency enquiry", "ar": "الاستفسار عن إقامة الشريك التجاري في عُمان" },
+  "مشاوره سجل تجارتی و مدارک شرکتی عمان": { "en": "Oman commercial registration and company document guidance", "ar": "استشارة السجل التجاري ووثائق الشركات في عُمان" },
+  "بررسی ویزای دیدار فامیلی عمان": { "en": "Oman family visit visa enquiry", "ar": "الاستفسار عن تأشيرة الزيارة العائلية إلى عُمان" },
+  "واتساپ خدمات عمان": { "en": "Oman services WhatsApp", "ar": "واتساب خدمات عُمان" },
   "فجر پارسا": {
     "en": "Fajr Parsa",
     "ar": "فجر بارسا"

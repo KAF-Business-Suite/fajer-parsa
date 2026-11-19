@@ -43,3 +43,13 @@ No existing office/auth or public release requirements are relaxed.
 **Release acceptance:** FA → PS → EN → AR labels, RTL/LTR layout, real Android/S21 page position on refresh, stable login/logout (Office), working WhatsApp/email submission actions when approved, accessibility, valid service content and no guessed fees/visa conditions. Tests with synthetic requests are not approval to write real customer data. Release remains blocked until exact source/deploy SHA, relevant CI, safety, legal/privacy and owner acceptance are independently verified. Do not duplicate a backend, credential, form or DB table.
 
 **Escalation:** any data migration, RLS/permission change, secret, customer message, paid activation, auth redirect/domain or public Production change requires its existing authorization; routine docs/QA changes stay within the current parent gate. No unnecessary build/upload for AGENTS text edits.
+
+## Agent source parity and public QA batching — 19 Nov 2026
+
+**This Draft PR is the public four-language site/catalogue and synthetic-only intake**, not staff Office or an approved Production site. Follow [current canonical Fajr main AGENTS](https://github.com/KAF-Business-Suite/fajer-parsa/blob/main/AGENTS.md) for global release-off and Cloudflare Direct Upload discipline; it is an explicit pointer, not a guarantee future main updates automatically appear in this branch.
+
+**Existing branch scripts:** from `web-v2/`, `npm ci --no-audit --no-fund`; targeted `npm run test:intake`, `npm run test:site-settings`, `npm run build`, `npm run test:smoke`, `npm run test:seo`, `npm run test:intake-form` as applicable. All these scripts are present in this PR's `web-v2/package.json`. Do not invent prices, immigration approvals or guaranteed visa timelines.
+
+**Free-tier and real acceptance:** execute the cheapest appropriate local/CI test *before* requesting one meaningful owner-reviewed Pages preview; no upload for every small commit or docs-only edit. Review FA/PS/EN/AR switching, RTL/LTR, accessibility, tiny-screen action labels, synthetic intake response and error states. Static/synthetic QA is not legal/privacy approval or real client acceptance. Do not send client inquiries, change customer DB/permissions, introduce a second intake Worker or publish to production outside existing KAF-31.
+
+**Current global priority:** KAF-26 internal tool cleanup; leave UI redesign and Office/Auth work in their own existing gates. This documentation-only change does not authorize code deployment.

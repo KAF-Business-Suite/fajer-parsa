@@ -109,6 +109,14 @@ export const countryPresentation:Record<string,CountryPresentation> = {
       "تجارت و سفر"
     ]
   },
+  "عمان": {
+    "code": "OM",
+    "tags": ["ویزا و اقامت", "دعوتنامه و تجارت"],
+    "image": "/media/oman-destination.webp",
+    "place": "مسقط",
+    "credit": "Reyyan",
+    "source": "https://www.pexels.com/photo/scenic-view-of-muttrah-corniche-oman-30799019/"
+  },
   "ترکیه": {
     "code": "TR",
     "tags": [

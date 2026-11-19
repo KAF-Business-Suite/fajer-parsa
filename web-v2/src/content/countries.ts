@@ -1,4 +1,4 @@
-// Business service scope confirmed by the owner on 2026-10-28.
+// Owner-confirmed enquiry scope; Oman added on 2026-11-18 (not visa eligibility).
 // Not a statement of visa eligibility, approval, price or current immigration rules.
 export const countryServices = [
   {
@@ -24,6 +24,15 @@ export const countryServices = [
       "ویزا و اقامت",
       "دبی، تور و سیاحت",
       "تکت و خدمات تجارتی"
+    ]
+  },
+  {
+    "name": "عمان",
+    "services": [
+      "بررسی ویزای تجارتی و اقامت دوساله عمان",
+      "بررسی اقامت شریک تجارتی عمان",
+      "مشاوره سجل تجارتی و مدارک شرکتی عمان",
+      "بررسی ویزای دیدار فامیلی عمان"
     ]
   },
   {
