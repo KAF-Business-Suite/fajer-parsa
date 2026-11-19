@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict'
 import {chromium} from 'playwright'
+import {readFile} from 'node:fs/promises'
+import {fileURLToPath} from 'node:url'
+import {resolve} from 'node:path'
+const uiRoot=fileURLToPath(new URL('../dist-office-preview/',import.meta.url))
 import officeCandidate from '../../workers/fajr-office-qa/worker.mjs'
 const base='https://fajr-office-qa.khoojafahim.workers.dev/'
 const config='https://krzxajtrhvupyywovdzy.supabase.co/functions/v1/fajr-office/config'
@@ -14,7 +18,14 @@ async function installCandidate(context){
  }))
  await context.route(target+'**',async route=>{
   const req=route.request(),url=new URL(req.url())
-  if(req.method()!=='GET'||!['/','/app.css','/app.js'].includes(url.pathname))return route.abort('blockedbyclient')
+  if(req.method()!=='GET')return route.abort('blockedbyclient')
+  if(url.pathname==='/console')return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:await readFile(resolve(uiRoot,'office-preview.html'))})
+  if(url.pathname.startsWith('/assets/')&&/^[A-Za-z0-9._-]{1,180}$/.test(url.pathname.slice(8))){
+   const name=url.pathname.slice(8)
+   const type=name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':name.endsWith('.woff2')?'font/woff2':'application/octet-stream'
+   return route.fulfill({status:200,contentType:type,body:await readFile(resolve(uiRoot,'assets',name))})
+  }
+  if(!['/','/app.css','/app.js'].includes(url.pathname))return route.abort('blockedbyclient')
   const response=await officeCandidate.fetch(new Request(req.url(),{method:'GET'}),{})
   return route.fulfill({status:response.status,headers:Object.fromEntries(response.headers.entries()),body:await response.text()})
  })
@@ -135,33 +146,30 @@ try{
  await page.locator('#password').fill('synthetic-only')
  await page.locator('#remember-device').check()
  await page.locator('#login-button').click()
- await page.locator('#office-view').waitFor({state:'visible'})
+ await page.waitForURL('**/console#/overview',{timeout:15000})
+ await page.locator('.fpx-live-overview').waitFor({state:'visible'})
  assert.equal(loginCount,1)
- assert.equal(await page.locator('.case').count(),1)
+ assert.equal(await page.locator('.fpx-root').getAttribute('data-office'),'private')
  const stored=await context.cookies(base)
  assert.ok(stored.some(x=>x.name==='__Host-fp-office-session'&&x.httpOnly&&x.secure),'trusted-device cookie must be HttpOnly and Secure')
  assert.equal(await page.evaluate(()=>sessionStorage.getItem('fajr-office-qa-session-v1')),null)
- await page.reload({waitUntil:'domcontentloaded'})
- await page.locator('#office-view').waitFor({state:'visible'})
+ await page.reload({waitUntil:'networkidle'})
+ await page.locator('.fpx-live-overview').waitFor({state:'visible'})
  assert.equal(loginCount,1,'refresh must not ask for login again')
- // Language changes must preserve safe navigation history, not reset the current view.
- await page.evaluate(()=>history.replaceState({...history.state,'fajr-office-view-v1':{page:0,y:30}},''))
- await page.locator('#office-lang').selectOption('en')
- assert.equal(await page.evaluate(()=>history.state?.['fajr-office-view-v1']?.page),0)
- await page.reload({waitUntil:'domcontentloaded'})
- await page.locator('#office-view').waitFor({state:'visible'})
- assert.equal(await page.locator('#office-lang').inputValue(),'en')
- assert.equal(loginCount,1,'changing language and refreshing must preserve the secure session')
- await page.locator('#office-lang').selectOption('fa')
- await page.locator('.case select').selectOption('reviewing')
- assert.equal(await page.locator('#confirm').evaluate(el=>el.open),true)
- await page.locator('#confirm-yes').click()
- await page.waitForFunction(()=>document.querySelector('.case .status')?.textContent==='در حال بررسی')
+ assert.equal(new URL(page.url()).pathname,'/console')
+ await page.evaluate(()=>{location.hash='/requests'})
+ await page.locator('.fpx-live-office-item').waitFor({state:'visible'})
+ assert.equal(await page.locator('.fpx-live-office-item').count(),1)
+ await page.locator('.fpx-live-office-item').getByRole('button',{name:'تغییر وضعیت'}).click()
+ await page.getByRole('dialog',{name:'بررسی تغییر وضعیت'}).waitFor({state:'visible'})
+ await page.getByRole('dialog').getByRole('button',{name:'تأیید و ثبت'}).click()
+ await page.locator('.fpx-live-office-feedback[data-kind=success]').waitFor({state:'visible'})
  assert.equal(writes,1)
  assert.ok(reads>=3)
- await page.locator('#logout').click()
+ assert.equal(new URL(page.url()).pathname,'/console','Owner edits stay inside one Admin shell')
+ await page.locator('.fpx-private-shortcuts').getByRole('button',{name:'خروج امن'}).click()
+ await page.waitForURL(url=>url.pathname==='/',{timeout:15000})
  await page.locator('#login-view').waitFor({state:'visible'})
- assert.equal(await page.locator('#office-view').isVisible(),false)
  assert.equal((await context.cookies(base)).some(x=>x.name==='__Host-fp-office-session'),false)
  await context.close()
 
@@ -220,9 +228,9 @@ try{
  await recoveryContext.close()
  console.log('PASS: recovery email request and password update with intercepted synthetic tokens, no actual email sent')
 
- console.log('PASS: synthetic full office login -> list -> confirm -> audited API request -> refresh -> logout, and visible access denial')
+ console.log('PASS: unified Admin login -> console -> request read/write/readback -> refresh -> logout, and visible access denial')
 
  console.log('PASS: candidate Office loads at 390/1280 using synthetic config; no deployed BFF acceptance inferred')
 
- console.log('PASS: secure-cookie synthetic login, reload persistence, list/update, denied access, logout, recovery')
+ console.log('PASS: secure-cookie unified console, reload persistence, confirmed requests, denied access, logout, recovery')
 }finally{await browser.close()}
