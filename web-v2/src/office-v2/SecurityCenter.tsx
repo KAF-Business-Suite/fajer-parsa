@@ -57,7 +57,7 @@ const words={
  }
 } as const
 
-export function SecurityCenter({lang,privateOffice}:{lang:AdminLanguage;privateOffice:boolean}){
+export function SecurityCenter({lang,privateOffice,onGo}:{lang:AdminLanguage;privateOffice:boolean;onGo?:(id:string)=>void}){
  const tx=words[lang]
  const [revision,setRevision]=useState(0)
  const [state,setState]=useState<SecurityReadResult|null>(null)
@@ -126,10 +126,10 @@ export function SecurityCenter({lang,privateOffice}:{lang:AdminLanguage;privateO
   {privateOffice&&data&&<section className="fpx-security-workflow" aria-label={tx.realActions}>
    <div className="fpx-security-subheading"><h2>{tx.realActions}</h2></div>
    <div className="fpx-security-workflow-grid">
-    <a href="/"><BriefcaseBusiness size={19}/><span>{tx.officeLink}</span><ExternalLink size={15}/></a>
-    <a href="/site-settings"><Globe2 size={19}/><span>{tx.siteLink}</span><ExternalLink size={15}/></a>
-    <a href="/resources"><Layers size={19}/><span>{tx.resourcesLink}</span><ExternalLink size={15}/></a>
-    <a href="#/designsystem"><Palette size={19}/><span>{tx.themeLink}</span><ExternalLink size={15}/></a>
+    <button type="button" onClick={()=>onGo?.('requests')}><BriefcaseBusiness size={19}/><span>{tx.officeLink}</span></button>
+    <button type="button" onClick={()=>onGo?.('website')}><Globe2 size={19}/><span>{tx.siteLink}</span></button>
+    <button type="button" onClick={()=>onGo?.('resources')}><Layers size={19}/><span>{tx.resourcesLink}</span></button>
+    <button type="button" onClick={()=>onGo?.('settings')}><Palette size={19}/><span>{tx.themeLink}</span></button>
    </div><p className="fpx-security-workflow-note">{tx.actionsNote}</p>
   </section>}
   {privateOffice&&<section className="fpx-security-diagnostic" aria-label={tx.probeTitle}>
