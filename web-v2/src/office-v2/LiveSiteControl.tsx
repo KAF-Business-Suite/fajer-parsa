@@ -59,5 +59,5 @@ export function LiveSiteControl({lang}:{lang:AdminLanguage}){
   <div className="fpx-live-site-footer"><p><LockKeyhole size={15}/>{tx.note}</p>
    <span className="fpx-live-site-integrated"><ShieldCheck size={15}/>{lang==='fa'?'ویرایش در همین کنسول':'Edit inside this console'}</span>
   </div>
- </section><IntegratedSiteEditor lang={lang}/></div>
+ </section>{state?.status==='ready'&&<IntegratedSiteEditor lang={lang}/>}</div>
 }
