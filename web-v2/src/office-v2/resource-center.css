@@ -145,3 +145,20 @@
 .fpx-private-shortcuts button{display:inline-flex;align-items:center;background:#fff;border:1px solid #d7e6e8;color:#286b7c;border-radius:11px;padding:8px 11px;font-size:11px;font-weight:700;min-height:42px}
 .fpx-private-shortcuts button:hover{background:#e9f7f2}
 .fpx-root[data-theme=dark] .fpx-private-shortcuts button{background:#244651;border-color:#407d72;color:#d2efe9}
+
+/* KAF-35: private verified resource within shared console; no standalone screen. */
+.fpx-unified-resource{display:grid;gap:15px;max-width:1100px;margin-inline:auto}
+.fpx-unified-resource-card{display:grid;gap:15px;background:var(--fpx-panel,#fff);border:1px solid var(--fpx-line,#dce6ec);padding:clamp(16px,3vw,24px);border-radius:20px}
+.fpx-unified-resource-status{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:820;color:var(--fpx-success,#168a7a)}
+.fpx-unified-resource-head{display:flex;align-items:center;gap:12px;min-width:0;color:var(--fpx-success,#168a7a)}
+.fpx-unified-resource-head h3{font-size:20px;font-weight:860;color:var(--fpx-ink,#203749);margin:0}
+.fpx-unified-resource-head p{font-size:12px;margin:5px 0 0;color:var(--fpx-subtle,#63798a)}
+.fpx-unified-resource-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.fpx-unified-resource-facts>div{display:grid;gap:7px;border-radius:12px;padding:13px;background:var(--fpx-raised,#f5f8f9);border:1px solid var(--fpx-line,#dde7ec);min-width:0}
+.fpx-unified-resource-facts small{font-size:11px;color:var(--fpx-subtle,#687989)}
+.fpx-unified-resource-facts strong{font-size:12px;font-weight:800;overflow-wrap:anywhere;color:var(--fpx-ink,#203749)}
+.fpx-unified-resource-actions{display:flex;gap:10px;flex-wrap:wrap}
+.fpx-unified-resource-actions button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;font-size:12px;font-weight:800;border:1px solid var(--fpx-line,#cddfe4);background:var(--fpx-raised,#f7fafb);color:var(--fpx-ink,#253e51);border-radius:12px;padding:10px 15px}
+.fpx-unified-resource-actions button:first-child{background:var(--fpx-success-bg,#e5f2ec);border-color:var(--fpx-success,#168a7a)}
+.fpx-unified-resource-actions button:focus-visible{outline:3px solid var(--fpx-success,#168a7a);outline-offset:2px}
+@media(max-width:650px){.fpx-unified-resource-facts{grid-template-columns:1fr}.fpx-unified-resource-actions button{width:100%}}
