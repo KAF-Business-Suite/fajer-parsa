@@ -84,6 +84,7 @@ test('Enterprise admin: 45-feature bilingual shell, independent four-language we
    assert.equal(await page.locator('.fpx-security-launch').getAttribute('href'),'https://fajr-office-qa.khoojafahim.workers.dev/?next=console-security')
    await page.getByRole('link',{name:/Open private console and sign in securely/}).waitFor()
    assert.equal(await page.locator('.fpx-security-signout').count(),0)
+   assert.equal(await page.locator('.fpx-security-diagnostic').count(),0,'Public preview must never run authenticated control checks')
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-security.png',fullPage:true})
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true,'horizontal overflow after navigation at '+width)
    assert.deepEqual(errors,[],'browser console errors at '+width)
