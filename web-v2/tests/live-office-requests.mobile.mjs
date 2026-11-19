@@ -187,6 +187,37 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
     assert.ok(!requests.some(r=>r.path===path&&r.method!=='GET'),'forbidden probe mutation '+path)
    }
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-private-control-check.png',fullPage:true})
+   // FP-ADMIN-G6: private Global Settings must be genuinely adjustable and
+   // stay on the same page after browser reload. No account/server mutations.
+   await page.evaluate(()=>{location.hash='/settings'})
+   await page.getByRole('heading',{name:'تنظیمات عمومی کنسول'}).waitFor()
+   await page.getByRole('button',{name:'تاریک'}).click()
+   assert.equal(await page.locator('.fpx-root').getAttribute('data-theme'),'dark')
+   await page.getByRole('button',{name:'فشرده'}).click()
+   assert.equal(await page.locator('.fpx-root').getAttribute('data-density'),'compact')
+   await page.locator('.fpx-lang-switch select').selectOption('en')
+   await page.getByRole('heading',{name:'Console settings'}).waitFor()
+   await page.reload({waitUntil:'networkidle',timeout:20000})
+   await page.getByRole('heading',{name:'Console settings'}).waitFor()
+   assert.equal(await page.locator('.fpx-root').getAttribute('data-theme'),'dark')
+   assert.equal(await page.locator('.fpx-root').getAttribute('data-density'),'compact')
+   assert.equal(await page.locator('.fpx-lang-switch select').inputValue(),'en')
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true)
+   assert.equal(await page.locator('.fpx-content-actions button').count(),0,'Private settings cannot offer fake publish/create')
+   await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-private-global-settings.png',fullPage:true})
+   // Future modules are explicitly locked instead of showing fake Create/Add buttons.
+   await page.evaluate(()=>{location.hash='/customers'})
+   await page.getByRole('heading',{name:'Module not operational yet'}).waitFor()
+   assert.equal(await page.locator('.fpx-content-actions button').count(),0)
+   assert.equal(await page.locator('.fpx-admin-module-actions button').count(),2)
+   assert.equal(await page.locator('.fpx-admin-module-gate button').filter({hasText:'Create'}).count(),0)
+   assert.equal(await page.locator('.fpx-admin-module-gate button').filter({hasText:'Publish'}).count(),0)
+   await page.getByRole('button',{name:'Working interface settings'}).click()
+   await page.getByRole('heading',{name:'Console settings'}).waitFor()
+   await page.getByRole('button',{name:'Restore appearance defaults'}).click()
+   assert.equal(await page.locator('.fpx-root').getAttribute('data-theme'),'light')
+   assert.equal(await page.locator('.fpx-lang-switch select').inputValue(),'fa')
+   assert.deepEqual(errors,[],'No JS errors in real Settings / locked modules at '+width)
    // Public preview remains entirely synthetic, without accessing settings BFF.
    const siteReadCount=requests.filter(x=>x.path==='/api/site-settings/draft').length
    await nav.locator('button').filter({hasText:'درخواست‌ها'}).click()
