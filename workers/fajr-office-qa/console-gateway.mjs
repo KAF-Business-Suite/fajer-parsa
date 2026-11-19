@@ -9,7 +9,7 @@
  *
  * Stage and test in QA before updating the pin. No live writes here.
  */
-const PINNED_PAGES_ORIGIN='https://385e35fb.fajr-parsa-qa.pages.dev';
+const PINNED_PAGES_ORIGIN='https://1572f5f6.fajr-parsa-qa.pages.dev';
 const OFFICE_ORIGIN='https://fajr-office-qa.khoojafahim.workers.dev';
 // Temporary QA-only, fixed-source anonymous probe; returns no session or provider data.
 const QA_SOURCE_CHECK='/__qa/console-source-health';
