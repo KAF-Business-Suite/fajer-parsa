@@ -359,7 +359,10 @@ test('staff sign-in is accessible and restores only allowlisted console destinat
  assert.match(page,/id="password-visibility"[^>]*aria-pressed="false"/);
  assert.match(page,/id="login-progress"[^>]*role="status"/);
  assert.match(page,/id="login-button"[^>]*aria-busy="false"/);
- assert.match(script,/function nextPrivateView\(\)\{return new URLSearchParams\(location\.search\)\.get\('next'\)==='console'\?'\/console':null\}/);
+ assert.match(script,/function nextPrivateView\(\)/);
+ assert.ok(script.includes("next==='console-security'?'/console#/security':null"));
+ assert.ok(script.includes("next==='console'?'/console'"));
+ assert.doesNotMatch(script,/location\.replace\(new URLSearchParams\(/);
  assert.match(script,/updatePasswordVisibilityLabel\(\)/);
  assert.match(script,/document\.body\.classList\.toggle\('fp-auth-active',!yes\)/);
  assert.match(script,/location\.replace\(target\)/);
