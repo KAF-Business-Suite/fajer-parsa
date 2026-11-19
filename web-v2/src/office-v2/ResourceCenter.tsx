@@ -12,7 +12,7 @@ import type {ReadResult} from './private-office-bridge'
 type L='fa'|'en'
 type ResourceProps={
  lang:L;resources:PreviewResource[];onResources:(x:PreviewResource[])=>void;
- onToast:(text:string)=>void;
+ onToast:(text:string)=>void;onGo?:(id:string)=>void;
 }
 export type PreviewStyle={mode:'light'|'dark'|'system';accent:'jade'|'ocean'|'champagne';density:'comfortable'|'compact';corners:'rounded'|'extra';font:'estedad'}
 export const defaultStyle:PreviewStyle={mode:'light',accent:'champagne',density:'comfortable',corners:'rounded',font:'estedad'}
@@ -64,7 +64,7 @@ const types:{id:ResourceKind;icon:typeof Globe2}[]=[
 const available:Provider[]=['Cloudflare','Vercel','WordPress','Other']
 const capabilityKeys=['pages','media','content','integrations','publish'] as const
 
-export function ResourceCenter({lang,resources,onResources,onToast}:ResourceProps){
+export function ResourceCenter({lang,resources,onResources,onToast,onGo}:ResourceProps){
  const tx=copy[lang],dir=lang==='en'?'ltr':'rtl'
  const [tab,setTab]=useState<'all'|ResourceKind>('all')
  const [query,setQuery]=useState('')
@@ -116,6 +116,27 @@ export function ResourceCenter({lang,resources,onResources,onToast}:ResourceProp
   onToast(tx.removed)
  }
  const restore=()=>{if(!details)return;onResources(relinkInConsole(resources,details.id));onToast(tx.restored)}
+ // A private authenticated console NEVER displays editable-looking demo bookmarks.
+ // All future managed providers require independent verified capabilities.
+ if(privateMode)return <section className="fpx-resource-root fpx-unified-resource" dir={dir} aria-label={tx.title}>
+  <header className="fpx-resource-summary"><div><span className="fpx-resource-kicker">CONTROL / VERIFIED RESOURCES</span>
+   <h2>{tx.title}</h2><p>{lang==='fa'?'تمام منابع واقعی تأییدشده در همین کنسول. فهرست نمونه و ساختگی در اینجا نیست.':'Only verified resources appear here. No fictional provider cards.'}</p>
+   </div><button type="button" className="fpx-resource-primary" disabled={refreshing} onClick={()=>setReadCount(n=>n+1)}><RefreshCw size={17}/>{lang==='fa'?'بازخوانی اتصال':'Refresh connection'}</button></header>
+  {refreshing?<p role="status" className="fpx-resource-footnote">{lang==='fa'?'در حال تأیید مجوز…':'Checking permission…'}</p>:
+   liveRead.status==='connected'?<div className="fpx-unified-resource-card">
+    <div className="fpx-unified-resource-status"><CheckCircle2 size={19}/>{lang==='fa'?'اتصال تأییدشده · فقط‌خواندنی':'Verified · read-only'}</div>
+    <div className="fpx-unified-resource-head"><Globe2 size={24}/><div><h3>{liveRead.data.name}</h3><p>Cloudflare Pages</p></div></div>
+    <div className="fpx-unified-resource-facts">
+     <div><small>{lang==='fa'?'نشانی سایت':'Site'}</small><strong dir="ltr">{liveRead.data.url}</strong></div>
+     <div><small>{lang==='fa'?'شاخه':'Branch'}</small><strong dir="ltr">{liveRead.data.productionBranch}</strong></div>
+     <div><small>{lang==='fa'?'مجوز منابع':'Resource permission'}</small><strong>{lang==='fa'?'فقط مشاهده':'Inspect only'}</strong></div>
+    </div>
+    <div className="fpx-unified-resource-actions">
+     <button type="button" onClick={()=>onGo?.('website')}><Globe2 size={18}/>{lang==='fa'?'مدیریت محتوای سایت در همین کنسول':'Manage website in this console'}</button>
+     <button type="button" onClick={()=>onGo?.('security')}><ShieldCheck size={18}/>{lang==='fa'?'مجوزها و امنیت':'Permissions & security'}</button>
+    </div><p className="fpx-resource-footnote"><LockKeyhole size={16}/>{lang==='fa'?'اجازهٔ ویرایش پیش‌نویس سایت مستقل از اتصال فقط‌خواندنی Cloudflare بررسی می‌شود.':'Draft editing is separately authorized; this provider connection cannot publish.'}</p>
+   </div>:<p role="alert" className="fpx-resource-footnote">{liveRead.status==='access_denied'?(lang==='fa'?'مجوز مشاهدهٔ منبع تأیید نشد.':'Access denied.'):liveRead.status==='sign_in_required'?(lang==='fa'?'ورود مجدد لازم است.':'Sign in required.'):(lang==='fa'?'منبع واقعی قابل‌تأیید نیست؛ مورد ساختگی نشان داده نمی‌شود.':'No verified provider result; synthetic resources are hidden.')}</p>}
+ </section>
  return <div className="fpx-resource-root" dir={dir}>
   {privateMode&&<section className="fpx-live-resource" aria-label={lang==='fa'?'اتصال تأییدشدهٔ دفتر':'Verified office connection'}>
    <div className="fpx-live-resource-head"><ShieldCheck size={19}/><strong>{lang==='fa'?'اتصال واقعی دفتر خصوصی':'Private office verified connection'}</strong><button type="button" disabled={refreshing} onClick={()=>setReadCount(n=>n+1)}><RefreshCw size={16}/>{lang==='fa'?'بررسی دوباره':'Recheck'}</button></div>
