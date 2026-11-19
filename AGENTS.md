@@ -23,7 +23,7 @@ For continued development, open the [canonical KAF verified-delivery SKILL.md](h
 
 ## Free-tier Cloudflare QA deployment discipline — 19 Nov 2026
 
-Cloudflare `fajr-parsa-qa` is **Direct Upload**, not a GitHub-auto-build project. The live API history contains **126 successful deployment records in November 2026 through 19 Nov**; all 126 have distinct commit hashes (47 `fp-admin-v2-review`, 42 `fp07-service-catalog-preview`, 22 `fp-intake-safe-review`, 12 `fajr-ci-preview`, 3 `main`). This is not duplicate-SHA deployment waste. **Seven records were created on 19 Nov and 49 on 18 Nov.** Actual Cloudflare account billing meter cannot be read with current credentials; record count is not verified charged build count.
+Cloudflare `fajr-parsa-qa` is **Direct Upload**, not a GitHub-auto-build project. The dated November deployment count and exact SHA/branch evidence belong only in the [live Control Plane](https://github.com/KAF-Business-Suite/openai-cloudflare-github-hub/blob/main/docs/UNIVERSAL_SYSTEM_CONTROL_PLANE.md) and KAF-26; do not hard-code daily changing totals in permanent agent instructions. The account billing meter remains unverified until accessible through an authorized provider report.
 
 **Agent action contract, inside existing KAF-25/KAF-31/KAF-35 issues and current PRs:**
 1. Build + unit/browser/integration smoke **locally or in existing GitHub CI first**, with synthetic data; collect a single QA checklist and exact commit SHA.
@@ -33,3 +33,13 @@ Cloudflare `fajr-parsa-qa` is **Direct Upload**, not a GitHub-auto-build project
 5. Pass evidence to the existing KAF-26 cross-tool audit. This rule applies to agents that actually load this repository file; it is **not a provider-enforced throttle** and does not automatically restrain independent Cloudflare/third-party agents.
 
 No existing office/auth or public release requirements are relaxed.
+
+## Local development and four-language acceptance (19 Nov 2026)
+
+**Repo paths:** `web-v2/` is the canonical public FAJR React/Vite site; its manifest and `.nvmrc` specify the build. `web-v2/src/office-v2/` is the separate office design/work branch, not customer Production. Keep staff Office/Auth under PR #14 / KAF-35 and public site/intake under PR #24 / KAF-25; production promotion is controlled only by KAF-31. These pointers do **not** mean that main's changes are already installed in both PR branches; check their own HEAD/AGENTS.
+
+**Use existing package and CI scripts, no new paid CI:** from `web-v2/` run `npm ci --no-audit --no-fund`, then targeted `npm run test:intake`, `npm run build`, `npm run test:smoke`, `npm run test:seo`, and `npm run test:intake-form` as appropriate. Chromium installation for browser QA is in the existing `.github/workflows/fajr-web-v2-check.yml`. This text is guidance, not a claim these commands ran in the present edit.
+
+**Release acceptance:** FA → PS → EN → AR labels, RTL/LTR layout, real Android/S21 page position on refresh, stable login/logout (Office), working WhatsApp/email submission actions when approved, accessibility, valid service content and no guessed fees/visa conditions. Tests with synthetic requests are not approval to write real customer data. Release remains blocked until exact source/deploy SHA, relevant CI, safety, legal/privacy and owner acceptance are independently verified. Do not duplicate a backend, credential, form or DB table.
+
+**Escalation:** any data migration, RLS/permission change, secret, customer message, paid activation, auth redirect/domain or public Production change requires its existing authorization; routine docs/QA changes stay within the current parent gate. No unnecessary build/upload for AGENTS text edits.
