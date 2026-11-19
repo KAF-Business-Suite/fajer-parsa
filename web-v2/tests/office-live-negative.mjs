@@ -31,6 +31,7 @@ test('live staff login shell and script load via HTTPS',async()=>{
  const js=await grab('/app.js')
  assert.equal(js.status,200)
  assert.match(js.type,/javascript/)
+ assert.ok(js.body.includes("next==='console-security'?'/console#/security':null"),'QA Worker must keep the fixed internal Security Center destination after login')
  if(strictBff){
   assert.match(js.body,/\/api\/session\/login/,'BFF must use same-origin login')
   assert.doesNotMatch(js.body,/sessionStorage\.setItem|grant_type=password|grant_type=refresh_token/,'BFF browser must not manage passwords or refresh grants')
