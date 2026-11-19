@@ -4,9 +4,9 @@
  * Never put credentials, user email, JWT, session cookie or customer data in
  * the result. The existing owner-only BFF is the single authority.
  */
-import {readSecurityOverview} from './security-overview'
-import {readSiteControlSnapshot} from './site-control-snapshot'
-import {readOwnerPagesMetadata} from './private-office-bridge'
+import {readSecurityOverview} from './security-overview.ts'
+import {readSiteControlSnapshot} from './site-control-snapshot.ts'
+import {readOwnerPagesMetadata} from './private-office-bridge.ts'
 
 export type OfficeProbeName='identity'|'website'|'resources'
 export type OfficeProbeStatus='ready'|'sign_in_required'|'access_denied'|'rate_limited'|'unavailable'
