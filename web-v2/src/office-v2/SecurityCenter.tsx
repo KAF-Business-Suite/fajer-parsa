@@ -92,7 +92,7 @@ export function SecurityCenter({lang,privateOffice}:{lang:AdminLanguage;privateO
    <button type="button" className="fpx-security-refresh" disabled={!privateOffice||!state}
     onClick={()=>setRevision(x=>x+1)}><RefreshCw size={16}/>{tx.refresh}</button>
   </div>
-  {!privateOffice?<div className="fpx-security-preview-notice" role="status"><p>{tx.preview}</p><a className="fpx-security-launch" href="https://fajr-office-qa.khoojafahim.workers.dev/console#/security"><LockKeyhole size={17}/>{tx.enterReal}<ExternalLink size={15}/></a></div>:
+  {!privateOffice?<div className="fpx-security-preview-notice" role="status"><p>{tx.preview}</p><a className="fpx-security-launch" href="https://fajr-office-qa.khoojafahim.workers.dev/?next=console-security"><LockKeyhole size={17}/>{tx.enterReal}<ExternalLink size={15}/></a></div>:
    !state?<p className="fpx-security-feedback" role="status">{tx.loading}</p>:
    error?<p className="fpx-security-feedback" role="alert">{error}</p>:
    <div className="fpx-security-overview">
