@@ -1,7 +1,7 @@
 /**
  * FP-ADMIN | Enterprise console design candidate: real MIT shadcn-admin Card,
  * Input and Table primitives, existing React/Radix/Lucide.
- * Only fake in-memory records; no fetch/credentials/database on this route.
+ * Private routes use existing permissioned BFF, and unsupported modules are explicitly locked.
  */
 import {useEffect,useMemo,useRef,useState} from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -33,6 +33,8 @@ import {LiveOfficeOverview} from './LiveOfficeOverview'
 import {LiveSiteControl} from './LiveSiteControl'
 import {LiveKafCases} from './LiveKafCases'
 import {SecurityCenter} from './SecurityCenter'
+import {AdminSettingsCenter,NotYetConnectedModule} from './AdminSettingsCenter'
+import {readAdminLanguage,saveAdminLanguage} from './admin-preferences'
 import type {PreviewStyle} from './ResourceCenter'
 import {previewSeed} from './resource-registry'
 import type {PreviewResource} from './resource-registry'
@@ -153,6 +155,8 @@ const roleLabels:{fa:string;en:string}[]=[
 const connectors=['Cloudflare','Supabase','GitHub','WhatsApp Business','Google Workspace','Meta Business','Google Analytics','Vercel']
 /** Non-secret, browser-local appearance preference only. Authorization never reads this. */
 const appearanceKey='fp-admin-appearance-v1'
+/** Only these modules have a supported private UI. Others must not pose as live editors. */
+const PRIVATE_APPROVED_MODULES=new Set(['overview','requests','website','cases','tasks','security','resources','designsystem','settings'])
 function readAppearancePreference():PreviewStyle{
  try{
   const saved=JSON.parse(window.localStorage.getItem(appearanceKey)||'null') as Partial<PreviewStyle>|null
@@ -173,8 +177,9 @@ const buildingBlocks:{fa:string;en:string;icon:string}[]=[
 ]
 
 export default function EnterpriseConsole(){
- const [lang,setLang]=useState<AdminLanguage>('fa')
+ const [lang,setLang]=useState<AdminLanguage>(readAdminLanguage)
  const privateOffice=isPrivateOfficeConsole(window.location)
+  useEffect(()=>{saveAdminLanguage(lang)},[lang])
  const [resources,setResources]=useState<PreviewResource[]>(()=>previewSeed.map(x=>({...x})))
  const [appearance,setAppearance]=useState<PreviewStyle>(readAppearancePreference)
  useEffect(()=>{
@@ -212,7 +217,7 @@ export default function EnterpriseConsole(){
   window.addEventListener('hashchange',change);window.addEventListener('keydown',keys)
   return()=>{window.removeEventListener('hashchange',change);window.removeEventListener('keydown',keys)}
  },[])
- useEffect(()=>{document.documentElement.lang=lang;document.documentElement.dir=dir;document.title=label+' | Fajr Parsa Console Preview'},[lang,dir,label])
+ useEffect(()=>{document.documentElement.lang=lang;document.documentElement.dir=dir;document.title=label+(privateOffice?' | Fajr Parsa Admin':' | Fajr Parsa Console Preview')},[lang,dir,label,privateOffice])
  function go(id:string){location.hash='/'+encodeURIComponent(id);setFeatureId(id);setMobileMenu(false);setRowQuery('');setCurrentTab('overview');window.scrollTo({top:0,behavior:'instant'})}
  async function privateLogout(){
   if(!privateOffice)return
@@ -242,8 +247,8 @@ export default function EnterpriseConsole(){
   </>
  }
  function featureHeader(){
-  if(featureId==='resources'||featureId==='designsystem'||featureId==='security')return null
-   if(privateOffice&&(['requests','overview','website','cases','tasks'].includes(featureId)))return null // Live Office modules own their titles; no simulated publish/create actions.
+  if(privateOffice||['resources','designsystem','security','settings'].includes(featureId))return null
+   // The following public review action is never a private create/publish operation.
   return <div className="fpx-content-head"><div><div className="fpx-overline">{tx.workspace} / {groups.find(g=>g.id===current.group)?.name[lang]}</div><h1>{featureId==='overview'?tx.heading:label}</h1><p>{featureId==='overview'?tx.subtitle:current.description[lang]}</p></div><div className="fpx-content-actions"><span className="fpx-state-pill"><span/>{tx.pending}</span><button type="button" onClick={()=>setModal(current.mode==='publishing'||current.mode==='website'?'publish':'create')}><Plus size={16}/>{current.mode==='website'||current.mode==='publishing'?tx.review:tx.add}</button></div></div>
  }
  return <div className={'fpx-root '+(collapsed?'is-collapsed':'')} dir={dir} data-theme={appearance.mode} data-tone={appearance.accent} data-density={appearance.density} data-corners={appearance.corners} data-font={appearance.font} data-office={privateOffice?'private':'preview'}>
@@ -255,13 +260,13 @@ export default function EnterpriseConsole(){
       <label className="fpx-global-search"><Search size={17}/><Input aria-label={tx.search} placeholder={tx.search+'   Ctrl+K'} ref={searchRef} value={query} onChange={e=>setQuery(e.target.value)}/></label>
       <label className="fpx-lang-switch"><Languages size={17}/><select aria-label={tx.changeLanguage} value={lang} onChange={e=>setLang(e.target.value as AdminLanguage)}>{adminLanguages.map(l=><option key={l.id} value={l.id}>{l.label}</option>)}</select></label>
       <button type="button" className="fpx-icon-button" onClick={()=>go('notifications')} title={tx.notifications}><Bell size={19}/></button>
-      <button type="button" className="fpx-avatar" onClick={()=>go('permissions')} aria-label={tx.role}>FP</button>
+      <button type="button" className="fpx-avatar" onClick={()=>go(privateOffice?'security':'settings')} aria-label={privateOffice?(lang==='fa'?'امنیت حساب':'Account security'):tx.role}>FP</button>
     </div>
    </header>
    <main className="fpx-main">
      <div className="fpx-warning"><span className="fpx-warning-label"><Eye size={15}/>{privateOffice?(lang==='fa'?'کنسول خصوصی':'Private console'):tx.mode}</span><span className="fpx-warning-copy">{privateOffice?(lang==='fa'?'خانه، درخواست‌ها، پرونده‌های KAF، پیگیری‌های ثبت‌شده، منابع و تنظیمات سایت به داده‌های واقعی وصل‌اند؛ سایر بخش‌ها نمایشی‌اند.':'Home, requests, KAF cases and recorded follow-ups, resources and website status use authorized data; other modules remain previews.'):tx.demoOnly}</span><span className="fpx-warning-lock"><LockKeyhole size={14}/>{tx.production}</span></div>{privateOffice&&<nav className="fpx-private-shortcuts" aria-label={lang==='fa'?'دسترسی‌های دفتر':'Office shortcuts'}><a href="/"><BriefcaseBusiness size={17}/><span>{lang==='fa'?'دفتر':'Office'}</span></a><a href="/site-settings"><Globe2 size={17}/><span>{lang==='fa'?'تنظیمات سایت':'Site settings'}</span></a><a href="/resources"><Layers size={17}/><span>{lang==='fa'?'منابع':'Resources'}</span></a><button type="button" onClick={privateLogout}><LogOut size={17}/><span>{lang==='fa'?'خروج امن':'Sign out'}</span></button></nav>}
     {featureHeader()}
-    {featureId==='overview'&&privateOffice?<LiveOfficeOverview lang={lang} onGo={go}/>:featureId==='requests'&&privateOffice?<LiveOfficeRequests lang={lang}/>:featureId==='website'&&privateOffice?<LiveSiteControl lang={lang}/>:featureId==='cases'&&privateOffice?<LiveKafCases lang={lang} mode="cases"/>:featureId==='tasks'&&privateOffice?<LiveKafCases lang={lang} mode="tasks"/>:featureId==='security'?<SecurityCenter lang={lang} privateOffice={privateOffice}/>:featureId==='resources'?<ResourceCenter lang={lang} resources={resources} onResources={setResources} onToast={toast}/>:featureId==='designsystem'?<ThemeLab lang={lang} value={appearance} onChange={setAppearance}/>:isCustom?<CustomModule name={label} lang={lang} tx={tx} onAdd={()=>setModal('create')}/>:current.mode==='dashboard'?<OverviewPage tx={tx} lang={lang} onGo={go}/>:current.mode==='website'?<WebsitePage tx={tx} lang={lang} publicLang={publicLang} setPublicLang={setPublicLang} onReview={()=>setModal('publish')} current={current}/>:current.mode==='builder'||current.mode==='workspace'?<BuilderPage tx={tx} lang={lang} current={current} onAdd={()=>setModal('create')} onGo={go}/>:current.mode==='connectors'?<ConnectorsPage tx={tx}/>:current.mode==='permissions'?<RolesPage tx={tx} lang={lang}/>:current.mode==='developer'?<DevPage tx={tx} current={current}/>:current.mode==='publishing'?<PublishingPage tx={tx} current={current} onReview={()=>setModal('publish')}/>:current.mode==='reports'?<ReportPage tx={tx} current={current}/>:current.mode==='media'?<MediaPage tx={tx} onReview={()=>setModal('create')}/>:<RecordsPage tx={tx} lang={lang} current={current} query={rowQuery} setQuery={setRowQuery} onAdd={()=>setModal('create')}/>}
+    {privateOffice&&!PRIVATE_APPROVED_MODULES.has(featureId)?<NotYetConnectedModule lang={lang} feature={current} onGo={go}/>:featureId==='settings'?<AdminSettingsCenter lang={lang} onLanguage={setLang} value={appearance} onAppearance={setAppearance} privateOffice={privateOffice} onGo={go}/>:featureId==='overview'&&privateOffice?<LiveOfficeOverview lang={lang} onGo={go}/>:featureId==='requests'&&privateOffice?<LiveOfficeRequests lang={lang}/>:featureId==='website'&&privateOffice?<LiveSiteControl lang={lang}/>:featureId==='cases'&&privateOffice?<LiveKafCases lang={lang} mode="cases"/>:featureId==='tasks'&&privateOffice?<LiveKafCases lang={lang} mode="tasks"/>:featureId==='security'?<SecurityCenter lang={lang} privateOffice={privateOffice}/>:featureId==='resources'?<ResourceCenter lang={lang} resources={resources} onResources={setResources} onToast={toast}/>:featureId==='designsystem'?<ThemeLab lang={lang} value={appearance} onChange={setAppearance}/>:isCustom?<CustomModule name={label} lang={lang} tx={tx} onAdd={()=>setModal('create')}/>:current.mode==='dashboard'?<OverviewPage tx={tx} lang={lang} onGo={go}/>:current.mode==='website'?<WebsitePage tx={tx} lang={lang} publicLang={publicLang} setPublicLang={setPublicLang} onReview={()=>setModal('publish')} current={current}/>:current.mode==='builder'||current.mode==='workspace'?<BuilderPage tx={tx} lang={lang} current={current} onAdd={()=>setModal('create')} onGo={go}/>:current.mode==='connectors'?<ConnectorsPage tx={tx}/>:current.mode==='permissions'?<RolesPage tx={tx} lang={lang}/>:current.mode==='developer'?<DevPage tx={tx} current={current}/>:current.mode==='publishing'?<PublishingPage tx={tx} current={current} onReview={()=>setModal('publish')}/>:current.mode==='reports'?<ReportPage tx={tx} current={current}/>:current.mode==='media'?<MediaPage tx={tx} onReview={()=>setModal('create')}/>:<RecordsPage tx={tx} lang={lang} current={current} query={rowQuery} setQuery={setRowQuery} onAdd={()=>setModal('create')}/>}
     <footer className="fpx-footer"><span>{tx.builtBy} · MIT</span><span>Fajr Parsa · QA Admin Preview V4</span></footer>
    </main>
   </div>
