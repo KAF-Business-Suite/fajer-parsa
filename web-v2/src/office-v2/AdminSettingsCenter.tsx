@@ -66,8 +66,8 @@ export function AdminSettingsCenter({lang,onLanguage,value,onAppearance,privateO
    <div className="fpx-settings-links">
     <button type="button" onClick={()=>onGo('security')}><ShieldCheck size={19}/>{tx.security}<ArrowUpRight size={16}/></button>
     <button type="button" onClick={()=>onGo('overview')}><LayoutDashboard size={19}/>{tx.office}<ArrowUpRight size={16}/></button>
-    <a href="/site-settings"><Globe2 size={19}/>{tx.site}<ArrowUpRight size={16}/></a>
-    <a href="/resources"><Layers size={19}/>{tx.resources}<ArrowUpRight size={16}/></a>
+    <button type="button" onClick={()=>onGo('website')}><Globe2 size={19}/>{tx.site}<ArrowUpRight size={16}/></button>
+    <button type="button" onClick={()=>onGo('resources')}><Layers size={19}/>{tx.resources}<ArrowUpRight size={16}/></button>
    </div><p>{tx.note}</p></section>}
   <p className="fpx-settings-footer"><MonitorSmartphone size={17}/>{tx.help}</p>
  </section>
