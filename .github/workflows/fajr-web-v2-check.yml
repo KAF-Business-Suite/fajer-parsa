@@ -6,9 +6,19 @@ on:
       - release/fajr-production-20261030
     paths:
       - 'web-v2/**'
+      - 'workers/fajr-office-qa/**'
+      - 'supabase/functions/fajr-office/**'
+      - 'supabase/functions/fajr-office-api/**'
+      - 'docs/proposals/FAJR_OFFICE_UNAPPLIED.sql'
       - '.github/workflows/fajr-web-v2-check.yml'
       - '.github/workflows/testdriver.yml'
   workflow_dispatch:
+    inputs:
+      office_bff_required:
+        description: 'Strict live BFF acceptance ONLY after inspected isolated QA rollout'
+        type: boolean
+        required: false
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -16,7 +26,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
       run:
@@ -34,18 +44,100 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Run offline-safe intake server/client unit tests
         run: npm run test:intake
+      - name: Verify office Auth, state and API contracts (synthetic)
+        run: node --test server/office/handler.test.mjs server/office/adapters.test.mjs server/office/pages-entry.test.mjs src/office/office-gateway.test.mjs
+      - name: Validate encrypted cookie, CSRF, refresh and revoke (offline synthetic)
+        run: node --test ../workers/fajr-office-qa/session-bff.test.mjs
+      - name: Test owner website settings API and check UI/module syntax
+        run: |
+          node --test ../workers/fajr-office-qa/site-settings-api.test.mjs
+          node --test ../workers/fajr-office-qa/resource-provider-api.test.mjs
+          node --test ../workers/fajr-office-qa/kaf-cases-api.test.mjs
+          node --test ../workers/fajr-office-qa/console-gateway.test.mjs
+          node --test ../workers/fajr-office-qa/security-overview.test.mjs
+          node --test tests/security-overview.test.mjs
+          node --test tests/office-control-diagnostics.test.mjs
+          node --test tests/site-draft-bridge.test.mjs
+          node --test tests/admin-preferences.test.mjs
+          node --test tests/private-office-bridge.test.mjs
+          node --test tests/live-office-requests.test.mjs
+          node --test tests/live-kaf-cases.test.mjs
+          node --test tests/office-status-change.test.mjs
+          node --test tests/live-office-summary.test.mjs
+          node --test tests/site-control-snapshot.test.mjs
+          node --test tests/site-control-normalization.test.mjs
+          node --test tests/resource-registry.test.mjs
+          node --check ../workers/fajr-office-qa/site-settings-api.mjs
+          node --check ../workers/fajr-office-qa/resource-provider-api.mjs
+          node --check ../workers/fajr-office-qa/console-gateway.mjs
+          node --check ../workers/fajr-office-qa/security-overview.mjs
+          node --check ../workers/fajr-office-qa/site-settings-ui.mjs
+          node --check ../workers/fajr-office-qa/worker.mjs
+          node --check ../workers/fajr-office-qa/resources-ui.mjs
+      - name: Typecheck server-only office boundary
+        run: npx tsc --noEmit --target es2022 --lib es2022,dom --module esnext --moduleResolution bundler --allowImportingTsExtensions --strict --skipLibCheck server/office/handler.ts server/office/adapters.ts server/office/pages-entry.ts
+      - name: Verify live Worker anonymous denials; strict BFF check only on explicit QA release acceptance
+        run: node --test tests/office-live-negative.mjs
+        env:
+          FAJR_OFFICE_LIVE_BFF_REQUIRED: "${{ inputs.office_bff_required && 'true' || 'false' }}"
+      - name: Prove live QA Site Control is available and anonymous writes are denied
+        run: node --test tests/site-control-live-negative.mjs
       - name: Build the static site
         run: npm run build
+      - name: Build isolated Fajr Admin V2 design preview (does not alter public dist)
+        run: npm run build:office-demo
       - name: Install Chromium for local browser QA
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
+        # Ubuntu 24.04 GitHub runner provides shared Chromium libraries; avoid
+        # apt package sets removed from the new Ubuntu 26.04 runner image.
       - name: Verify website UX with local browser and synthetic data
         run: npm run test:smoke
+      - name: Verify complete Admin V2 design shell at 393px and desktop (fictional only)
+        run: |
+          node --test tests/office-v2-preview.mjs
+          node --test tests/live-office-requests.mobile.mjs
+          node --test tests/live-kaf-cases.mobile.mjs
+          node --test tests/office-status-change.mobile.mjs
+      - name: Verify Samsung S21 mobile multi-site preview with safe link/detach/reconnect and appearance
+        run: node --test tests/resource-center.mobile.mjs
+      - name: Verify FP-UI-01 semantic CSS, Light/Dark S21 and desktop contract
+        run: node --test tests/admin-css-contract.mobile.mjs
+      - name: Verify private connected-resources interface at S21 widths without real customer data
+        run: node --test tests/private-resources.mobile.mjs
+      - name: Verify PR14 candidate Office in Chromium with synthetic intercepted APIs
+        run: node tests/office-live-browser.mjs
+      - name: Verify Site Control QA on S21-sized and desktop Chromium, with synthetic intercepted APIs
+        run: node --test tests/site-control-browser.mjs
       - name: Verify crawlable inbound HTML and local Pages routing (no deploy)
         env:
           WRANGLER_SEND_METRICS: "false"
         run: npm run test:seo
       - name: Verify optional intake form with intercepted API and synthetic challenge
         run: npm run test:intake-form
+      - name: Deploy Fajr Admin V2 fictional design to existing isolated QA Pages branch
+        # No customer/Production, database, secrets in browser or new Pages project.
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'work/fajr-office-main-aligned-20261031'
+        working-directory: web-v2
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          set -euo pipefail
+          test -s dist-office-preview/office-preview.html
+          test -d dist-office-preview/assets
+          test ! -e dist-office-preview/_worker.js
+          test ! -d dist-office-preview/functions
+          if [[ -z "${CLOUDFLARE_ACCOUNT_ID}" || -z "${CLOUDFLARE_API_TOKEN}" ]]; then
+            echo "FP_ADMIN_V2_DEPLOY=SKIPPED_MISSING_QA_CREDENTIALS"
+            exit 0
+          fi
+          npx --yes wrangler@4 pages deploy dist-office-preview \
+            --project-name=fajr-parsa-qa \
+            --branch=fp-admin-v2-review \
+            --commit-hash="$GITHUB_SHA"
+          echo "FP_ADMIN_V2_QA_PREVIEW_DEPLOYED (not Production)"
       - name: Save synthetic inbound visual QA for owner review
         if: always()
         uses: actions/upload-artifact@v4
@@ -55,7 +147,71 @@ jobs:
             web-v2/test-results/inbound-*.png
             web-v2/test-results/results.json
             web-v2/test-results/inbound-seo-results.json
+            web-v2/test-results/fajr-site-settings-*.png
+            web-v2/test-results/fp-admin-v2-*.png
             web-v2/test-results/inbound-response.html
             web-v2/test-results/inbound-pages.log
           if-no-files-found: error
           retention-days: 3
+
+  office-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: synthetic-ci-only
+          POSTGRES_DB: fajr_office_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: web-v2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: web-v2/.nvmrc
+      - name: Verify SQL permissions, quota, audit and concurrency in disposable PostgreSQL
+        run: node --test server/office/quota.postgres.test.mjs
+        env:
+          OFFICE_TEST_DATABASE_URL: postgresql://postgres:synthetic-ci-only@127.0.0.1:5432/fajr_office_test
+
+  site-control-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: synthetic-ci-only
+          POSTGRES_DB: fajr_office_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: web-v2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version-file: web-v2/.nvmrc
+      - name: Verify Fajr Site Control PostgreSQL migration with fictional accounts only
+        run: node --test server/office/site-control.postgres.test.mjs
+        env:
+          OFFICE_TEST_DATABASE_URL: postgresql://postgres:synthetic-ci-only@127.0.0.1:5432/fajr_office_test
