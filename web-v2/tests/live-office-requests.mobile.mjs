@@ -18,6 +18,8 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
   for(const width of [360,393]){
    let mode='guest'
    let siteMode='ready'
+   let siteRevision='d5072836-0d50-4dfa-88dc-596e9befd276'
+   let siteDraft={contact:{whatsapp:'93700123456',email:'qa@example.invalid'},office:{address:{fa:'کابل',ps:'کابل',en:'Kabul',ar:'كابل'},hours:{fa:'۹–۵',ps:'۹–۵',en:'9–5',ar:'٩–٥'}},design:{fontPreset:'vazirmatn-manrope'},content:{notice:{fa:'اعلان QA',ps:'QA خبرتیا',en:'QA notice',ar:'إشعار QA'},faq:[]}}
    const requests=[]
    const context=await browser.newContext({viewport:{width,height:800},isMobile:true,hasTouch:true,reducedMotion:'reduce'})
    const page=await context.newPage()
@@ -55,12 +57,16 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
      })})
     }
     if(u.pathname==='/api/site-settings/draft'){
-     requests.push({path:u.pathname,method:route.request().method(),header:route.request().headers()['x-fp-office-request']})
-     const status=siteMode==='denied'?403:siteMode==='guest'?401:siteMode==='down'?503:200
-     const body=siteMode==='ready'?{draftRevision:'d5072836-0d50-4dfa-88dc-596e9befd276',publishedRevision:null,canEdit:true,canPublish:false,
-       draft:{secret:'must-not-render'},history:[{private:'must-not-render'}]}:{error:'unauthorized'}
-     await route.fulfill({status,contentType:'application/json',body:JSON.stringify(body)})
-     return
+     const method=route.request().method()
+     requests.push({path:u.pathname,method,header:route.request().headers()['x-fp-office-request']})
+     if(siteMode!=='ready')return route.fulfill({status:siteMode==='denied'?403:siteMode==='guest'?401:503,json:{error:'unauthorized'}})
+     if(method==='POST'){
+      const body=route.request().postDataJSON()
+      if(body.expected!==siteRevision)return route.fulfill({status:409,json:{error:'stale_revision'}})
+      siteDraft=body.draft;siteRevision='syn-qa-2'
+     }
+     return route.fulfill({status:200,json:{draftRevision:siteRevision,publishedRevision:null,canEdit:true,canPublish:false,
+      draft:{...siteDraft,private_secret:'must-not-render'},history:[{private:'must-not-render'}]}})
     }
     if(u.pathname==='/api/office'){
      requests.push({path:u.pathname,offset:u.searchParams.get('offset'),method:route.request().method(),header:route.request().headers()['x-fp-office-request']})
@@ -153,8 +159,18 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
    await website.waitFor()
    await website.getByRole('heading',{name:'مدیریت واقعی وب‌سایت'}).waitFor()
    await website.getByText('d5072836-0d50-4dfa-88dc-596e9befd276').waitFor()
-   await website.getByRole('link',{name:/ورود به تنظیمات اصلی/}).waitFor()
-   assert.equal(await website.getByRole('link',{name:/ورود به تنظیمات اصلی/}).getAttribute('href'),'/site-settings')
+   const editor=page.locator('.fpx-site-editor')
+   await editor.getByRole('heading',{name:'ویرایش محتوای وب‌سایت'}).waitFor()
+   assert.equal(await page.locator('.fpx-private-shortcuts a').count(),0,'All Office shortcuts must navigate within one shell')
+   assert.equal(await editor.getByRole('textbox',{name:'واتساپ'}).inputValue(),'93700123456')
+   await editor.getByRole('textbox',{name:'واتساپ'}).fill('۰۷۸۱۲۳۴۵۶۷')
+   await editor.getByRole('button',{name:'ذخیرهٔ پیش‌نویس QA'}).click()
+   await editor.getByRole('status').filter({hasText:'پیش‌نویس روی سرور ذخیره و دوباره تأیید شد.'}).waitFor()
+   assert.equal(siteDraft.contact.whatsapp,'93781234567')
+   assert.ok(requests.some(x=>x.path==='/api/site-settings/draft'&&x.method==='POST'&&x.header==='same-origin'))
+   assert.equal(await editor.getByRole('textbox',{name:'واتساپ'}).inputValue(),'93781234567')
+   assert.equal(await page.getByText('must-not-render').count(),0,'Private server metadata never appears on screen')
+   assert.equal(new URL(page.url()).pathname,'/console','Site editing stays in the Admin Console')
    assert.equal(await website.getByText('must-not-render').count(),0)
    assert.equal(await website.getByRole('button',{name:/نشر/}).count(),0)
    assert.ok(requests.some(x=>x.path==='/api/site-settings/draft'&&x.method==='GET'&&x.header==='same-origin'))
@@ -164,6 +180,7 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
    await website.getByRole('button',{name:'تازه‌سازی'}).click()
    await website.getByRole('alert').filter({hasText:'مجوز دیدن تنظیمات'}).waitFor()
    assert.equal(await website.locator('.fpx-live-site-tile').count(),0)
+   assert.equal(await page.locator('.fpx-site-editor').count(),0,'Private editor unmounted when permissions denied')
    siteMode='guest'
    await website.getByRole('button',{name:'تازه‌سازی'}).click()
    await website.getByRole('alert').filter({hasText:'نشست دفتر پایان یافته'}).waitFor()
