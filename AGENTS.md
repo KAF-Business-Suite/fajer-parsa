@@ -29,3 +29,11 @@ All new application/website/admin feature work follows the canonical [design-fir
 ## Owner mobile-first multi-resource admin lock — 2026-11-18
 
 Before any further Admin V2 source/style edits under existing KAF-35 / PR #14, read the [latest owner mobile-first multi-site design shortlist and behavioral contract](docs/FP_ADMIN_MOBILE_MULTISITE_DESIGN_DECISION.md) plus [Global Master §14](https://github.com/KAF-Business-Suite/openai-cloudflare-github-hub/blob/main/docs/GLOBAL_PROJECT_AI_GOVERNANCE.md). **Owner wants existing open-source admin examples/demo/code before redesign, then approves one cohesive look.** First implement mobile-S21-only integrated UX; desktop gets responsive no-break smoke. Do NOT remove any 45 modules. Multiple sites/apps/docs later connect via permissioned provider adapters; unlinking the console entry never deletes the actual remote website. Staff UI fa/en; public Fajr site fa/ps/en/ar. Refine Core not yet installed, source mock ≠ operational multi-provider suite. All production release/legal gates remain active, no customer messages, paid services or DB deletes.
+
+## Agent source parity and Office-specific acceptance — 19 Nov 2026
+
+**This Draft PR keeps its stronger Office design rules above** and now also follows the current [Fajr main AGENTS](https://github.com/KAF-Business-Suite/fajer-parsa/blob/main/AGENTS.md) Free-tier QA-batching, safe Direct Upload and latest four-language/public-intake boundaries. This link is not proof that future main changes auto-sync: re-read both instructions before new code.
+
+**Office-only build evidence:** in `web-v2/`, `npm ci --no-audit --no-fund` then `npm run build:office-demo` (actual PR14 package script). Office/Auth negative browser/session tests and exact live QA Worker SHA are a **different acceptance class** from the static Office preview. No public site publish, sensitive credential, production/staff role change, external message, DB migration or live Office acceptance through this documentation commit.
+
+**Global cleanup precedence:** KAF-26 continues first; defer UI expansion unless the owner explicitly resumes that product gate. Real S21 staff login/refresh/controls/logout stays KAF-35; CSS/HTML mock success is not permission to change the backend or customer traffic. No duplicate module kit or new app.
