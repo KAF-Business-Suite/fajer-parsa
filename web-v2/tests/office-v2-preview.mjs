@@ -81,7 +81,7 @@ test('Enterprise admin: 45-feature bilingual shell, independent four-language we
    await page.getByRole('heading',{name:'Account identity & security'}).waitFor()
    await page.getByRole('status').filter({hasText:'This is a design-only preview'}).waitFor()
    assert.equal(await page.locator('.fpx-security-refresh').isDisabled(),true)
-   assert.equal(await page.locator('.fpx-security-launch').getAttribute('href'),'https://fajr-office-qa.khoojafahim.workers.dev/console#/security')
+   assert.equal(await page.locator('.fpx-security-launch').getAttribute('href'),'https://fajr-office-qa.khoojafahim.workers.dev/?next=console-security')
    await page.getByRole('link',{name:/Open private console and sign in securely/}).waitFor()
    assert.equal(await page.locator('.fpx-security-signout').count(),0)
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-security.png',fullPage:true})
