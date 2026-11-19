@@ -38,6 +38,22 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
      const mime=name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':name.endsWith('.woff2')?'font/woff2':'application/octet-stream'
      await route.fulfill({status:200,body:await readFile(resolve(root,'assets',name)),contentType:mime});return
     }
+    if(u.pathname==='/api/security/overview'){
+     requests.push({path:u.pathname,method:route.request().method(),header:route.request().headers()['x-fp-office-request']})
+     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      scope:'fajr_owner_console',emailVerification:'verified',totp:'not_enrolled',
+      linkedProviders:['email'],session:{remember:true,expiresAt:'2026-12-01T09:00:00.000Z'}
+     })})
+    }
+    if(u.pathname==='/api/resources/providers/cloudflare/fajr-parsa-qa'){
+     requests.push({path:u.pathname,method:route.request().method(),header:route.request().headers()['x-fp-office-request']})
+     return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      id:'cloudflare-pages/fajr-parsa-qa',provider:'cloudflare_pages',name:'fajr-parsa-qa',
+      url:'https://fajr-parsa-qa.pages.dev',productionBranch:'main',
+      permission:'read-only',ownerVerified:true,allowedActions:['inspect'],
+      lastVerifiedAt:'2026-11-19T00:00:00Z'
+     })})
+    }
     if(u.pathname==='/api/site-settings/draft'){
      requests.push({path:u.pathname,method:route.request().method(),header:route.request().headers()['x-fp-office-request']})
      const status=siteMode==='denied'?403:siteMode==='guest'?401:siteMode==='down'?503:200
@@ -152,6 +168,25 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
    await website.getByRole('button',{name:'تازه‌سازی'}).click()
    await website.getByRole('alert').filter({hasText:'نشست دفتر پایان یافته'}).waitFor()
    assert.equal(await website.locator('.fpx-live-site-tile').count(),0)
+   // FP-SEC-04: owner can manually test real control availability on S21
+   // with protected, GET-only probes. Never show a fake connection or send writes.
+   siteMode='ready'
+   mode='owner'
+   await page.evaluate(()=>{location.hash='/security'})
+   await page.getByRole('heading',{name:'امنیت و هویت حساب'}).waitFor()
+   await page.getByRole('button',{name:'بررسی واقعی اتصال‌ها'}).click()
+   await page.locator('.fpx-security-probe-row').first().waitFor()
+   assert.equal(await page.locator('.fpx-security-probe-row').count(),3)
+   assert.equal(await page.locator('.fpx-security-probe-row span.is-verified').count(),3)
+   assert.match(await page.locator('.fpx-security-probe-row').nth(1).innerText(),/مجوز ویرایش اعلام‌شده: دارد/)
+   assert.match(await page.locator('.fpx-security-probe-row').nth(1).innerText(),/مجوز انتشار اعلام‌شده: ندارد/)
+   assert.equal(await page.getByText('must-not-render').count(),0)
+   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true)
+   for(const path of ['/api/security/overview','/api/site-settings/draft','/api/resources/providers/cloudflare/fajr-parsa-qa']){
+    assert.ok(requests.some(r=>r.path===path&&r.method==='GET'&&r.header==='same-origin'),'read-only secured probe '+path)
+    assert.ok(!requests.some(r=>r.path===path&&r.method!=='GET'),'forbidden probe mutation '+path)
+   }
+   await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-private-control-check.png',fullPage:true})
    // Public preview remains entirely synthetic, without accessing settings BFF.
    const siteReadCount=requests.filter(x=>x.path==='/api/site-settings/draft').length
    await nav.locator('button').filter({hasText:'درخواست‌ها'}).click()
