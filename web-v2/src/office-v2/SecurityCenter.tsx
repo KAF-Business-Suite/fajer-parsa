@@ -4,6 +4,8 @@ import {CheckCircle2,Clock3,Fingerprint,KeyRound,LockKeyhole,
 import type {AdminLanguage} from './console-model'
 import {readSecurityOverview} from './security-overview'
 import type {SecurityReadResult,SecurityOverview} from './security-overview'
+import {checkOfficeControls} from './office-control-diagnostics'
+import type {OfficeProbeReport,OfficeProbeName,OfficeProbeStatus} from './office-control-diagnostics'
 import './security-center.css'
 
 const words={
@@ -12,6 +14,7 @@ const words={
   verified:'اطلاعات مجاز · فقط مشاهده',preview:'این صفحه فقط نمونهٔ طراحی است؛ تغییر واقعی باید در کنسول خصوصی انجام شود.',
   enterReal:'بازکردن کنسول خصوصی و ورود امن',realActions:'کنترول‌های واقعی دفتر',officeLink:'مدیریت درخواست‌ها',siteLink:'تنظیمات وب‌سایت',resourcesLink:'بررسی منابع متصل',themeLink:'تنظیم ظاهر کنسول',
   actionsNote:'این مسیرها به ابزارهای فعلی دفتر وصل هستند. تغییر اطلاعات فقط با مجوز و تأیید سرور انجام می‌شود.',
+  probeTitle:'آزمایش اتصال کنترل‌ها',probeIntro:'با یک لمس، فقط اتصال و مجوز سه بخش را از سرور می‌خواند؛ هیچ موردی ذخیره یا ویرایش نمی‌شود.',probeRun:'بررسی واقعی اتصال‌ها',probeRunning:'در حال بررسی امن…',probeIdle:'برای شروع روی دکمهٔ بررسی بزنید.',probeIdentity:'ورود و مجوز مدیر',probeWebsite:'تنظیمات وب‌سایت',probeResources:'منابع Cloudflare',probeReady:'اتصال تأیید شد',probeUnverified:'وضعیت نامشخص',probeCanEdit:'مجوز ویرایش اعلام‌شده',probeCanPublish:'مجوز انتشار اعلام‌شده',probeYes:'دارد',probeNo:'ندارد',probeUntried:'این بررسی هیچ ذخیره یا نشری را آزمایش نمی‌کند.',
   loading:'در حال بررسی نشست و مجوز حساب…',refresh:'بررسی دوباره',active:'نشست فعلی',
   personal:'این دستگاه تا ۷ روز به یاد سپرده شده است.',normal:'نشست عادی؛ تازه‌سازی صفحه به‌تنهایی آن را خاتمه نمی‌دهد.',
   expires:'اعتبار نشست تا',email:'تأیید ایمیل',mfa:'Authenticator (کد ۶ رقمی)',
@@ -34,6 +37,7 @@ const words={
   verified:'Verified private view · read only',preview:'This is a design-only preview; real changes require the private console.',
   enterReal:'Open private console and sign in securely',realActions:'Working office controls',officeLink:'Manage requests',siteLink:'Website settings',resourcesLink:'Connected resources',themeLink:'Console appearance',
   actionsNote:'These lead to existing authorized office tools. Any changes are checked and confirmed by the server.',
+  probeTitle:'Check real controls',probeIntro:'One tap checks connectivity and permissions on three existing server paths. No data is changed.',probeRun:'Run secure control check',probeRunning:'Checking securely…',probeIdle:'Press the check button to start.',probeIdentity:'Owner access & session',probeWebsite:'Website settings',probeResources:'Cloudflare resources',probeReady:'Verified connection',probeUnverified:'Unverified status',probeCanEdit:'Server-reported edit permission',probeCanPublish:'Server-reported publish permission',probeYes:'Allowed',probeNo:'Not allowed',probeUntried:'No actual edit or publication is tested.',
   loading:'Checking verified session and account permissions…',refresh:'Refresh status',active:'Current session',
   personal:'This personal device is remembered for up to 7 days.',normal:'Normal browser session; refreshing the page alone does not end it.',
   expires:'Session expires',email:'Verified email',mfa:'Authenticator (6-digit code)',
@@ -59,6 +63,8 @@ export function SecurityCenter({lang,privateOffice}:{lang:AdminLanguage;privateO
  const [state,setState]=useState<SecurityReadResult|null>(null)
  const [signingOut,setSigningOut]=useState(false)
  const [logoutError,setLogoutError]=useState('')
+ const [probing,setProbing]=useState(false)
+ const [probe,setProbe]=useState<OfficeProbeReport|null>(null)
  useEffect(()=>{
   if(!privateOffice)return
   let active=true
@@ -71,6 +77,14 @@ export function SecurityCenter({lang,privateOffice}:{lang:AdminLanguage;privateO
  const emailStatus=data?.emailVerification==='verified'?tx.verifiedEmail:data?.emailVerification==='not_verified'?tx.notVerifiedEmail:tx.unknown
  const totpStatus=data?.totp==='enabled'?tx.totpEnabled:data?.totp==='not_enrolled'?tx.totpOff:tx.totpUnknown
  const providers:[string,string][]=[['google','Google'],['github','GitHub'],['azure','Microsoft']]
+ async function runControlCheck(){
+  if(!privateOffice||probing)return
+  setProbing(true);setProbe(null)
+  try{setProbe(await checkOfficeControls())}
+  finally{setProbing(false)}
+ }
+ const probeTitles:Record<OfficeProbeName,string>={identity:tx.probeIdentity,website:tx.probeWebsite,resources:tx.probeResources}
+ const probeResult=(status:OfficeProbeStatus)=>status==='ready'?tx.probeReady:status==='sign_in_required'?tx.sign_in_required:status==='access_denied'?tx.access_denied:status==='rate_limited'?tx.rate_limited:tx.unavailable
  async function signOut(){
   if(!privateOffice||signingOut||!window.confirm(tx.logoutConfirm))return
   setSigningOut(true)
@@ -117,6 +131,19 @@ export function SecurityCenter({lang,privateOffice}:{lang:AdminLanguage;privateO
     <a href="/resources"><Layers size={19}/><span>{tx.resourcesLink}</span><ExternalLink size={15}/></a>
     <a href="#/designsystem"><Palette size={19}/><span>{tx.themeLink}</span><ExternalLink size={15}/></a>
    </div><p className="fpx-security-workflow-note">{tx.actionsNote}</p>
+  </section>}
+  {privateOffice&&<section className="fpx-security-diagnostic" aria-label={tx.probeTitle}>
+   <div className="fpx-security-diagnostic-head"><div><h2>{tx.probeTitle}</h2><p>{tx.probeIntro}</p></div>
+    <button className="fpx-security-refresh" type="button" disabled={probing} aria-busy={probing} onClick={runControlCheck}><RefreshCw size={16}/>{probing?tx.probeRunning:tx.probeRun}</button>
+   </div>
+   {probe?<div className="fpx-security-probe-list" role="status" aria-live="polite">
+    {probe.checks.map(item=><div className="fpx-security-probe-row" key={item.name}>
+     <strong>{probeTitles[item.name]}</strong>
+     <span className={item.status==='ready'?'is-verified':'is-unverified'}>{probeResult(item.status)}</span>
+     {item.name==='website'&&item.status==='ready'&&<small>{tx.probeCanEdit}: {item.canEdit?tx.probeYes:tx.probeNo} · {tx.probeCanPublish}: {item.canPublish?tx.probeYes:tx.probeNo}</small>}
+    </div>)}
+    <p className="fpx-security-workflow-note">{tx.probeUntried}</p>
+   </div>:<p className="fpx-security-workflow-note" role="status">{probing?tx.probeRunning:tx.probeIdle}</p>}
   </section>}
   <div className="fpx-security-subheading"><h2>{tx.methods}</h2></div>
   <div className="fpx-security-methods">
