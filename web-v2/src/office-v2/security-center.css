@@ -42,13 +42,13 @@
 .fpx-security-launch:hover{filter:brightness(1.12)}
 .fpx-security-workflow{display:grid;gap:11px}
 .fpx-security-workflow-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.fpx-security-workflow-grid a{display:flex;align-items:center;gap:10px;min-height:52px;padding:10px 14px;background:var(--fpx-panel,#fff);color:var(--fpx-ink,#203848);border:1px solid var(--fpx-line,#e1e6e9);border-radius:13px;text-decoration:none;font-size:12px;font-weight:750}
-.fpx-security-workflow-grid a:hover{background:var(--fpx-raised,#f8f8f6);border-color:var(--fpx-success,#17846f)}
-.fpx-security-workflow-grid a>svg:first-child{color:var(--fpx-success,#17846f);flex-shrink:0}
-.fpx-security-workflow-grid a>span{flex:1}
-.fpx-security-workflow-grid a>svg:last-child{opacity:.65;flex-shrink:0}
+.fpx-security-workflow-grid :is(a,button){display:flex;align-items:center;gap:10px;min-height:52px;padding:10px 14px;background:var(--fpx-panel,#fff);color:var(--fpx-ink,#203848);border:1px solid var(--fpx-line,#e1e6e9);border-radius:13px;text-decoration:none;font-size:12px;font-weight:750}
+.fpx-security-workflow-grid :is(a,button):hover{background:var(--fpx-raised,#f8f8f6);border-color:var(--fpx-success,#17846f)}
+.fpx-security-workflow-grid :is(a,button)>svg:first-child{color:var(--fpx-success,#17846f);flex-shrink:0}
+.fpx-security-workflow-grid :is(a,button)>span{flex:1}
+.fpx-security-workflow-grid :is(a,button)>svg:last-child{opacity:.65;flex-shrink:0}
 .fpx-security-workflow-note{font-size:11px;line-height:1.9;color:var(--fpx-subtle,#607586);margin:0}
-.fpx-security-launch:focus-visible,.fpx-security-workflow-grid a:focus-visible{outline:3px solid var(--fpx-success,#17846f);outline-offset:2px}
+.fpx-security-launch:focus-visible,.fpx-security-workflow-grid :is(a,button):focus-visible{outline:3px solid var(--fpx-success,#17846f);outline-offset:2px}
 @media(max-width:600px){.fpx-security-preview-notice{padding:16px}.fpx-security-launch{width:100%}.fpx-security-workflow-grid{grid-template-columns:1fr}}
 
 /* FP-SEC-04: one-tap, no-write security connectivity diagnostic. */
