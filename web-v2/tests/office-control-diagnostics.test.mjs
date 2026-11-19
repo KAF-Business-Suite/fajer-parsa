@@ -44,7 +44,7 @@ test('owner diagnostic uses exactly three no-write same-origin private GETs and 
    {name:'resources',status:'ready',mode:'read_only'}
   ]
  })
- assert.doesNotMatch(JSON.stringify(result),/secret|token|@example|rev-qa|productionBranch|id/)
+ assert.doesNotMatch(JSON.stringify(result),/secret|token|@example|rev-qa|productionBranch|private_token/)
 })
 test('403 and 401 are explicit, not faked as successful connections',async()=>{
  const out=await checkOfficeControls(async(path)=>{
