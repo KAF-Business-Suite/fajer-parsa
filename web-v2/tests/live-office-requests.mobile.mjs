@@ -191,6 +191,7 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
    mode='owner'
    await page.evaluate(()=>{location.hash='/security'})
    await page.getByRole('heading',{name:'امنیت و هویت حساب'}).waitFor()
+   const writesBeforeProbe=requests.filter(x=>x.method!=='GET').length
    await page.getByRole('button',{name:'بررسی واقعی اتصال‌ها'}).click()
    await page.locator('.fpx-security-probe-row').first().waitFor()
    assert.equal(await page.locator('.fpx-security-probe-row').count(),3)
@@ -201,8 +202,9 @@ test('S21: private 46-module console shows ONLY approved real-path requests; nev
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),true)
    for(const path of ['/api/security/overview','/api/site-settings/draft','/api/resources/providers/cloudflare/fajr-parsa-qa']){
     assert.ok(requests.some(r=>r.path===path&&r.method==='GET'&&r.header==='same-origin'),'read-only secured probe '+path)
-    assert.ok(!requests.some(r=>r.path===path&&r.method!=='GET'),'forbidden probe mutation '+path)
+    assert.ok(requests.some(r=>r.path===path&&r.method==='GET'),'probe reads '+path)
    }
+   assert.equal(requests.filter(x=>x.method!=='GET').length,writesBeforeProbe,'Diagnostic itself must never write; earlier explicit QA draft save is separate')
    await page.screenshot({path:'test-results/fp-admin-v2-'+width+'-private-control-check.png',fullPage:true})
    // FP-ADMIN-G6: private Global Settings must be genuinely adjustable and
    // stay on the same page after browser reload. No account/server mutations.
