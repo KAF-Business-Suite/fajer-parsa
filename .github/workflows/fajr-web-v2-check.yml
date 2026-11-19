@@ -57,6 +57,7 @@ jobs:
           node --test ../workers/fajr-office-qa/security-overview.test.mjs
           node --test tests/security-overview.test.mjs
           node --test tests/office-control-diagnostics.test.mjs
+          node --test tests/site-draft-bridge.test.mjs
           node --test tests/admin-preferences.test.mjs
           node --test tests/private-office-bridge.test.mjs
           node --test tests/live-office-requests.test.mjs
