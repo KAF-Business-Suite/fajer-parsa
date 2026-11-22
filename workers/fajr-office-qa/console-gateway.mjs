@@ -31,6 +31,13 @@ const headersFor=(security,contentType)=>{
  headers.set('Cross-Origin-Resource-Policy','same-origin');
  return headers;
 };
+const loginAtCanonicalConsole=(services,clearSessionCookie=null)=>{
+ const html=services.loginHtml;
+ if(typeof html!=='string'||!html.includes('id="login-view"')||html.length>250000)return fail(503,services.security,'login_shell');
+ const h=headersFor(services.security,'text/html; charset=utf-8');
+ if(clearSessionCookie)h.set('Set-Cookie',clearSessionCookie);
+ return new Response(html,{status:200,headers:h});
+};
 const fail=(status,security,stage='unavailable')=>{
  const h=headersFor(security,'text/plain; charset=utf-8');
  h.set('X-FP-Console-Stage',stage);
@@ -85,7 +92,7 @@ export async function handlePrivateConsole(request,env,services,transport=fetch)
  }
  const cookie=request.headers.get('Cookie')||'';
  if(!cookie.includes('__Host-fp-office-session=')){
-  return new Response(null,{status:302,headers:{...services.security,Location:'/?next=console', 'Cache-Control':'no-store'}})
+  return loginAtCanonicalConsole(services)
  }
  // Browser navigation cannot send the custom CSRF/API header. Owner access
  // is verified through the existing encrypted cookie, Auth and SQL role RPC.
@@ -97,10 +104,7 @@ export async function handlePrivateConsole(request,env,services,transport=fetch)
  try{auth=await services.handleConsoleAccess(privateSessionRequest,env,transport)}
  catch{return fail(503,services.security,'session_exception')}
  if(!auth||auth.status!==200){
-  if(auth?.status===401)return new Response(null,{status:302,headers:{
-   ...services.security,Location:'/?next=console', 'Cache-Control':'no-store',
-   ...(auth.headers.get('Set-Cookie')?{'Set-Cookie':auth.headers.get('Set-Cookie')}:{})
-  }});
+  if(auth?.status===401)return loginAtCanonicalConsole(services,auth.headers.get('Set-Cookie'));
   return fail(auth?.status===403?403:503,services.security,auth?.status===403?'permission':'session_upstream');
  }
  try{
