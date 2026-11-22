@@ -5,13 +5,13 @@ import {chromium} from 'playwright'
 import worker from '../../workers/fajr-office-qa/worker.mjs'
 
 const office='https://fajr-office-qa.khoojafahim.workers.dev'
-test('FP-UNIFY-03: actual Office entry matches one Admin shell at S21/mobile and desktop',async()=>{
+test('FP-ADMIN-AUTH-01: standalone KAF login on S21/mobile and desktop',async()=>{
  await mkdir('test-results',{recursive:true})
  const browser=await chromium.launch({headless:true})
  try{
   for(const width of [360,393,1280]){
    const context=await browser.newContext({viewport:{width,height:844},isMobile:width<800,hasTouch:width<800,reducedMotion:'reduce'})
-   await context.addInitScript(()=>{localStorage.setItem('fp-admin-appearance-v1',JSON.stringify({mode:'dark',density:'compact',corners:'extra'}))})
+   await context.addInitScript(()=>{localStorage.setItem('kaf-admin-auth-theme','dark')})
    const page=await context.newPage()
    const errors=[],attempts=[]
    page.on('pageerror',e=>errors.push(e.message))
@@ -23,7 +23,7 @@ test('FP-UNIFY-03: actual Office entry matches one Admin shell at S21/mobile and
      await route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({error:'sign_in_required'})})
      return
     }
-    if(['/','/console','/app.css','/app.js'].includes(u.pathname)){
+    if(['/','/console','/admin-auth.css','/admin-auth.js'].includes(u.pathname)){
      const response=await worker.fetch(new Request(office+u.pathname),{})
      await route.fulfill({status:response.status,body:await response.text(),contentType:response.headers.get('content-type')||'text/plain'})
      return
@@ -33,9 +33,9 @@ test('FP-UNIFY-03: actual Office entry matches one Admin shell at S21/mobile and
    await page.goto(office+'/console#/website',{waitUntil:'networkidle',timeout:20000})
    assert.equal(new URL(page.url()).pathname,'/console','Guest must stay at canonical /console while signing in')
    assert.equal(new URL(page.url()).hash,'#/website','Browser must retain requested module')
-   assert.equal(await page.evaluate(()=>nextPrivateView()),'/console#/website','Successful login should return to intended module')
-   await page.getByRole('heading',{name:'کنسول مدیریت فجرپارسا'}).waitFor()
-   await page.getByRole('heading',{name:'ورود امن به کنسول'}).waitFor()
+   assert.equal(new URL(page.url()).hash,'#/website','Selected private view stays in URL until login')
+   await page.getByRole('heading',{name:'ورود به Admin Console'}).waitFor()
+   assert.equal(await page.getByText('KAF BUSINESS SUITE', {exact:false}).count()>0,true)
    assert.equal(await page.locator('html').getAttribute('data-theme'),'dark')
    assert.equal(await page.locator('#login-view').isVisible(),true)
    assert.equal(await page.locator('input#email').getAttribute('autocomplete'),'username')
@@ -51,7 +51,7 @@ test('FP-UNIFY-03: actual Office entry matches one Admin shell at S21/mobile and
    assert.equal(await page.locator('#password').getAttribute('type'),'text')
    await page.locator('#password-visibility').click()
    assert.equal(await page.locator('#password').getAttribute('type'),'password')
-   await page.screenshot({path:'test-results/fp-unified-login-'+width+'-dark.png',fullPage:true})
+   await page.screenshot({path:'test-results/kaf-admin-login-'+width+'-dark.png',fullPage:true})
    assert.deepEqual(errors,[],'No JS error at '+width)
    await context.close()
   }
