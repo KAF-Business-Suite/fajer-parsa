@@ -378,3 +378,20 @@ test('staff sign-in is accessible and restores only allowlisted console destinat
  assert.match(css,/html\[data-theme=dark\] body\.fp-auth-active/);
  assert.match(css,/prefers-reduced-motion:reduce/);
 });
+
+
+test('FP-ENTRY-01: already shared next= links jump to canonical console but recovery entry remains',async()=>{
+ const {default:worker}=await import('./worker.mjs')
+ for(const next of ['console','console-security','console-website','console-resources']){
+  const r=await worker.fetch(new Request(base+'/?next='+next),env)
+  assert.equal(r.status,302)
+  assert.equal(r.headers.get('Location'),'/console?next='+next)
+  assert.match(r.headers.get('Cache-Control')||'',/no-store/)
+ }
+ const recovery=await worker.fetch(new Request(base+'/?type=recovery'),env)
+ assert.equal(recovery.status,200,'Existing recovery callback must remain available')
+ assert.match(await recovery.text(),/id="password-reset-view"/)
+ const injection=await worker.fetch(new Request(base+'/?next=https%3A%2F%2Fevil.invalid'),env)
+ assert.equal(injection.status,200,'Unknown next is never an external redirect')
+ assert.equal(injection.headers.get('Location'),null)
+})
