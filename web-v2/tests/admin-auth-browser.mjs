@@ -84,7 +84,7 @@ test('FP-ADMIN-AUTH-01: real KAF sign-in UI uses BFF, synthetic recovery and ind
    await recoveryPage.locator('#recover-view').waitFor({state:'visible'})
    await recoveryPage.locator('#recovery-email').fill('qa@example.invalid')
    await recoveryPage.locator('#recover-button').click()
-   await recoveryPage.waitForFunction(()=>document.querySelector('#recover-alert')?.textContent?.includes('لینک بازیابی'))
+   await recoveryPage.waitForFunction(()=>{const e=document.querySelector('#recover-alert');return e?.dataset.kind==='success'&&e.textContent?.includes('لینک بازیابی')})
    assert.equal(authCalls.includes('recover'),true)
    await recoveryPage.goto(origin+'/console?mode=recovery#access_token=synthetic-recovery-token&type=recovery',{waitUntil:'networkidle'})
    await recoveryPage.locator('#reset-view').waitFor({state:'visible'})
