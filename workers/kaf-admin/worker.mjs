@@ -10,7 +10,7 @@ export const KAF_ENTRY_HOST='kaf-admin.khoojafahim.workers.dev';
 export const KAF_ENTRY_ORIGIN='https://'+KAF_ENTRY_HOST;
 export const VERIFIED_BFF_ORIGIN='https://fajr-office-qa.khoojafahim.workers.dev';
 // This immutable QA bundle must be advanced only after independent GitHub CI.
-export const PINNED_KAF_PAGES_ORIGIN='https://7d0113f4.fajr-parsa-qa.pages.dev';
+export const PINNED_KAF_PAGES_ORIGIN='https://7672d13c.fajr-parsa-qa.pages.dev';
 const CSP="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'self' https://krzxajtrhvupyywovdzy.supabase.co; img-src 'self' data:; form-action 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'";
 const baseSecurity={'Content-Security-Policy':CSP,'Referrer-Policy':'no-referrer','X-Frame-Options':'DENY','X-Content-Type-Options':'nosniff','Cache-Control':'private, no-store','X-Robots-Tag':'noindex, nofollow','Cross-Origin-Resource-Policy':'same-origin'};
 const assets=/^\/assets\/[A-Za-z0-9._-]{1,180}\.(?:js|css|woff2|svg|png|webp|ico)$/;
