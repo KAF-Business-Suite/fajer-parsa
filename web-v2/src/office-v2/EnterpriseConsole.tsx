@@ -217,7 +217,7 @@ export default function EnterpriseConsole(){
   window.addEventListener('hashchange',change);window.addEventListener('keydown',keys)
   return()=>{window.removeEventListener('hashchange',change);window.removeEventListener('keydown',keys)}
  },[])
- useEffect(()=>{document.documentElement.lang=lang;document.documentElement.dir=dir;document.title=label+(privateOffice?' | Fajr Parsa Admin':' | Fajr Parsa Console Preview')},[lang,dir,label,privateOffice])
+ useEffect(()=>{document.documentElement.lang=lang;document.documentElement.dir=dir;document.title=label+(privateOffice?' | KAF Admin Console':' | KAF Admin Preview')},[lang,dir,label,privateOffice])
  function go(id:string){location.hash='/'+encodeURIComponent(id);setFeatureId(id);setMobileMenu(false);setRowQuery('');setCurrentTab('overview');window.scrollTo({top:0,behavior:'instant'})}
  async function privateLogout(){
   if(!privateOffice)return
@@ -230,8 +230,8 @@ export default function EnterpriseConsole(){
  function toggleGroup(id:AdminGroup){setExpanded(x=>x.includes(id)?x.filter(y=>y!==id):[...x,id])}
  function toast(m:string){setNotice(m)}
  function sidebar(){
-  return <><div className="fpx-brand"><div className="fpx-logo">FP</div>{!collapsed&&<div><strong>FAJR PARSA</strong><small>ADMIN CONSOLE</small></div>}</div>
-   <div className="fpx-workspace-card" onClick={()=>go(privateOffice?'resources':'workspaces')} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==='Enter')go('workspaces')}}><Layers size={18}/>{!collapsed&&<div><strong>{tx.company}</strong><small>{tx.workspace}</small></div>}{!collapsed&&<ChevronDown size={14}/>}</div>
+  return <><div className="fpx-brand"><div className="fpx-logo">KAF</div>{!collapsed&&<div><strong>KAF</strong><small>ADMIN CONSOLE</small></div>}</div>
+   <div className="fpx-workspace-card" aria-label={privateOffice?(lang==='fa'?'فضای کاری فعال: فجر پارسا':'Active workspace: Fajr Parsa'):undefined} onClick={privateOffice?undefined:()=>go('workspaces')} role={privateOffice?undefined:'button'} tabIndex={privateOffice?undefined:0} onKeyDown={privateOffice?undefined:(e)=>{if(e.key==='Enter')go('workspaces')}} style={privateOffice?{cursor:'default'}:undefined}><Layers size={18}/>{!collapsed&&<div><strong>{tx.company}</strong><small>{privateOffice?(lang==='fa'?'فضای کاری فعال':'Active workspace'):tx.workspace}</small></div>}{!collapsed&&!privateOffice&&<ChevronDown size={14}/>}</div>
    <div className="fpx-nav-scroll">{groups.map(group=>{
     const found=filtered.filter(f=>f.group===group.id)
     if(!found.length)return null
@@ -255,19 +255,19 @@ export default function EnterpriseConsole(){
   <aside className="fpx-sidebar">{sidebar()}</aside>
   <div className="fpx-frame">
    <header className="fpx-header"><button type="button" className="fpx-icon-button fpx-menu-mobile" onClick={()=>setMobileMenu(true)} aria-label={tx.menu}><Menu size={22}/></button>
-    <div className="fpx-breadcrumb"><span>FAJR PARSA</span><ChevronRight size={14}/><strong>{label}</strong></div>
+    <div className="fpx-breadcrumb"><span>KAF ADMIN</span><ChevronRight size={14}/><strong>{label}</strong></div>
     <div className="fpx-header-actions">
       <label className="fpx-global-search"><Search size={17}/><Input aria-label={tx.search} placeholder={tx.search+'   Ctrl+K'} ref={searchRef} value={query} onChange={e=>setQuery(e.target.value)}/></label>
       <label className="fpx-lang-switch"><Languages size={17}/><select aria-label={tx.changeLanguage} value={lang} onChange={e=>setLang(e.target.value as AdminLanguage)}>{adminLanguages.map(l=><option key={l.id} value={l.id}>{l.label}</option>)}</select></label>
       <button type="button" className="fpx-icon-button" onClick={()=>go('notifications')} title={tx.notifications}><Bell size={19}/></button>
-      <button type="button" className="fpx-avatar" onClick={()=>go(privateOffice?'security':'settings')} aria-label={privateOffice?(lang==='fa'?'امنیت حساب':'Account security'):tx.role}>FP</button>
+      <button type="button" className="fpx-avatar" onClick={()=>go(privateOffice?'security':'settings')} aria-label={privateOffice?(lang==='fa'?'امنیت حساب':'Account security'):tx.role}>K</button>
     </div>
    </header>
    <main className="fpx-main">
      <div className="fpx-warning"><span className="fpx-warning-label"><Eye size={15}/>{privateOffice?(lang==='fa'?'کنسول خصوصی':'Private console'):tx.mode}</span><span className="fpx-warning-copy">{privateOffice?(lang==='fa'?'خانه، درخواست‌ها، پرونده‌های KAF، پیگیری‌های ثبت‌شده، منابع و تنظیمات سایت به داده‌های واقعی وصل‌اند؛ سایر بخش‌ها نمایشی‌اند.':'Home, requests, KAF cases and recorded follow-ups, resources and website status use authorized data; other modules remain previews.'):tx.demoOnly}</span><span className="fpx-warning-lock"><LockKeyhole size={14}/>{tx.production}</span></div>{privateOffice&&<nav className="fpx-private-shortcuts" aria-label={lang==='fa'?'دسترسی‌های دفتر':'Office shortcuts'}><button type="button" onClick={()=>go('requests')}><BriefcaseBusiness size={17}/><span>{lang==='fa'?'دفتر':'Office'}</span></button><button type="button" onClick={()=>go('website')}><Globe2 size={17}/><span>{lang==='fa'?'مدیریت وب‌سایت':'Website'}</span></button><button type="button" onClick={()=>go('resources')}><Layers size={17}/><span>{lang==='fa'?'منابع':'Resources'}</span></button><button type="button" onClick={privateLogout}><LogOut size={17}/><span>{lang==='fa'?'خروج امن':'Sign out'}</span></button></nav>}
     {featureHeader()}
     {privateOffice&&!PRIVATE_APPROVED_MODULES.has(featureId)?<NotYetConnectedModule lang={lang} feature={current} onGo={go}/>:featureId==='settings'?<AdminSettingsCenter lang={lang} onLanguage={setLang} value={appearance} onAppearance={setAppearance} privateOffice={privateOffice} onGo={go}/>:featureId==='overview'&&privateOffice?<LiveOfficeOverview lang={lang} onGo={go}/>:featureId==='requests'&&privateOffice?<LiveOfficeRequests lang={lang}/>:featureId==='website'&&privateOffice?<LiveSiteControl lang={lang}/>:featureId==='cases'&&privateOffice?<LiveKafCases lang={lang} mode="cases"/>:featureId==='tasks'&&privateOffice?<LiveKafCases lang={lang} mode="tasks"/>:featureId==='security'?<SecurityCenter lang={lang} privateOffice={privateOffice} onGo={go}/>:featureId==='resources'?<ResourceCenter lang={lang} resources={resources} onResources={setResources} onToast={toast} onGo={go}/>:featureId==='designsystem'?<ThemeLab lang={lang} value={appearance} onChange={setAppearance}/>:isCustom?<CustomModule name={label} lang={lang} tx={tx} onAdd={()=>setModal('create')}/>:current.mode==='dashboard'?<OverviewPage tx={tx} lang={lang} onGo={go}/>:current.mode==='website'?<WebsitePage tx={tx} lang={lang} publicLang={publicLang} setPublicLang={setPublicLang} onReview={()=>setModal('publish')} current={current}/>:current.mode==='builder'||current.mode==='workspace'?<BuilderPage tx={tx} lang={lang} current={current} onAdd={()=>setModal('create')} onGo={go}/>:current.mode==='connectors'?<ConnectorsPage tx={tx}/>:current.mode==='permissions'?<RolesPage tx={tx} lang={lang}/>:current.mode==='developer'?<DevPage tx={tx} current={current}/>:current.mode==='publishing'?<PublishingPage tx={tx} current={current} onReview={()=>setModal('publish')}/>:current.mode==='reports'?<ReportPage tx={tx} current={current}/>:current.mode==='media'?<MediaPage tx={tx} onReview={()=>setModal('create')}/>:<RecordsPage tx={tx} lang={lang} current={current} query={rowQuery} setQuery={setRowQuery} onAdd={()=>setModal('create')}/>}
-    <footer className="fpx-footer"><span>{tx.builtBy} · MIT</span><span>Fajr Parsa · Unified Admin QA</span></footer>
+    <footer className="fpx-footer"><span>{tx.builtBy} · MIT</span><span>KAF Admin Console · QA</span></footer>
    </main>
   </div>
   <nav className="fpx-mobile-tabs" aria-label={tx.menu}>{[
