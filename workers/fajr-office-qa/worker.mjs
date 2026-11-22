@@ -4,6 +4,7 @@ import {handleKafCasesRead} from './kaf-cases-api.mjs';
 import {SITE_HTML,SITE_CSS,SITE_JS} from './site-settings-ui.mjs';
 import {RESOURCE_HTML,RESOURCE_CSS,RESOURCE_JS} from './resources-ui.mjs';
 import {handlePrivateConsole} from './console-gateway.mjs';
+import {ADMIN_AUTH_HTML,ADMIN_AUTH_CSS,ADMIN_AUTH_JS} from './admin-auth-ui.mjs';
 import {legacyConsoleNavigation} from './legacy-console-route.mjs';
 import {handleSecurityOverview} from './security-overview.mjs';
 // Fajr Parsa private office UI — QA only, no customer intake or outbound messages.
@@ -243,11 +244,13 @@ export default {async fetch(request,env){
   if(['console','console-security','console-website','console-resources'].includes(oldNext))return new Response(null,{status:302,headers:{...security,Location:'/console?next='+oldNext}});
   return new Response(HTML,{headers:{...security,'Content-Type':'text/html; charset=utf-8'}});
  }
+ if(request.method==='GET'&&url.pathname==='/admin-auth.css')return new Response(ADMIN_AUTH_CSS,{headers:{...security,'Content-Type':'text/css; charset=utf-8'}});
+ if(request.method==='GET'&&url.pathname==='/admin-auth.js')return new Response(ADMIN_AUTH_JS,{headers:{...security,'Content-Type':'text/javascript; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/app.css')return new Response(CSS,{headers:{...security,'Content-Type':'text/css; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/app.js')return new Response(JS,{headers:{...security,'Content-Type':'text/javascript; charset=utf-8'}});
  const legacyRedirect=legacyConsoleNavigation(request,security);
  if(legacyRedirect)return legacyRedirect;
- const consoleResponse=await handlePrivateConsole(request,env,{handleConsoleAccess,security,loginHtml:HTML});
+ const consoleResponse=await handlePrivateConsole(request,env,{handleConsoleAccess,security,loginHtml:ADMIN_AUTH_HTML});
  if(consoleResponse)return consoleResponse;
  if(request.method==='GET'&&url.pathname==='/site-settings')return new Response(SITE_HTML,{headers:{...security,'Content-Type':'text/html; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/resources')return new Response(RESOURCE_HTML,{headers:{...security,'Content-Type':'text/html; charset=utf-8'}});
