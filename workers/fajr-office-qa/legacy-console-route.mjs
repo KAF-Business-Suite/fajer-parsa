@@ -18,7 +18,7 @@ export function legacyConsoleNavigation(request,security){
  // No source URL/query/host is copied into the Location header.
  // A present cookie is only a navigation hint: /console ALWAYS rechecks role.
  const hasSession=(request.headers.get('Cookie')||'').split(';').some(x=>x.trim().startsWith('__Host-fp-office-session='));
- const location=hasSession?'/console#/'+selected.module:'/?next='+selected.login;
+ const location=hasSession?'/console#/'+selected.module:'/console?next='+selected.login;
  const h=new Headers(security);
  h.set('Location',location);
  h.set('Cache-Control','private, no-store');
