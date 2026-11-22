@@ -90,6 +90,10 @@ export async function handlePrivateConsole(request,env,services,transport=fetch)
    return new Response(upstream.body,{status:200,headers:head});
   }catch{return fail(503,services.security,'asset_transport')}
  }
+ // Recovery links can carry a short-lived identity token in the URL fragment.
+ // Force the self-contained sign-in shell even when a prior session cookie exists;
+ // never expose React staff HTML on a password-reset callback.
+ if(url.searchParams.get('mode')==='recovery')return loginAtCanonicalConsole(services);
  const cookie=request.headers.get('Cookie')||'';
  if(!cookie.includes('__Host-fp-office-session=')){
   return loginAtCanonicalConsole(services)
