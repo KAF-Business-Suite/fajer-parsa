@@ -12,7 +12,7 @@ test('old site settings entry stays safe during staged QA console migration',asy
  }
  const page=await r.text()
  assert.match(page,/id="workspace"/)
- assert.match(page,/site-settings\\.js/)
+ assert.match(page,/site-settings\.js/)
  assert.doesNotMatch(page,/service_role|refresh_token|access_token|sb_secret_/)
 })
 test('anonymous draft read is rejected by live BFF',async()=>{
