@@ -8,7 +8,7 @@ test('old separate pages always redirect to same-origin Admin module, not separa
  for(const [path,module,login] of [['/site-settings','website','console-website'],['/resources','resources','console-resources']]){
   const anon=legacyConsoleNavigation(get(path),security)
   assert.equal(anon.status,302)
-  assert.equal(anon.headers.get('Location'),'/?next='+login)
+  assert.equal(anon.headers.get('Location'),'/console?next='+login)
   assert.equal(anon.headers.get('Cache-Control'),'private, no-store')
   assert.equal(anon.headers.get('Content-Security-Policy'),security['Content-Security-Policy'])
   const member=legacyConsoleNavigation(get(path,true),security)
