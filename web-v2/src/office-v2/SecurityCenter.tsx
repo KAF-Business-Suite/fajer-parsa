@@ -26,7 +26,7 @@ const words={
   future:'پس از پیکربندی، تست و تأیید مالک',recoveryReady:'بازیابی رمز از صفحهٔ ورود موجود است؛ روش ورود تازه فعال نشده.',
   safety:'ورود با Google، GitHub یا Microsoft به‌تنهایی مجوز دسترسی به کنسول نمی‌دهد؛ اجازهٔ مدیر همچنان در سرور بررسی می‌شود.',
   logout:'خروج امن از این دستگاه',logoutConfirm:'آیا می‌خواهید نشست همین دستگاه را پایان دهید؟',
-  logoutFail:'خروج تأیید نشد. از دفتر اصلی دوباره تلاش کنید.',
+  logoutFail:'خروج تأیید نشد. اتصال را بررسی و دوباره تلاش کنید.',
   sign_in_required:'نشست منقضی شده یا ورود لازم است. دوباره وارد دفتر شوید.',
   access_denied:'این حساب اجازهٔ دیدن مرکز امنیت مدیر را ندارد.',
   rate_limited:'درخواست‌ها محدود شده‌اند. کمی بعد دوباره بررسی کنید.',
@@ -49,7 +49,7 @@ const words={
   future:'Requires configuration, tests and owner approval',recoveryReady:'Password recovery exists on the login page; no new login method was enabled.',
   safety:'Signing in with Google, GitHub or Microsoft alone never grants console access. Your owner permission is checked again by the server.',
   logout:'Secure sign out from this device',logoutConfirm:'End the session on this device?',
-  logoutFail:'Sign out was not confirmed. Retry from the Office page.',
+  logoutFail:'Sign out was not confirmed. Check the connection and retry.',
   sign_in_required:'Session expired or sign-in required. Please sign in again.',
   access_denied:'This account is not authorized to see owner security status.',
   rate_limited:'Requests are rate-limited. Try again later.',
@@ -95,7 +95,7 @@ export function SecurityCenter({lang,privateOffice,onGo}:{lang:AdminLanguage;pri
     headers:{'X-FP-Office-Request':'same-origin'},cache:'no-store',redirect:'error'
    })
    if(!r.ok)throw Error('logout_failed')
-   window.location.replace('/')
+   window.location.replace('/console')
   }catch{setLogoutError(tx.logoutFail);setSigningOut(false)}
  }
  return <section className="fpx-security" aria-label={tx.heading}>
@@ -106,7 +106,7 @@ export function SecurityCenter({lang,privateOffice,onGo}:{lang:AdminLanguage;pri
    <button type="button" className="fpx-security-refresh" disabled={!privateOffice||!state}
     onClick={()=>setRevision(x=>x+1)}><RefreshCw size={16}/>{tx.refresh}</button>
   </div>
-  {!privateOffice?<div className="fpx-security-preview-notice" role="status"><p>{tx.preview}</p><a className="fpx-security-launch" href="https://fajr-office-qa.khoojafahim.workers.dev/?next=console-security"><LockKeyhole size={17}/>{tx.enterReal}<ExternalLink size={15}/></a></div>:
+  {!privateOffice?<div className="fpx-security-preview-notice" role="status"><p>{tx.preview}</p><a className="fpx-security-launch" href="https://fajr-office-qa.khoojafahim.workers.dev/console#/security"><LockKeyhole size={17}/>{tx.enterReal}<ExternalLink size={15}/></a></div>:
    !state?<p className="fpx-security-feedback" role="status">{tx.loading}</p>:
    error?<p className="fpx-security-feedback" role="alert">{error}</p>:
    <div className="fpx-security-overview">
