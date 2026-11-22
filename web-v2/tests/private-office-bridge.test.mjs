@@ -2,11 +2,14 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {isPrivateOfficeConsole,readOwnerPagesMetadata,PRIVATE_PAGES_PATH} from '../src/office-v2/private-office-bridge.ts'
 
-test('only the canonical authenticated Office /console origin can enter private mode',()=>{
+test('only KAF or explicitly retained legacy private /console origins can enter private mode',()=>{
+ assert.equal(isPrivateOfficeConsole({hostname:'kaf-admin.khoojafahim.workers.dev',pathname:'/console'}),true)
  assert.equal(isPrivateOfficeConsole({hostname:'fajr-office-qa.khoojafahim.workers.dev',pathname:'/console'}),true)
  for(const [hostname,pathname] of [
   ['fajr-office-qa.khoojafahim.workers.dev','/'],
   ['fajr-office-qa.khoojafahim.workers.dev','/resources'],
+  ['kaf-admin.khoojafahim.workers.dev.attacker.org','/console'],
+  ['kaf-admin.khoojafahim.workers.dev','/'],
   ['fp-admin-v2-review.fajr-parsa-qa.pages.dev','/console'],
   ['127.0.0.1','/console'],
   ['fajr-office-qa.khoojafahim.workers.dev.attacker.org','/console']
