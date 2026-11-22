@@ -19,7 +19,15 @@ async function installCandidate(context){
  await context.route(target+'**',async route=>{
   const req=route.request(),url=new URL(req.url())
   if(req.method()!=='GET')return route.abort('blockedbyclient')
-  if(url.pathname==='/console')return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:await readFile(resolve(uiRoot,'office-preview.html'))})
+  if(url.pathname==='/console'){
+   // One canonical URL: protected React with a sealed session; otherwise login.
+   const hasCookie=(req.headers().cookie||'').includes('__Host-fp-office-session=')
+   if(!hasCookie){
+    const response=await officeCandidate.fetch(new Request(req.url(),{method:'GET'}),{})
+    return route.fulfill({status:response.status,headers:Object.fromEntries(response.headers.entries()),body:await response.text()})
+   }
+   return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:await readFile(resolve(uiRoot,'office-preview.html'))})
+  }
   if(url.pathname.startsWith('/assets/')&&/^[A-Za-z0-9._-]{1,180}$/.test(url.pathname.slice(8))){
    const name=url.pathname.slice(8)
    const type=name.endsWith('.js')?'text/javascript':name.endsWith('.css')?'text/css':name.endsWith('.woff2')?'font/woff2':'application/octet-stream'
@@ -168,7 +176,7 @@ try{
  assert.ok(reads>=3)
  assert.equal(new URL(page.url()).pathname,'/console','Owner edits stay inside one Admin shell')
  await page.locator('.fpx-private-shortcuts').getByRole('button',{name:'خروج امن'}).click()
- await page.waitForURL(url=>url.pathname==='/',{timeout:15000})
+ await page.waitForURL(url=>url.pathname==='/console'&&url.hash==='',{timeout:15000})
  await page.locator('#login-view').waitFor({state:'visible'})
  assert.equal((await context.cookies(base)).some(x=>x.name==='__Host-fp-office-session'),false)
  await context.close()
