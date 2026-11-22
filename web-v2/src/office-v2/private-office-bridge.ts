@@ -8,10 +8,11 @@ export type OwnerPagesMetadata={
  productionBranch:string;permission:'read-only';ownerVerified:true;
  allowedActions:['inspect'];lastVerifiedAt:string
 }
-export const PRIVATE_OFFICE_HOST='fajr-office-qa.khoojafahim.workers.dev'
+export const PRIVATE_OFFICE_HOST='kaf-admin.khoojafahim.workers.dev'
+export const LEGACY_PRIVATE_OFFICE_HOST='fajr-office-qa.khoojafahim.workers.dev'
 export const PRIVATE_PAGES_PATH='/api/resources/providers/cloudflare/fajr-parsa-qa'
 export function isPrivateOfficeConsole(locationLike:{hostname:string;pathname:string}):boolean{
- return locationLike.hostname===PRIVATE_OFFICE_HOST && locationLike.pathname==='/console'
+ return (locationLike.hostname===PRIVATE_OFFICE_HOST||locationLike.hostname===LEGACY_PRIVATE_OFFICE_HOST) && locationLike.pathname==='/console'
 }
 export type ReadResult={status:'connected';data:OwnerPagesMetadata}|{status:'sign_in_required'|'access_denied'|'unavailable';data:null}
 export async function readOwnerPagesMetadata(transport:typeof fetch=fetch):Promise<ReadResult>{
