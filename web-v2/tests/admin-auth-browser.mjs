@@ -52,7 +52,7 @@ test('FP-ADMIN-AUTH-01: real KAF sign-in UI uses BFF, synthetic recovery and ind
      logoutCount++
      return route.fulfill({status:200,contentType:'application/json',headers:{'Set-Cookie':'__Host-fp-office-session=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0'},body:JSON.stringify({signedOut:true})})
     }
-    if(url.pathname==='/console'&&url.searchParams.get('mode')!=='recovery'&&(req.headers().cookie||'').includes('__Host-fp-office-session=synthetic-test-cookie'))
+    if(url.pathname==='/console'&&url.searchParams.get('mode')!=='recovery'&&((await req.allHeaders()).cookie||'').includes('__Host-fp-office-session=synthetic-test-cookie'))
      return route.fulfill({status:200,contentType:'text/html',body:'<!doctype html><html><body><main id="root"><h1>Authorized synthetic Admin Console</h1></main></body></html>'})
     if(req.method()!=='GET')return route.abort('blockedbyclient')
     const result=await worker.fetch(new Request(req.url(),{method:'GET',headers:req.headers()}),{})
