@@ -26,3 +26,15 @@ test('FP-AUTH-02: central server still owns credentials; React modules are not g
  assert.match(server,/FAJR_SESSION_KEY/)
  assert.doesNotMatch(admin,/grant_type=password|fajr-office-qa-session-v1|localStorage\.setItem\(.{0,30}(access_token|refresh_token)/)
 })
+
+test('FP-ENTRY-02: the canonical login is presented as Admin Console, with one centered login card',async()=>{
+ const server=await read('../../workers/fajr-office-qa/worker.mjs')
+ assert.match(server,/ورود اختصاصی به Admin Console فجر پارسا/)
+ assert.match(server,/با حساب مدیر وارد شوید. تمام بخش‌های مجاز پس از ورود در همین Admin Console باز می‌شوند/)
+ assert.match(server,/FAJR PARSA · ADMIN CONSOLE · PRIVATE QA/)
+ assert.match(server,/Admin Console language/)
+ assert.match(server,/body\.fp-auth-active main\.wrap\{grid-template-columns:minmax\(0,520px\)/)
+ assert.doesNotMatch(server,/یک محیط کاری واحد برای دفتر، درخواست‌ها/)
+ assert.doesNotMatch(server,/اتصال امن دفتر/)
+ assert.match(server,/location\.replace\('\/console#\/overview'\)/)
+})
