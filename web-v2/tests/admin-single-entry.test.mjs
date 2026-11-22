@@ -14,7 +14,7 @@ test('FP-AUTH-02: all private Admin logout controls return to the same /console 
   assert.match(source,/window\.location\.replace\('\/console'\)/,name+' must return to canonical entry')
   assert.doesNotMatch(source,/window\.location\.replace\('\/'\)/,name+' must not open separate historical root')
  }
- assert.match(security,/fajr-office-qa\.khoojafahim\.workers\.dev\/console#\/security/)
+ assert.match(security,/kaf-admin\.khoojafahim\.workers\.dev\/console#\/security/)
 })
 test('FP-AUTH-02: central server still owns credentials; React modules are not given new password prompts',async()=>{
  const [server,admin]=await Promise.all([
