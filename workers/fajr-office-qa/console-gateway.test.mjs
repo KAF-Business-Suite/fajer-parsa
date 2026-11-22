@@ -26,7 +26,7 @@ function fake({auth=200,assetStatus=200,wrongHtml=false,redirectAsset=false}={})
   assert.equal(req.headers.get('Cookie'),cookie)
   return Response.json(auth===200?{authenticated:true}:{error:'denied'},{status:auth,headers:auth===200?{}:{'Set-Cookie':'__Host-fp-office-session=; Max-Age=0'}})
  }
- return{calls,transport,services:{handleConsoleAccess,security}}
+ return{calls,transport,services:{handleConsoleAccess,security,loginHtml:'<!doctype html><html lang="fa"><body><section id="login-view">Sign in to Admin Console</section></body></html>'}}
 }
 test('private 46-module route not available on public/noncanonical domains',async()=>{
  const m=fake()
@@ -35,19 +35,23 @@ test('private 46-module route not available on public/noncanonical domains',asyn
  assert.equal(await handlePrivateConsole(request('/assets/../../etc/passwd'),{},m.services,m.transport),null)
  assert.equal(m.calls.length,0)
 })
-test('no cookie returns office login redirect BEFORE any network or HTML',async()=>{
+test('guest sees secured Admin sign-in at the SAME /console URL without redirects or Pages fetches',async()=>{
  const m=fake()
  const r=await handlePrivateConsole(request('/console'),{},m.services,m.transport)
- assert.equal(r.status,302)
- assert.equal(r.headers.get('Location'),'/?next=console')
- assert.equal(r.headers.get('Cache-Control'),'no-store')
+ assert.equal(r.status,200)
+ assert.equal(r.headers.get('Location'),null)
+ assert.match(r.headers.get('Content-Type'),/text\/html/)
+ assert.match(r.headers.get('Cache-Control'),/no-store/)
+ assert.match(r.headers.get('X-Robots-Tag'),/noindex/)
+ assert.match(await r.text(),/id="login-view"/)
  assert.equal(m.calls.length,0)
 })
 test('invalid or revoked staff session never releases private HTML',async()=>{
  for(const code of [401,403,503]){
   const m=fake({auth:code})
   const r=await handlePrivateConsole(request('/console',{Cookie:cookie}),{},m.services,m.transport)
-  assert.equal(r.status,code===401?302:code)
+  assert.equal(r.status,code===401?200:code)
+  if(code===401){assert.match(await r.text(),/id="login-view"/);assert.match(r.headers.get('Set-Cookie')||'',/Max-Age=0/)}
   assert.equal(m.calls.length,0,'no Pages content fetched before Office privilege acceptance')
  }
 })
@@ -109,8 +113,9 @@ test('tracking query on /console does not block safe owner navigation or affect 
  assert.equal(m.calls[0].init.headers.Authorization,undefined)
  const guest=fake()
  const denied=await handlePrivateConsole(request(path),{},guest.services,guest.transport)
- assert.equal(denied.status,302)
- assert.equal(denied.headers.get('Location'),'/?next=console')
+ assert.equal(denied.status,200)
+ assert.equal(denied.headers.get('Location'),null)
+ assert.match(await denied.text(),/id="login-view"/)
  assert.equal(guest.calls.length,0)
  const revoked=fake({auth:403})
  const forbidden=await handlePrivateConsole(request(path,{Cookie:cookie}),{},revoked.services,revoked.transport)
