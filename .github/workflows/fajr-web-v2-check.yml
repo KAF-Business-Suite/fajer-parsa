@@ -101,6 +101,7 @@ jobs:
         run: |
           node --test tests/office-v2-preview.mjs
           node --test tests/office-login-shell.mobile.mjs
+          node --test tests/admin-auth-browser.mjs
           node --test tests/live-office-requests.mobile.mjs
           node --test tests/live-kaf-cases.mobile.mjs
           node --test tests/office-status-change.mobile.mjs
