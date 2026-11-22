@@ -1,0 +1,134 @@
+// Fajr Office website management UI, served only on existing QA Office Worker.
+export const SITE_HTML=String.raw`<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>فجرپارسا | مدیریت وب‌سایت</title><link rel="stylesheet" href="/site-settings.css"></head><body>
+<header class="top"><div class="wrap bar"><a href="/" class="brand">FP <span>فجرپارسا</span></a><nav><a href="/" id="back" data-i18n="back">بازگشت به دفتر</a><select id="language" aria-label="Language"><option value="fa">دری</option><option value="ps">پښتو</option><option value="en">English</option><option value="ar">العربية</option></select></nav></div></header>
+<main class="wrap">
+<div class="intro"><p class="eyebrow">FAJR PARSA · PRIVATE OFFICE · QA</p><h1 data-i18n="heading">مدیریت وب‌سایت</h1><p data-i18n="description">تغییرات را نخست به‌عنوان پیش‌نویس ذخیره کنید، بعد پیش‌نمایش ببینید و نشر را تأیید کنید.</p></div>
+<p id="status" role="status" aria-live="polite"></p>
+<div id="workspace" hidden>
+<section class="panel"><div class="sectionhead"><h2 data-i18n="contacts">تماس و ارتباطات</h2><small data-i18n="verified">فقط اطلاعات تأییدشده را نشر کنید</small></div><div class="grid">
+<label>WhatsApp <input data-field="contact.whatsapp" type="tel" dir="ltr" maxlength="18" inputmode="tel" placeholder="07XXXXXXXX یا +937XXXXXXXX"></label>
+<label>Email <input data-field="contact.email" type="email" dir="ltr" maxlength="254" placeholder="verified@example.com"></label>
+<label data-i18n="phone">شمارهٔ تماس <input data-field="contact.phone" type="tel" dir="ltr" maxlength="18" inputmode="tel"></label>
+<label data-i18n="map">لینک نقشه <input data-field="contact.mapUrl" type="url" dir="ltr" maxlength="350" placeholder="https://maps.app.goo.gl/..."></label>
+</div><p class="hint" data-i18n="phoneHint">شمارهٔ 07xxxxxxxx افغانستان هنگام ذخیره به 93xxxxxxxxx تبدیل می‌شود.</p></section>
+<section class="panel"><h2 data-i18n="office">آدرس و ساعات دفتر</h2>
+<div class="fieldblocks"><fieldset><legend data-i18n="address">آدرس رسمی</legend><div class="grid">
+<label>دری <textarea data-field="office.address.fa" maxlength="300"></textarea></label><label>پښتو <textarea data-field="office.address.ps" maxlength="300"></textarea></label><label>English <textarea data-field="office.address.en" maxlength="300" dir="ltr"></textarea></label><label>العربية <textarea data-field="office.address.ar" maxlength="300"></textarea></label>
+</div></fieldset><fieldset><legend data-i18n="hours">ساعات کاری</legend><div class="grid">
+<label>دری <input data-field="office.hours.fa" maxlength="120"></label><label>پښتو <input data-field="office.hours.ps" maxlength="120"></label><label>English <input data-field="office.hours.en" maxlength="120" dir="ltr"></label><label>العربية <input data-field="office.hours.ar" maxlength="120"></label>
+</div></fieldset></div></section>
+<section class="panel"><h2 data-i18n="appearance">برند و نمایش</h2><label data-i18n="font">قالب فونت <select data-field="design.fontPreset"><option value="vazirmatn-manrope">Vazirmatn + Manrope</option><option value="estedad-inter">Estedad + Inter</option></select></label><p class="hint" data-i18n="brandNote">لوگو و رنگ‌های رسمی خارج از این فورم تغییر داده نمی‌شوند.</p></section>
+<section class="panel"><h2 data-i18n="content">اعلان و پرسش‌های متداول</h2><fieldset><legend data-i18n="notice">اعلان عمومی</legend><div class="grid">
+<label>دری <textarea data-field="content.notice.fa" maxlength="500"></textarea></label><label>پښتو <textarea data-field="content.notice.ps" maxlength="500"></textarea></label><label>English <textarea data-field="content.notice.en" maxlength="500" dir="ltr"></textarea></label><label>العربية <textarea data-field="content.notice.ar" maxlength="500"></textarea></label>
+</div></fieldset><div class="sectionhead"><h3 data-i18n="faq">پرسش‌های متداول (حداکثر ۵)</h3><button id="faq-add" type="button" class="secondary" data-i18n="addFaq">افزودن پرسش</button></div><div id="faq-list"></div></section>
+<section class="panel controls"><h2 data-i18n="release">ذخیره و نشر</h2><p id="revisions" class="hint"></p>
+<div class="buttons"><button id="save" class="primary" type="button" data-i18n="save">ذخیرهٔ پیش‌نویس</button><button id="preview" class="secondary" type="button" data-i18n="preview">بررسی پیش‌نمایش</button><button id="publish" class="primary danger" type="button" data-i18n="publish">تأیید و نشر در QA</button></div>
+<details><summary data-i18n="history">تاریخچه و بازگردانی نسخه</summary><label data-i18n="choose">نسخهٔ قبلی <select id="history"></select></label><button id="rollback" class="secondary" type="button" data-i18n="rollback">بازگردانی با تأیید</button></details>
+</section>
+</div><div id="preview-modal" class="modal" hidden><div class="modal-panel"><h2 data-i18n="previewTitle">پیش‌نمایش تغییرات ذخیره‌شده</h2><div id="preview-body" class="preview-grid"></div><button id="preview-close" class="secondary" data-i18n="close">بستن</button></div></div>
+</main><script src="/site-settings.js" defer></script></body></html>`;
+export const SITE_CSS=String.raw`:root{font-family:Vazirmatn,Tahoma,"Segoe UI",sans-serif;color:#13283c;background:#f5f7fa}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1100px;width:calc(100% - 28px);margin:auto}.top{background:#102a43;color:white}.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;min-height:68px}.brand{color:white;text-decoration:none;font-weight:800;font-size:19px;display:flex;gap:10px;align-items:center}.brand span{font-size:15px}nav{display:flex;align-items:center;gap:12px}nav a{color:#ebf3fa;font-size:13px}nav select{background:#224460;color:white;border:1px solid #7890a2;border-radius:10px;padding:9px}.intro{padding:29px 0 19px}.intro h1{font-size:clamp(22px,5vw,31px);margin:7px 0}.intro p{line-height:1.8;color:#607286}.eyebrow{font:700 11px Inter,sans-serif;letter-spacing:.1em;color:#b88b3d!important}.panel{background:white;border:1px solid #e0e6ed;border-radius:18px;box-shadow:0 7px 22px #183a5d09;padding:clamp(15px,3vw,25px);margin:0 0 16px}.panel h2{font-size:18px;margin:0 0 16px}.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.sectionhead small,.hint{font-size:12px;color:#687989;line-height:1.8}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.fieldblocks{display:grid;gap:17px}.panel label{display:grid;gap:8px;color:#345066;font-size:13px;font-weight:600}.panel input,.panel select,.panel textarea{font:inherit;width:100%;max-width:100%;border:1px solid #cbd8e4;border-radius:10px;padding:11px;color:#15324b;background:white;min-height:45px}.panel textarea{min-height:72px;resize:vertical}.panel input:focus-visible,.panel select:focus-visible,.panel textarea:focus-visible,button:focus-visible{outline:3px solid #e5bc75;outline-offset:2px}fieldset{border:1px solid #e4e8ef;border-radius:13px;padding:13px;min-width:0}legend{font-size:13px;padding:0 7px;font-weight:700}.buttons{display:flex;gap:10px;flex-wrap:wrap}button{cursor:pointer;min-height:44px;padding:10px 15px;border-radius:11px;font:700 13px inherit;border:1px solid #cad6e2;font-family:inherit;font-weight:700;font-size:13px}button:disabled{opacity:.5;cursor:not-allowed}.primary{background:#102a43;color:white;border-color:#102a43}.secondary{color:#173c5b;background:#f6f9fc}.danger{background:#845329;border-color:#845329}details{margin-top:19px;border-top:1px solid #e8edf3;padding-top:15px}details summary{cursor:pointer;margin-bottom:12px;font-size:14px;font-weight:650}#status{min-height:24px;font-size:14px;font-weight:700;white-space:pre-wrap}#status[data-error="true"]{color:#b02e43}#faq-list{display:grid;gap:14px}.faq-item{border:1px solid #e2e7ef;border-radius:11px;padding:13px;margin-bottom:10px}.faq-item h4{font-size:13px}.faq-item .remove{margin:10px 0}.modal{position:fixed;inset:0;background:#071827ac;display:grid;place-items:center;padding:14px;z-index:100}.modal[hidden]{display:none}.modal-panel{background:white;width:min(680px,100%);max-height:92vh;overflow:auto;border-radius:16px;padding:22px}.preview-grid{display:grid;gap:12px}.preview-card{background:#f7f9fb;border:1px solid #e0e8ef;border-radius:13px;padding:14px;overflow-wrap:anywhere}.preview-card h3{margin:0 0 8px;color:#102a43;font-size:15px}.preview-card h4{margin:13px 0 4px;font-size:13px;color:#345066}.preview-card p{font-size:13px;line-height:1.8;margin:4px 0}.preview-card a{color:#0d587c}.preview-pill{font-size:11px;color:#52687b;background:#e7eef5;border-radius:999px;padding:3px 9px;display:inline-block}.preview-empty{color:#8091a1;font-size:12px}#revisions{overflow-wrap:anywhere}#history{margin:10px 0}@media(max-width:620px){.grid{grid-template-columns:1fr}.bar{gap:6px}.brand span{display:none}.intro{padding-top:18px}.buttons button{flex:1}.panel{border-radius:15px}}[dir=ltr] .panel label{text-align:left}`;
+export const SITE_JS=String.raw`const $=s=>document.querySelector(s);
+let current=null,busy=false,lang='fa';
+const langs=['fa','ps','en','ar'];
+const words={
+fa:{back:'بازگشت به دفتر',heading:'مدیریت وب‌سایت',description:'اول پیش‌نویس را ذخیره کنید؛ پس از بررسی و تأیید، فقط در محیط آزمایشی نشر می‌شود.',contacts:'تماس و ارتباطات',verified:'فقط اطلاعات تأییدشده را نشر کنید',phone:'شمارهٔ تماس',map:'لینک نقشه',office:'آدرس و ساعات دفتر',address:'آدرس رسمی',hours:'ساعات کاری',appearance:'برند و نمایش',font:'قالب فونت',brandNote:'لوگو و رنگ‌های رسمی از این فورم تغییر داده نمی‌شوند.',content:'اعلان و پرسش‌های متداول',notice:'اعلان عمومی',faq:'پرسش‌های متداول (حداکثر ۵)',addFaq:'افزودن پرسش',release:'ذخیره و نشر',save:'ذخیرهٔ پیش‌نویس',preview:'بررسی پیش‌نمایش',publish:'تأیید و نشر در QA',history:'تاریخچه و بازگردانی',choose:'نسخهٔ قبلی',rollback:'بازگردانی با تأیید',previewTitle:'پیش‌نمایش نسخهٔ ذخیره‌شده',close:'بستن',question:'پرسش',answer:'پاسخ',remove:'حذف',loading:'در حال خواندن تنظیمات ...',ready:'تنظیمات بارگذاری شد.',saved:'پیش‌نویس ذخیره و از سرور دوباره خوانده شد.',published:'نسخهٔ آزمایشی نشر و بازخوانی شد.',restored:'نسخهٔ پیشین بازگردانی شد.',login:'ابتدا وارد دفتر شوید.',phoneHint:'شماره‌های موبایل افغانستان با ۰۷ آغاز می‌شوند؛ هنگام ذخیره به قالب بین‌المللی ۹۳ تبدیل می‌شوند.',invalidNumber:'شمارهٔ واتساپ یا تماس معتبر نیست. شمارهٔ ۰۷... افغانستان را وارد کنید.',invalidEmail:'آدرس ایمیل درست نیست.',invalidMap:'لینک نقشه باید از Google Maps یا OpenStreetMap باشد.',invalidData:'این اطلاعات قابل ثبت یا نشر نیست. فیلدهای تماس و ترجمه‌ها را بررسی کنید.',network:'اتصال به سرور برقرار نشد؛ اطلاعات در همین فورم باقی مانده است.',rate:'تعداد درخواست‌ها زیاد شده است؛ یک دقیقه بعد دوباره کوشش کنید.',error:'درخواست موفق نشد. اطلاعات موجود تغییر نکرد.',conflict:'نسخه تغییر کرده؛ صفحه را تازه‌سازی کنید.',denied:'اجازهٔ این عمل را ندارید.',confirm:'آیا نشر نسخهٔ ذخیره‌شده را در محیط آزمایشی تأیید می‌کنید؟',confirmBack:'آیا بازگردانی این نسخه را تأیید می‌کنید؟',saveFirst:'نخست پیش‌نویس را ذخیره کنید.',qaOnly:'تنها در محیط QA؛ نشر اصلی مسدود است.'},
+ps:{back:'دفتر ته ستنېدل',heading:'د وېبپاڼې مدیریت',description:'لومړی مسوده خوندي کړئ، بیا یې وګورئ او په ازمایښتي چاپېریال کې خپره کړئ.',contacts:'اړیکې',verified:'یوازې تایید شوي معلومات خپاره کړئ',phone:'د اړیکې شمېره',map:'د نقشې تړونی',office:'د دفتر پته او وختونه',address:'رسمي پته',hours:'کاري وختونه',appearance:'بڼه او نښه',font:'لیکبڼه',brandNote:'رسمي لوګو دلته نه بدلېږي.',content:'خبرتیا او پوښتنې',notice:'عامه خبرتیا',faq:'تکراري پوښتنې (تر ۵)',addFaq:'پوښتنه زیاتول',release:'خوندي کول او خپرول',save:'مسوده خوندي کړئ',preview:'مخکتنه',publish:'QA کې تایید او خپرول',history:'تاریخچه او بېرته راګرځول',choose:'پخوانۍ نسخه',rollback:'بېرته راګرځول',previewTitle:'د خوندي شوې نسخې مخکتنه',close:'بندول',question:'پوښتنه',answer:'ځواب',remove:'لرې کول',loading:'معلومات لوستل کېږي ...',ready:'چمتو دی.',saved:'مسوده خوندي شوه.',published:'ازمایښتي نسخه خپره شوه.',restored:'نسخه بېرته وګرځېده.',login:'لومړی دفتر ته ننوځئ.',phoneHint:'د افغانستان ۰۷ شمېره د خوندي کولو پر مهال ۹۳ نړیوالې بڼې ته بدلېږي.',invalidNumber:'د واتساپ یا ټلیفون شمېره ناسمه ده؛ ۰۷... شمېره ولیکئ.',invalidEmail:'د برېښنالیک پته ناسمه ده.',invalidMap:'د نقشې تړونی باید د Google Maps یا OpenStreetMap وي.',invalidData:'معلومات د خوندي کولو یا خپرولو وړ نه دي؛ برخې وګورئ.',network:'له سرور سره اړیکه نشته؛ معلومات په فورم کې پاتې دي.',rate:'غوښتنې ډېرې شوې دي؛ یوه دقیقه وروسته بیا هڅه وکړئ.',error:'غوښتنه بریالۍ نه شوه.',conflict:'نسخه بدله شوې؛ بیا یې تازه کړئ.',denied:'اجازه نشته.',confirm:'ایا په QA کې خپرول تاییدوئ؟',confirmBack:'ایا بېرته راګرځول تاییدوئ؟',saveFirst:'لومړی مسوده خوندي کړئ.',qaOnly:'یوازې QA؛ اصلي خپرونه بنده ده.'},
+en:{back:'Back to Office',heading:'Website management',description:'Save a draft, review a preview, then confirm publishing to QA only.',contacts:'Contact channels',verified:'Publish verified details only',phone:'Office phone',map:'Map link',office:'Office location and hours',address:'Official address',hours:'Opening hours',appearance:'Brand and appearance',font:'Font preset',brandNote:'Official logos and brand colors cannot be changed here.',content:'Notice and FAQs',notice:'Public notice',faq:'Frequently asked questions (max 5)',addFaq:'Add FAQ',release:'Save and publish',save:'Save draft',preview:'Preview saved draft',publish:'Confirm and publish to QA',history:'History and rollback',choose:'Earlier revision',rollback:'Confirm rollback',previewTitle:'Saved draft preview',close:'Close',question:'Question',answer:'Answer',remove:'Remove',loading:'Loading settings ...',ready:'Settings loaded.',saved:'Draft saved and read back.',published:'QA published and read back.',restored:'Previous revision restored.',login:'Sign in to Office first.',phoneHint:'Afghan mobile numbers starting 07 are converted to international +93 format on save.',invalidNumber:'Invalid WhatsApp or phone number. Enter a valid number, e.g. 07… for Afghanistan.',invalidEmail:'Enter a valid email address.',invalidMap:'Use a Google Maps or OpenStreetMap HTTPS link.',invalidData:'The settings cannot be saved or published. Check the contact fields and translations.',network:'Could not reach the server. Your unsaved fields are kept in this form.',rate:'Too many requests. Try again in a minute.',error:'Request failed; no changes applied.',conflict:'Revision changed. Reload before editing.',denied:'Your role cannot do this.',confirm:'Confirm publishing the saved draft to QA only?',confirmBack:'Confirm rolling back to this revision?',saveFirst:'Save the draft first.',qaOnly:'QA only; customer production remains locked.'},
+ar:{back:'العودة إلى المكتب',heading:'إدارة الموقع',description:'احفظ المسودة ثم راجع المعاينة وأكّد النشر في بيئة الاختبار فقط.',contacts:'قنوات التواصل',verified:'انشر المعلومات المؤكدة فقط',phone:'هاتف المكتب',map:'رابط الخريطة',office:'العنوان وساعات العمل',address:'العنوان الرسمي',hours:'ساعات العمل',appearance:'العلامة والمظهر',font:'الخط',brandNote:'لا يمكن تغيير الشعار الرسمي من هنا.',content:'الإعلانات والأسئلة',notice:'إعلان عام',faq:'الأسئلة الشائعة (٥ كحد أقصى)',addFaq:'إضافة سؤال',release:'الحفظ والنشر',save:'حفظ المسودة',preview:'معاينة المسودة',publish:'تأكيد النشر للاختبار',history:'السجل والتراجع',choose:'نسخة سابقة',rollback:'استعادة النسخة',previewTitle:'معاينة المسودة المحفوظة',close:'إغلاق',question:'سؤال',answer:'جواب',remove:'إزالة',loading:'جار تحميل الإعدادات ...',ready:'تم التحميل.',saved:'حُفظت المسودة وأعيدت قراءتها.',published:'نُشرت نسخة الاختبار.',restored:'تمت استعادة النسخة.',login:'سجّل الدخول إلى المكتب أولاً.',phoneHint:'تُحوّل أرقام أفغانستان التي تبدأ بـ ٠٧ إلى صيغة ٩٣ الدولية عند الحفظ.',invalidNumber:'رقم واتساب أو الهاتف غير صحيح؛ أدخل الرقم ٠٧... لأفغانستان.',invalidEmail:'عنوان البريد الإلكتروني غير صحيح.',invalidMap:'استخدم رابط Google Maps أو OpenStreetMap الآمن.',invalidData:'تعذر حفظ أو نشر المعلومات؛ راجع بيانات التواصل والترجمات.',network:'تعذر الاتصال بالخادم. بقيت البيانات في النموذج.',rate:'طلبات كثيرة؛ حاول بعد دقيقة.',error:'فشلت العملية ولم تتغير البيانات.',conflict:'تغيرت النسخة؛ أعد التحميل.',denied:'لا توجد صلاحية.',confirm:'هل تؤكد نشر المسودة في الاختبار فقط؟',confirmBack:'هل تؤكد استعادة هذه النسخة؟',saveFirst:'احفظ المسودة أولاً.',qaOnly:'اختبار فقط؛ نشر العملاء مقفل.'}
+};
+const t=k=>(words[lang]||words.fa)[k]||k;
+function setStatus(s,error=false){$('#status').textContent=s;$('#status').dataset.error=String(error)}
+function tr(){document.documentElement.lang=lang;document.documentElement.dir=['en'].includes(lang)?'ltr':'rtl';for(const el of document.querySelectorAll('[data-i18n]')){const value=t(el.dataset.i18n);if(el.firstChild&&el.firstChild.nodeType===3)el.firstChild.textContent=value+' ';else if(el.tagName!=='LABEL')el.textContent=value}}
+
+function latinDigits(value){
+ return String(value||'').replace(/[۰-۹]/g,c=>String(c.charCodeAt(0)-1776))
+   .replace(/[٠-٩]/g,c=>String(c.charCodeAt(0)-1632));
+}
+// Only Afghan 07 + eight-digit national mobile numbers receive the +93 conversion.
+// All other countries retain their own international dialling codes.
+function normalizeMobile(value,whatsapp=false){
+ let digits=latinDigits(value).trim().replace(/[ ()\-]/g,'');
+ if(/^07[0-9]{8}$/.test(digits))digits='93'+digits.slice(1);
+ else if(/^0093[0-9]{9}$/.test(digits))digits=digits.slice(2);
+ if(whatsapp)return digits.startsWith('+')?digits.slice(1):digits;
+ if(!digits)return '';
+ return digits.startsWith('+')?digits:'+'+digits;
+}
+function isAllowedMap(value){
+ if(!value)return true;
+ try{
+  const u=new URL(value);
+  if(u.protocol!=='https:'||u.username||u.password)return false;
+  if(u.hostname==='maps.app.goo.gl')return /^\/[a-zA-Z0-9_-]+\/?$/.test(u.pathname);
+  if(['www.google.com','google.com','maps.google.com'].includes(u.hostname))return u.pathname.startsWith('/maps');
+  return u.hostname==='www.openstreetmap.org'&&u.pathname.startsWith('/');
+ }catch{return false}
+}
+function draftIssue(data,forPublication=false){
+ const contact=data.contact||{};
+ if((forPublication||contact.whatsapp)&& !/^[1-9][0-9]{6,14}$/.test(contact.whatsapp||''))return {key:'invalidNumber',field:'contact.whatsapp'};
+ if(contact.phone&&!/^\+?[1-9][0-9]{6,14}$/.test(contact.phone))return {key:'invalidNumber',field:'contact.phone'};
+ if((forPublication||contact.email)&& !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.][a-zA-Z]{2,24}$/.test(contact.email||''))return {key:'invalidEmail',field:'contact.email'};
+ if(!isAllowedMap(contact.mapUrl||''))return {key:'invalidMap',field:'contact.mapUrl'};
+ return null;
+}
+function showIssue(issue){
+ setStatus(t(issue.key),true);
+ const field=document.querySelector('[data-field="'+issue.field+'"]');
+ if(field){field.setAttribute('aria-invalid','true');field.focus({preventScroll:false})}
+}
+function stable(value){
+ if(Array.isArray(value))return value.map(stable);
+ if(value!==null&&typeof value==='object')return Object.fromEntries(Object.keys(value).sort().map(k=>[k,stable(value[k])]));
+ return value;
+}
+function sameDraft(a,b){return JSON.stringify(stable(a))===JSON.stringify(stable(b))}
+function at(obj,path){return path.split('.').reduce((v,k)=>v?.[k],obj)}
+function put(obj,path,value){const parts=path.split('.');let ref=obj;for(const key of parts.slice(0,-1))ref=ref[key]??(ref[key]={});ref[parts.at(-1)]=value}
+function formatFaq(obj){const outer=document.createElement('section');outer.className='faq-item';for(const kind of ['question','answer']){const head=document.createElement('h4');head.textContent=t(kind);outer.append(head);const grid=document.createElement('div');grid.className='grid';for(const lg of langs){const label=document.createElement('label');label.textContent=lg.toUpperCase();const el=document.createElement('textarea');el.maxLength=kind==='answer'?600:180;el.value=obj?.[kind]?.[lg]||'';el.dataset.kind=kind;el.dataset.language=lg;label.append(el);grid.append(label)}outer.append(grid)}const del=document.createElement('button');del.type='button';del.className='secondary remove';del.textContent=t('remove');del.onclick=()=>outer.remove();outer.append(del);$('#faq-list').append(outer)}
+function render(){const draft=current?.draft||{};for(const e of document.querySelectorAll('[data-field]'))e.value=at(draft,e.dataset.field)||'';$('#faq-list').replaceChildren();for(const faq of draft.content?.faq||[])formatFaq(faq);const history=$('#history');history.replaceChildren();for(const item of current?.history||[]){const opt=document.createElement('option');opt.value=item.revision;opt.textContent=item.action+' · '+new Date(item.at).toLocaleString()+' · '+item.revision.slice(0,8);history.append(opt)}$('#revisions').textContent='Draft: '+current.draftRevision.slice(0,8)+' | Published: '+(current.publishedRevision?.slice(0,8)||'—')+' · '+t('qaOnly');for(const id of ['save','preview','publish'])$('#'+id).disabled=busy||!current.canEdit||(id==='publish'&&!current.canPublish);$('#rollback').disabled=busy||!current.canPublish||!history.value;$('#workspace').hidden=false}
+function collect(){const obj={contact:{whatsapp:'',email:''},design:{fontPreset:'vazirmatn-manrope'},office:{address:{},hours:{}},content:{notice:{},faq:[]}};for(const field of document.querySelectorAll('[data-field]'))put(obj,field.dataset.field,field.value.trim());obj.content.faq=[...document.querySelectorAll('.faq-item')].map(el=>{const item={question:{},answer:{}};for(const x of el.querySelectorAll('textarea'))item[x.dataset.kind][x.dataset.language]=x.value.trim();return item});obj.contact.whatsapp=normalizeMobile(obj.contact.whatsapp,true);if(obj.contact.phone)obj.contact.phone=normalizeMobile(obj.contact.phone);else delete obj.contact.phone;if(!obj.contact.mapUrl)delete obj.contact.mapUrl;return obj}
+async function api(path,method='GET',body){const response=await fetch('/api/site-settings/'+path,{method,credentials:'same-origin',redirect:'error',cache:'no-store',headers:{'X-FP-Office-Request':'same-origin',Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});const data=await response.json().catch(()=>({}));if(!response.ok){const err=new Error(data.error||'error');err.status=response.status;throw err}return data}
+async function run(fn){if(busy)return;busy=true;for(const id of ['save','preview','publish','rollback'])$('#'+id).disabled=true;try{await fn()}catch(e){const msg=e.status===401?t('login'):e.status===403?t('denied'):e.status===409?t('conflict'):e.status===429?t('rate'):e.status===400?t('invalidData'):e.status===503?t('network'):t('error');setStatus(msg+(e.status?' (HTTP '+e.status+')':''),true)}finally{busy=false;if(current){for(const id of ['save','preview','publish'])$('#'+id).disabled=!current.canEdit||(id==='publish'&&!current.canPublish);$('#rollback').disabled=!current.canPublish||!$('#history').value}}}
+async function refresh(){current=await api('draft');render()}
+$('#language').addEventListener('change',e=>{lang=e.target.value;tr();for(const item of document.querySelectorAll('.faq-item')){item.querySelectorAll('h4').forEach((node,i)=>{node.textContent=t(i===0?'question':'answer')});const remove=item.querySelector('button.remove');if(remove)remove.textContent=t('remove')}});
+$('#faq-add').addEventListener('click',()=>{if(document.querySelectorAll('.faq-item').length<5)formatFaq({question:{},answer:{}})});
+$('#save').onclick=()=>run(async()=>{const draft=collect();const issue=draftIssue(draft);if(issue){showIssue(issue);return}const result=await api('draft','POST',{expected:current.draftRevision,draft});current=result;render();setStatus(t('saved'))});
+function renderPreview(draft){
+ const box=$('#preview-body');box.replaceChildren();
+ const contact=draft.contact||{},office=draft.office||{},content=draft.content||{};
+ for(const code of langs){
+  const card=document.createElement('section');card.className='preview-card';card.lang=code;card.dir=code==='en'?'ltr':'rtl';
+  const title=document.createElement('h3');title.textContent=code==='fa'?'دری — افغانستان':code==='ps'?'پښتو — افغانستان':code==='en'?'English':'العربية';
+  card.append(title);
+  const fields=[
+   [t('contacts'),[contact.whatsapp,contact.phone,contact.email].filter(Boolean).join(' · ')],
+   [t('address'),office.address?.[code]||''],
+   [t('hours'),office.hours?.[code]||''],
+   [t('notice'),content.notice?.[code]||'']
+  ];
+  let visible=0;
+  for(const [name,value] of fields){
+   if(!value)continue;
+   const heading=document.createElement('h4');heading.textContent=name;
+   const paragraph=document.createElement('p');paragraph.textContent=value;
+   card.append(heading,paragraph);visible++;
+  }
+  for(const faq of content.faq||[]){
+   const question=faq.question?.[code],answer=faq.answer?.[code];
+   if(!question||!answer)continue;
+   const heading=document.createElement('h4');heading.textContent=question;
+   const paragraph=document.createElement('p');paragraph.textContent=answer;
+   card.append(heading,paragraph);visible++;
+  }
+  if(!visible){const empty=document.createElement('p');empty.className='preview-empty';empty.textContent='—';card.append(empty)}
+  box.append(card);
+ }
+}
+$('#preview').onclick=()=>run(async()=>{const draft=collect();const issue=draftIssue(draft,true);if(issue){showIssue(issue);return}if(!sameDraft(draft,current.draft)){setStatus(t('saveFirst'),true);return}const data=await api('preview','POST',{});current=data;renderPreview(data.draft);$('#preview-modal').hidden=false;setStatus(t('qaOnly'))});
+$('#publish').onclick=()=>run(async()=>{const draft=collect();const issue=draftIssue(draft,true);if(issue){showIssue(issue);return}if(!sameDraft(draft,current.draft)){setStatus(t('saveFirst'),true);return}if(!confirm(t('confirm')))return;current=await api('publish','POST',{expected:current.draftRevision,expectedPublished:current.publishedRevision||'',confirmed:true});render();setStatus(t('published'))});
+$('#rollback').onclick=()=>run(async()=>{const targetRevision=$('#history').value;if(!targetRevision||!confirm(t('confirmBack')))return;current=await api('rollback','POST',{targetRevision,expectedPublished:current.publishedRevision||'',confirmed:true});render();setStatus(t('restored'))});
+$('#preview-close').onclick=()=>{$('#preview-modal').hidden=true};
+(async()=>{lang=localStorage.getItem('fp-site-language')||'fa';if(!langs.includes(lang))lang='fa';$('#language').value=lang;tr();setStatus(t('loading'));try{await refresh();setStatus(t('ready'))}catch(e){setStatus(e.status===401?t('login'):t('error'),true)}})();
+`;

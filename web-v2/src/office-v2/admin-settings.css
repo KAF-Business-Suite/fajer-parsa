@@ -1,0 +1,39 @@
+/* FP-ADMIN-G6: scoped and keyboard-accessible actual console preferences / module gate. */
+.fpx-admin-settings{display:grid;gap:19px;max-width:1150px;margin-inline:auto;color:var(--fpx-ink,#203749)}
+.fpx-settings-header{display:flex;align-items:flex-start;gap:15px}
+.fpx-settings-symbol{width:49px;height:49px;flex-shrink:0;display:grid;place-items:center;border:1px solid var(--fpx-line,#dde6e8);border-radius:17px;background:var(--fpx-raised,#f2f6f5);color:var(--fpx-success,#167d70)}
+.fpx-settings-header h1,.fpx-admin-module-gate h1{font-size:clamp(21px,2.7vw,29px);line-height:1.45;margin:2px 0 5px;font-weight:850;color:var(--fpx-ink,#203749)}
+.fpx-settings-header p{font-size:12px;line-height:1.85;color:var(--fpx-subtle,#647689);margin:0}
+.fpx-settings-kicker{font-size:11px;color:var(--fpx-success,#137c6b);font-weight:800;display:flex;align-items:center;gap:6px}
+.fpx-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fpx-settings-panel{background:var(--fpx-panel,#fff);border:1px solid var(--fpx-line,#e2e8ed);border-radius:19px;padding:19px;min-width:0}
+.fpx-settings-panel h2,.fpx-settings-connected h2{font-size:14px;line-height:1.5;margin:0 0 13px;display:flex;align-items:center;gap:9px;color:var(--fpx-ink,#24394a);font-weight:850}
+.fpx-settings-panel h2 svg{color:var(--fpx-success,#168171)}
+.fpx-settings-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.fpx-settings-options button{display:flex;justify-content:center;align-items:center;gap:8px;padding:10px;min-height:48px;border-radius:12px;background:var(--fpx-raised,#f7f9fa);color:var(--fpx-ink,#24394a);border:1px solid var(--fpx-line,#dde5eb);font-size:11.5px;font-weight:750;cursor:pointer;transition:border-color .15s,background .15s}
+.fpx-settings-options button span{min-width:0;overflow-wrap:anywhere}
+.fpx-settings-options button[aria-pressed=true]{border-color:var(--fpx-success,#178573);background:var(--fpx-success-bg,#e6f4ef);color:var(--fpx-ink,#234039)}
+.fpx-settings-options button:hover,.fpx-settings-actions button:hover,.fpx-settings-links :is(button,a):hover,.fpx-admin-module-actions button:hover{border-color:var(--fpx-success,#178573)}
+.fpx-admin-settings button:focus-visible,.fpx-admin-settings a:focus-visible,.fpx-admin-module-gate button:focus-visible{outline:3px solid var(--fpx-success,#178573);outline-offset:2px}
+.fpx-settings-small{font-size:11px;line-height:1.8;color:var(--fpx-subtle,#66798b);margin:12px 0 0}
+.fpx-settings-note{display:flex;gap:10px;align-items:flex-start;font-size:11.5px;line-height:1.85;margin:0;padding:14px 16px;background:var(--fpx-raised,#f8faf9);color:var(--fpx-subtle,#627485);border:1px solid var(--fpx-line,#dde7e7);border-radius:13px}
+.fpx-settings-note svg{flex-shrink:0;margin-top:2px;color:var(--fpx-success,#147968)}
+.fpx-settings-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.fpx-settings-actions button{min-height:44px;display:flex;align-items:center;gap:9px;border-radius:11px;padding:9px 15px;background:var(--fpx-panel,#fff);color:var(--fpx-ink,#24394a);font-size:11.5px;font-weight:800;border:1px solid var(--fpx-line,#dbe5e9)}
+.fpx-settings-actions p{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--fpx-success,#168171);margin:0}
+.fpx-settings-connected{display:grid;gap:10px}
+.fpx-settings-connected h2{font-size:16px;margin:2px 0 0}
+.fpx-settings-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.fpx-settings-links :is(button,a){min-width:0;min-height:52px;display:flex;align-items:center;gap:10px;background:var(--fpx-panel,#fff);color:var(--fpx-ink,#24394a);border:1px solid var(--fpx-line,#dce4e9);border-radius:12px;padding:11px 13px;font-size:12px;font-weight:750;text-decoration:none}
+.fpx-settings-links :is(button,a)>svg:first-child{color:var(--fpx-success,#168171);flex-shrink:0}
+.fpx-settings-links :is(button,a)>svg:last-child{margin-inline-start:auto;flex-shrink:0}
+.fpx-settings-connected>p,.fpx-settings-footer{font-size:11px;line-height:1.85;color:var(--fpx-subtle,#627789);margin:0}
+.fpx-settings-footer{display:flex;gap:9px;align-items:center}
+.fpx-admin-module-gate{border:1px solid var(--fpx-line,#dce4e9);border-radius:20px;background:var(--fpx-panel,#fff);padding:clamp(20px,4vw,32px);display:grid;justify-items:start;gap:12px;max-width:850px;margin-inline:auto;color:var(--fpx-ink,#203749)}
+.fpx-admin-module-gate h1,.fpx-admin-module-gate h2,.fpx-admin-module-gate p{margin:0}
+.fpx-admin-module-gate h2{font-size:17px;font-weight:800}
+.fpx-admin-module-gate>p:last-of-type{font-size:12px;line-height:1.9;color:var(--fpx-subtle,#627789)}
+.fpx-admin-module-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:5px}
+.fpx-admin-module-actions button{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--fpx-line,#dce4e9);color:var(--fpx-ink,#24394a);background:var(--fpx-raised,#f8faf9);padding:10px 14px;border-radius:12px;min-height:45px;font-size:11.5px;font-weight:800}
+@media(max-width:660px){.fpx-settings-header{gap:11px}.fpx-settings-symbol{width:43px;height:43px;border-radius:14px}.fpx-settings-grid,.fpx-settings-links{grid-template-columns:1fr}.fpx-settings-panel{padding:16px}.fpx-settings-options{gap:7px}.fpx-settings-options button{min-height:45px}.fpx-admin-module-actions{width:100%}.fpx-admin-module-actions button{flex:1;justify-content:center}}
+@media(prefers-reduced-motion:reduce){.fpx-settings-options button{transition:none}}
