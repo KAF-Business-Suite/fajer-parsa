@@ -23,14 +23,17 @@ test('FP-UNIFY-03: actual Office entry matches one Admin shell at S21/mobile and
      await route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({error:'sign_in_required'})})
      return
     }
-    if(['/','/app.css','/app.js'].includes(u.pathname)){
+    if(['/','/console','/app.css','/app.js'].includes(u.pathname)){
      const response=await worker.fetch(new Request(office+u.pathname),{})
      await route.fulfill({status:response.status,body:await response.text(),contentType:response.headers.get('content-type')||'text/plain'})
      return
     }
     await route.fulfill({status:404,body:'Not found'})
    })
-   await page.goto(office+'/?next=console-website',{waitUntil:'networkidle',timeout:20000})
+   await page.goto(office+'/console#/website',{waitUntil:'networkidle',timeout:20000})
+   assert.equal(new URL(page.url()).pathname,'/console','Guest must stay at canonical /console while signing in')
+   assert.equal(new URL(page.url()).hash,'#/website','Browser must retain requested module')
+   assert.equal(await page.evaluate(()=>nextPrivateView()),'/console#/website','Successful login should return to intended module')
    await page.getByRole('heading',{name:'کنسول مدیریت فجرپارسا'}).waitFor()
    await page.getByRole('heading',{name:'ورود امن به کنسول'}).waitFor()
    assert.equal(await page.locator('html').getAttribute('data-theme'),'dark')
