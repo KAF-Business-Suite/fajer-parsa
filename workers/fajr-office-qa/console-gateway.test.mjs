@@ -150,3 +150,23 @@ test('private route failure stage is sanitized and does not echo cookies',async(
  assert.equal(x.status,503);
  assert.equal(x.headers.get('X-FP-Console-Stage'),'source_upstream');
 })
+
+
+test('FP-ENTRY-01: session-checked old next links open precisely intended React section',async()=>{
+ for(const [next,view] of [
+  ['console-security','security'],['console-website','website'],['console-resources','resources']
+ ]){
+  const m=fake()
+  const r=await handlePrivateConsole(request('/console?next='+next,{Cookie:cookie}),{},m.services,m.transport)
+  assert.equal(r.status,302)
+  assert.equal(r.headers.get('Location'),'/console#/'+view)
+  assert.equal(m.calls.length,0,'Fixed redirect happens after auth but before Pages')
+  assert.match(r.headers.get('Cache-Control')||'',/no-store/)
+ }
+ const m=fake()
+ const guest=await handlePrivateConsole(request('/console?next=console-security'),{},m.services,m.transport)
+ assert.equal(guest.status,200)
+ assert.match(await guest.text(),/id="login-view"/)
+ assert.equal(guest.headers.get('Location'),null)
+ assert.equal(m.calls.length,0)
+})
