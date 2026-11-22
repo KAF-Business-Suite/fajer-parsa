@@ -32,6 +32,7 @@ test('KAF Admin recovery is explicit, wipes URL fragment and never offers self r
  assert.match(ADMIN_AUTH_JS,/\/auth\/v1\/recover\?redirect_to=/)
  assert.match(ADMIN_AUTH_JS,/\/console\?mode=recovery/)
  assert.match(ADMIN_AUTH_JS,/history\.replaceState\(null,'','\/console\?mode=recovery'\)/)
+ assert.match(ADMIN_AUTH_JS,/addEventListener\('hashchange',\(\)=>\{acceptRecovery\(\)\}\)/,'Same-tab password-reset link must be processed')
  assert.match(ADMIN_AUTH_JS,/recoveryToken=null/)
  assert.match(ADMIN_AUTH_JS,/authBase\+'\/auth\/v1\/user'/)
  assert.doesNotMatch(ADMIN_AUTH_JS,/\/auth\/v1\/signup/)
