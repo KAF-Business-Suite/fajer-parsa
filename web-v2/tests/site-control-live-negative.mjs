@@ -6,7 +6,7 @@ test('old site settings entry stays safe during staged QA console migration',asy
  const r=await fetch(origin+'/site-settings',{redirect:'manual',signal:timeout()})
  assert.ok([200,302].includes(r.status),'legacy page or protected redirect')
  if(r.status===302){
-  assert.equal(r.headers.get('Location'),'/?next=console-website')
+  assert.ok(['/?next=console-website','/console?next=console-website'].includes(r.headers.get('Location')),'safe old/new QA guest destinations only')
   assert.match(r.headers.get('Cache-Control'),/no-store/)
   return
  }
