@@ -62,6 +62,7 @@ jobs:
           node --test tests/site-draft-bridge.test.mjs
           node --test tests/admin-preferences.test.mjs
           node --test tests/admin-single-entry.test.mjs
+          node --test tests/kaf-shell-identity.test.mjs
           node --test tests/private-office-bridge.test.mjs
           node --test tests/live-office-requests.test.mjs
           node --test tests/live-kaf-cases.test.mjs
