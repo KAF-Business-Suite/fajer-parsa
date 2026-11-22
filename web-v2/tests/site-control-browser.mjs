@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {mkdir} from 'node:fs/promises'
 import {chromium} from 'playwright'
-import {SITE_JS} from '../../workers/fajr-office-qa/site-settings-ui.mjs'
+import {SITE_HTML,SITE_CSS,SITE_JS} from '../../workers/fajr-office-qa/site-settings-ui.mjs'
 
 const origin='https://fajr-office-qa.khoojafahim.workers.dev'
 const address={fa:'کابل',ps:'کابل',en:'Kabul',ar:'كابل'}
@@ -13,7 +13,7 @@ const sortedJson=v=>Array.isArray(v)?v.map(sortedJson):v&&typeof v==='object'?Ob
 test('browser script compiles as ordinary JavaScript, independent of worker module',()=>{
  assert.doesNotThrow(()=>new Function(SITE_JS))
 })
-test('live QA four-language mobile/desktop Site Settings UI, synthetic APIs only',async()=>{
+test('legacy Site Settings rollback UI still works with local synthetic assets, not a second live page',async()=>{
  await mkdir('test-results',{recursive:true})
  const browser=await chromium.launch({headless:true})
  try{
@@ -26,6 +26,18 @@ test('live QA four-language mobile/desktop Site Settings UI, synthetic APIs only
    let draft=structuredClone(blank),draftRevision='synthetic-a-0001'
    let publishedRevision=null,published=null
    const response=()=>({draft:sortedJson(draft),draftRevision,publishedRevision,published,canEdit:true,canPublish:true,history:[]})
+   // FP-UNIFY-03: this old UI remains a tested rollback component, not an
+   // operational standalone page. All modern /site-settings links redirect into
+   // /console#/website and must not be tested as if an old shell were still live.
+   // Serve its known historic HTML/CSS/JS in-memory with zero external fetches.
+   await page.route('**/*',async route=>{
+    const u=new URL(route.request().url())
+    if(u.origin!==origin){await route.abort('blockedbyclient');return}
+    if(u.pathname==='/site-settings')return route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:SITE_HTML})
+    if(u.pathname==='/site-settings.css')return route.fulfill({status:200,contentType:'text/css; charset=utf-8',body:SITE_CSS})
+    if(u.pathname==='/site-settings.js')return route.fulfill({status:200,contentType:'text/javascript; charset=utf-8',body:SITE_JS})
+    return route.abort('blockedbyclient')
+   })
    await page.route('**/api/site-settings/**',async route=>{
     const req=route.request();const action=new URL(req.url()).pathname.split('/').at(-1)
     const body=req.method()==='POST'?req.postDataJSON():null
