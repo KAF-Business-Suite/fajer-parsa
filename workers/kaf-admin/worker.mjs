@@ -23,9 +23,11 @@ function outputHeaders(type='text/plain; charset=utf-8',cookie=null){
 }
 const fail=(status)=>new Response(status===404?'Not Found':'KAF Admin temporarily unavailable',{status,headers:outputHeaders()});
 function isFromKaf(request){
- const origin=request.headers.get('Origin');
+ // A link to KAF Admin from a website, email, or ChatGPT is cross-site GET.
+ // Restrict state-changing requests, not ordinary guest navigation.
+ if(request.method!=='POST')return true;
  const fetchSite=request.headers.get('Sec-Fetch-Site');
- return (!origin||origin===KAF_ENTRY_ORIGIN) && (!fetchSite||fetchSite==='same-origin'||fetchSite==='none');
+ return request.headers.get('Origin')===KAF_ENTRY_ORIGIN && (!fetchSite||fetchSite==='same-origin');
 }
 function proxyRequest(request,path,forceMethod=null){
  const headers=new Headers(request.headers);
@@ -37,7 +39,7 @@ function proxyRequest(request,path,forceMethod=null){
  const method=forceMethod||request.method;
  return new Request(VERIFIED_BFF_ORIGIN+path,{
   method,headers,redirect:'manual',cache:'no-store',
-  ...(method==='POST'?{body:request.body}:{}),
+  ...(method==='POST'?{body:request.body,duplex:'half'}:{}),
  });
 }
 async function forwardToBff(env,request,path){
