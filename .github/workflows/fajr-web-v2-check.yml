@@ -7,6 +7,7 @@ on:
     paths:
       - 'web-v2/**'
       - 'workers/fajr-office-qa/**'
+      - 'workers/kaf-admin/**'
       - 'supabase/functions/fajr-office/**'
       - 'supabase/functions/fajr-office-api/**'
       - 'docs/proposals/FAJR_OFFICE_UNAPPLIED.sql'
@@ -55,6 +56,7 @@ jobs:
           node --test ../workers/fajr-office-qa/kaf-cases-api.test.mjs
           node --test ../workers/fajr-office-qa/console-gateway.test.mjs
           node --test ../workers/fajr-office-qa/admin-auth-ui.test.mjs
+          node --test ../workers/kaf-admin/worker.test.mjs
           node --test ../workers/fajr-office-qa/legacy-console-route.test.mjs
           node --test ../workers/fajr-office-qa/security-overview.test.mjs
           node --test tests/security-overview.test.mjs
@@ -79,6 +81,7 @@ jobs:
           node --check ../workers/fajr-office-qa/security-overview.mjs
           node --check ../workers/fajr-office-qa/site-settings-ui.mjs
           node --check ../workers/fajr-office-qa/worker.mjs
+          node --check ../workers/kaf-admin/worker.mjs
           node --check ../workers/fajr-office-qa/resources-ui.mjs
       - name: Typecheck server-only office boundary
         run: npx tsc --noEmit --target es2022 --lib es2022,dom --module esnext --moduleResolution bundler --allowImportingTsExtensions --strict --skipLibCheck server/office/handler.ts server/office/adapters.ts server/office/pages-entry.ts
