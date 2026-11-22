@@ -170,3 +170,8 @@ test('FP-ENTRY-01: session-checked old next links open precisely intended React 
  assert.equal(guest.headers.get('Location'),null)
  assert.equal(m.calls.length,0)
 })
+
+
+test('KAF-SHELL-02: private bundle is pinned to independently verified KAF-branded immutable QA deployment',()=>{
+ assert.equal(consolePinnedOrigin(),'https://7d0113f4.fajr-parsa-qa.pages.dev')
+})
