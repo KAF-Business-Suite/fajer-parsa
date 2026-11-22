@@ -2,13 +2,18 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 const origin='https://fajr-office-qa.khoojafahim.workers.dev'
 const timeout=()=>AbortSignal.timeout(10000)
-test('existing QA Office serves site control without login details',async()=>{
+test('old site settings entry stays safe during staged QA console migration',async()=>{
  const r=await fetch(origin+'/site-settings',{redirect:'manual',signal:timeout()})
- assert.equal(r.status,200)
- const text=await r.text()
- assert.match(text,/id="workspace"/)
- assert.match(text,/site-settings\.js/)
- assert.doesNotMatch(text,/service_role|refresh_token|access_token|sb_secret_/)
+ assert.ok([200,302].includes(r.status),'legacy page or protected redirect')
+ if(r.status===302){
+  assert.equal(r.headers.get('Location'),'/?next=console-website')
+  assert.match(r.headers.get('Cache-Control'),/no-store/)
+  return
+ }
+ const page=await r.text()
+ assert.match(page,/id="workspace"/)
+ assert.match(page,/site-settings\\.js/)
+ assert.doesNotMatch(page,/service_role|refresh_token|access_token|sb_secret_/)
 })
 test('anonymous draft read is rejected by live BFF',async()=>{
  const r=await fetch(origin+'/api/site-settings/draft',{headers:{'X-FP-Office-Request':'same-origin'},redirect:'manual',signal:timeout()})
