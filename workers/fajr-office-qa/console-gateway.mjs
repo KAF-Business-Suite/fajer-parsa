@@ -107,6 +107,16 @@ export async function handlePrivateConsole(request,env,services,transport=fetch)
   if(auth?.status===401)return loginAtCanonicalConsole(services,auth.headers.get('Set-Cookie'));
   return fail(auth?.status===403?403:503,services.security,auth?.status===403?'permission':'session_upstream');
  }
+ // Older allowlisted links may specify a section after a successful session
+ // restore. Resolve it on the private origin without forwarding any query to Pages.
+ const postLogin=Object.freeze({'console-website':'/console#/website','console-resources':'/console#/resources','console-security':'/console#/security'});
+ const target=postLogin[url.searchParams.get('next')];
+ if(target){
+  const h=headersFor(services.security,'text/plain; charset=utf-8');
+  h.set('Location',target);
+  const rotated=auth.headers.get('Set-Cookie');if(rotated)h.set('Set-Cookie',rotated);
+  return new Response(null,{status:302,headers:h});
+ }
  try{
   const upstream=await pinnedGet('/office-preview',transport);
   if(!upstream)return fail(503,services.security,'source_upstream');
