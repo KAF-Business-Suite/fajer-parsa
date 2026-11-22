@@ -223,9 +223,9 @@ export default function EnterpriseConsole(){
   if(!privateOffice)return
   try{
    const response=await fetch('/api/session/logout',{method:'POST',credentials:'same-origin',headers:{'X-FP-Office-Request':'same-origin'},cache:'no-store'})
-   if(response.ok){window.location.replace('/');return}
+   if(response.ok){window.location.replace('/console');return}
   }catch{}
-  toast(lang==='fa'?'خروج امن تأیید نشد؛ لطفاً در دفتر اصلی دوباره تلاش کنید.':'Sign out could not be verified. Please try again in the office.')
+  toast(lang==='fa'?'خروج امن تأیید نشد؛ اتصال را بررسی و دوباره تلاش کنید.':'Sign out could not be verified. Check your connection and retry.')
  }
  function toggleGroup(id:AdminGroup){setExpanded(x=>x.includes(id)?x.filter(y=>y!==id):[...x,id])}
  function toast(m:string){setNotice(m)}
