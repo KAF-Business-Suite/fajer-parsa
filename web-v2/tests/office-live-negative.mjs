@@ -24,7 +24,7 @@ test('live staff login shell and script load via HTTPS',async()=>{
  const home=await grab('')
  assert.equal(home.status,200,'office HTML HTTPS must be live')
  assert.match(home.type,/text\/html/)
- assert.match(home.body,/دفتر مدیریت درخواست‌ها/)
+ assert.match(home.body,/دفتر مدیریت درخواست‌ها|کنسول مدیریت فجرپارسا/,'Safe QA migration: old or canonical auth heading')
  const css=await grab('/app.css')
  assert.equal(css.status,200)
  assert.match(css.type,/text\/css/)
