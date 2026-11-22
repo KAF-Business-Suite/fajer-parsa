@@ -235,7 +235,14 @@ export async function handleConsoleAccess(request,env,transport=fetch){
 export default {async fetch(request,env){
  const url=new URL(request.url);
  if(url.hostname!=='fajr-office-qa.khoojafahim.workers.dev')return new Response('Forbidden',{status:403});
- if(request.method==='GET'&&url.pathname==='/')return new Response(HTML,{headers:{...security,'Content-Type':'text/html; charset=utf-8'}});
+ if(request.method==='GET'&&url.pathname==='/'){
+  const oldNext=url.searchParams.get('next');
+  // Previously shared security/Office links use this legacy entry. Route them
+  // directly to ONE /console URL; leave ordinary root and token-based password
+  // recovery links on the existing, supported historical callback page.
+  if(['console','console-security','console-website','console-resources'].includes(oldNext))return new Response(null,{status:302,headers:{...security,Location:'/console?next='+oldNext}});
+  return new Response(HTML,{headers:{...security,'Content-Type':'text/html; charset=utf-8'}});
+ }
  if(request.method==='GET'&&url.pathname==='/app.css')return new Response(CSS,{headers:{...security,'Content-Type':'text/css; charset=utf-8'}});
  if(request.method==='GET'&&url.pathname==='/app.js')return new Response(JS,{headers:{...security,'Content-Type':'text/javascript; charset=utf-8'}});
  const legacyRedirect=legacyConsoleNavigation(request,security);
