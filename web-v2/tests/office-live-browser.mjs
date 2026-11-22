@@ -39,7 +39,7 @@ try{
   page.on('pageerror',error=>errors.push(error.message))
   await page.goto(base,{waitUntil:'domcontentloaded',timeout:20000})
   await page.locator('#login-form').waitFor()
-  assert.equal(await page.locator('h1').textContent(),'دفتر مدیریت درخواست‌ها')
+  assert.equal(await page.locator('h1').textContent(),'کنسول مدیریت فجرپارسا')
   assert.equal(await page.locator('#office-view').isVisible(),false)
   const cfg=await page.evaluate(async url=>{const r=await fetch(url,{cache:'no-store'});const x=await r.json();return {status:r.status,keyValid:typeof x.publishableKey==='string'&&x.publishableKey.length>20}},config)
   assert.deepEqual(cfg,{status:200,keyValid:true})
@@ -76,10 +76,10 @@ try{
 
  // Real BFF office must be readable in all four languages without exposing staff records.
  for(const [language,title,direction] of [
-  ['fa','دفتر مدیریت درخواست‌ها','rtl'],
-  ['ps','د فجر پارسا د غوښتنو دفتر','rtl'],
-  ['en','Fajr Parsa request office','ltr'],
-  ['ar','مكتب طلبات فجر بارسا','rtl']
+  ['fa','کنسول مدیریت فجرپارسا','rtl'],
+  ['ps','د فجر پارسا مدیریتي کنسول','rtl'],
+  ['en','Fajr Parsa Admin Console','ltr'],
+  ['ar','لوحة إدارة فجر بارسا','rtl']
  ]){
   const langContext=await browser.newContext({viewport:{width:393,height:852},locale:'fa-AF'})
   await installCandidate(langContext)
