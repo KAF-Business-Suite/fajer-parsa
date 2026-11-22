@@ -362,7 +362,11 @@ test('staff sign-in is accessible and restores only allowlisted console destinat
  assert.match(page,/id="login-progress"[^>]*role="status"/);
  assert.match(page,/id="login-button"[^>]*aria-busy="false"/);
  assert.match(script,/function nextPrivateView\(\)/);
+ assert.ok(script.includes("next==='console-website'?'/console#/website'"));
+ assert.ok(script.includes("next==='console-resources'?'/console#/resources'"));
  assert.ok(script.includes("next==='console-security'?'/console#/security':null"));
+ assert.ok(script.includes("location.replace('/console#/overview')"));
+ assert.doesNotMatch(script,/next===['"]https?:/);
  assert.ok(script.includes("next==='console'?'/console'"));
  assert.doesNotMatch(script,/location\.replace\(new URLSearchParams\(/);
  assert.match(script,/updatePasswordVisibilityLabel\(\)/);
